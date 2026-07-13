@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Visualisation quiz</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; padding: 1.5rem; }
+
+.page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 1rem; }
+
+.navbar { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.nav-logo i { font-size: 20px; color: #3b82f6; }
+.nav-back { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.nav-back:hover { color: #3b82f6; }
+
+.main { max-width: 720px; margin: 0 auto; }
+
+.quiz-header-card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.25rem 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.quiz-info h2 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.quiz-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.meta-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+.meta-badge.blue { background: #eff6ff; color: #3b82f6; }
+.meta-badge.green { background: #f0fdf4; color: #16a34a; }
+.meta-badge.amber { background: #fffbeb; color: #d97706; }
+.export-btns { display: flex; gap: 8px; flex-shrink: 0; }
+.btn-export { padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 12px; font-weight: 500; background: #fff; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-export:hover { background: #f8fafc; border-color: #bfdbfe; color: #3b82f6; }
+.btn-export i { font-size: 15px; }
+
+.progress-bar-wrap { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 12px; }
+.progress-bar-wrap span { font-size: 13px; color: #64748b; white-space: nowrap; }
+.progress-bar { flex: 1; height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: #3b82f6; border-radius: 99px; width: 30%; }
+.progress-count { font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; }
+
+.q-card { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+.q-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.q-num { font-size: 12px; font-weight: 600; color: #94a3b8; }
+.q-type { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+.q-type.qcm { background: #eff6ff; color: #3b82f6; }
+.q-type.vf { background: #f0fdf4; color: #16a34a; }
+.q-type.ouverte { background: #faf5ff; color: #a855f7; }
+.q-text { font-size: 14px; font-weight: 500; color: #1e293b; margin-bottom: 12px; line-height: 1.6; }
+.reponses { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.rep { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; }
+.rep.correct { border-color: #86efac; color: #15803d; background: #f0fdf4; font-weight: 500; }
+.rep i { font-size: 15px; flex-shrink: 0; }
+.rep-letter { width: 22px; height: 22px; border-radius: 6px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #64748b; flex-shrink: 0; }
+.rep.correct .rep-letter { background: #86efac; color: #15803d; }
+
+.q-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+.btn-act { font-size: 12px; font-weight: 500; color: #64748b; background: none; border: 1px solid #e2e8f0; border-radius: 7px; padding: 5px 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-act:hover { background: #f8fafc; }
+.btn-act.danger:hover { border-color: #fda4af; color: #e11d48; background: #fff1f2; }
+.btn-act i { font-size: 14px; }
+
+.open-answer { background: #faf5ff; border: 1px dashed #d8b4fe; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #7c3aed; font-style: italic; margin-bottom: 12px; }
+
+.add-btn { width: 100%; padding: 11px; border: 1.5px dashed #bfdbfe; border-radius: 10px; font-size: 13px; font-weight: 500; color: #3b82f6; background: #f8fbff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.5rem; }
+.add-btn:hover { background: #eff6ff; }
+</style>
+</head>
+<body>
+
+<p class="page-label">Maquette 7 / 8 — Visualisation &amp; Édition du quiz</p>
+
+<div class="navbar">
+  <div class="nav-logo">
+    <i class="ti ti-brain"></i>
+    EduQuizAI
+  </div>
+  <div class="nav-back">
+    <i class="ti ti-arrow-left"></i>
+    Retour au dashboard
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="quiz-header-card">
+    <div class="quiz-info">
+      <h2>Quiz — La photosynthèse</h2>
+      <div class="quiz-meta">
+        <span class="meta-badge blue"><i class="ti ti-list-check"></i> 3 questions</span>
+        <span class="meta-badge amber"><i class="ti ti-flame"></i> Moyen</span>
+        <span class="meta-badge green"><i class="ti ti-calendar"></i> 01/06/2026</span>
+      </div>
+    </div>
+    <div class="export-btns">
+      <button class="btn-export"><i class="ti ti-file-type-pdf"></i> PDF</button>
+      <button class="btn-export"><i class="ti ti-file-type-csv"></i> CSV</button>
+      <button class="btn-export"><i class="ti ti-share"></i> Partager</button>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <span>Progression</span>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <span class="progress-count">1 / 3 questions</span>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card">
+    <div class="q-top">
+      <span class="q-num">Question 1</span>
+      <span class="q-type qcm">QCM</span>
+    </div>
+    <p class="q-text">Quel pigment est principalement responsable de la photosynthèse chez les plantes ?</p>
+    <div class="reponses">
+      <div class="rep correct"><div class="rep-letter">A</div><i class="ti ti-check"></i> La chlorophylle</div>
+      <div class="rep"><div class="rep-letter">B</div> La mélanine</div>
+      <div class="rep"><div class="rep-letter">C</div> La kératine</div>
+      <div class="rep"><div class="rep-letter">D</div> La carotène</div>
+    </div>
+    <div class="q-actions">
+      <button class="btn-act"><i class="ti ti-edit"></i> Modifier</button>
+      <button class="btn-act danger"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card">
+    <div class="q-top">
+      <span class="q-num">Question 2</span>
+      <span class="q-type vf">Vrai / Faux</span>
+    </div>
+    <p class="q-text">La photosynthèse produit du dioxyde de carbone (CO₂).</p>
+    <div class="reponses">
+      <div class="rep"><div class="rep-letter">A</div> Vrai</div>
+      <div class="rep correct"><div class="rep-letter">B</div><i class="ti ti-check"></i> Faux</div>
+    </div>
+    <div class="q-actions">
+      <button class="btn-act"><i class="ti ti-edit"></i> Modifier</button>
+      <button class="btn-act danger"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card">
+    <div class="q-top">
+      <span class="q-num">Question 3</span>
+      <span class="q-type ouverte">Question ouverte</span>
+    </div>
+    <p class="q-text">Expliquez en quelques phrases le rôle du soleil dans la photosynthèse.</p>
+    <div class="open-answer">
+      <i class="ti ti-bulb" style="font-size:14px; margin-right:6px;"></i>
+      Réponse attendue : Le soleil fournit l'énergie lumineuse nécessaire pour convertir le CO₂ et l'eau en glucose et en oxygène.
+    </div>
+    <div class="q-actions">
+      <button class="btn-act"><i class="ti ti-edit"></i> Modifier</button>
+      <button class="btn-act danger"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+
+  <button class="add-btn">
+    <i class="ti ti-plus"></i> Ajouter une question
+  </button>
+
+</div>
+</body>
+</html>

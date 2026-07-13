@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Login</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+  .page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .card { background: rgba(255,255,255,0.97); border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+  .logo { text-align: center; margin-bottom: 1.75rem; }
+  .logo-icon { width: 52px; height: 52px; background: #eff6ff; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .logo-icon i { font-size: 26px; color: #3b82f6; }
+  .logo-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .logo-sub { font-size: 13px; color: #64748b; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; outline: none; background: #f8fafc; }
+  .btn-primary { width: 100%; padding: 11px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 1.25rem; }
+  .forgot { text-align: center; margin-top: 1rem; font-size: 12px; }
+  .forgot a { color: #3b82f6; text-decoration: none; }
+  .admin-msg { text-align: center; margin-top: 8px; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<p class="page-label">Maquette 1 / 8 — Login</p>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-brain"></i></div>
+    <div class="logo-title">EduQuizAI</div>
+    <div class="logo-sub">Connectez-vous à votre espace</div>
+  </div>
+  <div class="field">
+    <label>Adresse email</label>
+    <input type="text" placeholder="enseignant@ecole.fr" />
+  </div>
+  <div class="field">
+    <label>Mot de passe</label>
+    <input type="password" placeholder="••••••••" />
+  </div>
+  <button class="btn-primary"><i class="ti ti-login"></i> Se connecter</button>
+  <div class="forgot"><a href="#">Mot de passe oublié ?</a></div>
+  <div class="admin-msg">Première connexion ? <a href="mailto:admin@eduquizai.fr" style="color:#3b82f6;text-decoration:none;">Contacter l'administrateur</a></div>
+</div>
+</body>
+</html>

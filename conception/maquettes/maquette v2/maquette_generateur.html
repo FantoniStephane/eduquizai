@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Générateur de quiz</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; padding: 1.5rem; }
+
+.page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 1rem; }
+
+.navbar { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.nav-logo i { font-size: 20px; color: #3b82f6; }
+.nav-back { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.nav-back:hover { color: #3b82f6; }
+
+.card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.75rem; max-width: 720px; margin: 0 auto; }
+
+.page-title { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.page-title i { font-size: 20px; color: #3b82f6; }
+.page-sub { font-size: 13px; color: #64748b; margin-bottom: 1.75rem; }
+
+.field { margin-bottom: 1.25rem; }
+.field label { display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: #f8fafc; outline: none; }
+.field input::placeholder { color: #94a3b8; }
+
+.lecon-preview { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.lecon-preview i { font-size: 16px; color: #3b82f6; }
+.lecon-preview span { font-size: 13px; color: #1e293b; font-weight: 500; }
+.lecon-preview .meta { font-size: 12px; color: #94a3b8; margin-left: auto; }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.diff-btns { display: flex; gap: 8px; }
+.diff-btn { flex: 1; padding: 9px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 500; background: #f8fafc; color: #64748b; cursor: pointer; text-align: center; }
+.diff-btn.active.facile { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+.diff-btn.active.moyen { background: #fefce8; border-color: #fde047; color: #ca8a04; }
+.diff-btn.active.difficile { background: #fff1f2; border-color: #fda4af; color: #e11d48; }
+
+.types-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.type-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #f8fafc; }
+.type-card.selected { border-color: #bfdbfe; background: #eff6ff; }
+.type-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.type-icon.blue { background: #eff6ff; color: #3b82f6; }
+.type-icon.green { background: #f0fdf4; color: #22c55e; }
+.type-icon.purple { background: #faf5ff; color: #a855f7; }
+.type-icon.amber { background: #fffbeb; color: #f59e0b; }
+.type-label { font-size: 13px; font-weight: 500; color: #1e293b; }
+.type-desc { font-size: 12px; color: #94a3b8; }
+.type-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.type-card.selected .type-check { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+.type-check i { font-size: 12px; }
+
+.divider { height: 1px; background: #f1f5f9; margin: 1.5rem 0; }
+
+.ia-box { background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%); border: 1px solid #c7d2fe; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+.ia-box i { font-size: 22px; color: #6366f1; flex-shrink: 0; }
+.ia-box p { font-size: 13px; color: #4338ca; font-weight: 500; margin-bottom: 2px; }
+.ia-box span { font-size: 12px; color: #6366f1; }
+
+.btn-generate { width: 100%; padding: 13px; background: #3b82f6; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-generate:hover { background: #2563eb; }
+.btn-generate i { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<p class="page-label">Maquette 6 / 8 — Générateur de quiz</p>
+
+<div class="navbar">
+  <div class="nav-logo">
+    <i class="ti ti-brain"></i>
+    EduQuizAI
+  </div>
+  <div class="nav-back">
+    <i class="ti ti-arrow-left"></i>
+    Retour au dashboard
+  </div>
+</div>
+
+<div class="card">
+  <p class="page-title"><i class="ti ti-sparkles"></i> Générer un quiz</p>
+  <p class="page-sub">L'IA analyse votre leçon et génère automatiquement des questions pédagogiques.</p>
+
+  <div class="field">
+    <label>Leçon source <span style="color:#ef4444;">*</span></label>
+    <select>
+      <option value="">Sélectionner une leçon...</option>
+      <option selected>La photosynthèse</option>
+      <option>La Révolution française</option>
+      <option>Les fractions</option>
+    </select>
+    <div class="lecon-preview">
+      <i class="ti ti-book"></i>
+      <span>La photosynthèse</span>
+      <span class="meta">Sciences · 6ème · 01/06/2026</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Titre du quiz</label>
+    <input type="text" placeholder="Ex : Quiz — La photosynthèse" value="Quiz — La photosynthèse" />
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Nombre de questions</label>
+      <input type="number" placeholder="Ex : 10" value="10" min="1" max="30" />
+    </div>
+    <div class="field">
+      <label>Niveau de difficulté</label>
+      <div class="diff-btns">
+        <div class="diff-btn facile" onclick="setDiff(this,'facile')">Facile</div>
+        <div class="diff-btn moyen active" onclick="setDiff(this,'moyen')">Moyen</div>
+        <div class="diff-btn difficile" onclick="setDiff(this,'difficile')">Difficile</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Types de questions</label>
+    <div class="types-grid">
+      <div class="type-card selected" onclick="toggleType(this)">
+        <div class="type-icon blue"><i class="ti ti-checkbox"></i></div>
+        <div>
+          <div class="type-label">QCM</div>
+          <div class="type-desc">Choix multiple</div>
+        </div>
+        <div class="type-check"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="type-card selected" onclick="toggleType(this)">
+        <div class="type-icon green"><i class="ti ti-toggle-right"></i></div>
+        <div>
+          <div class="type-label">Vrai / Faux</div>
+          <div class="type-desc">Deux choix</div>
+        </div>
+        <div class="type-check"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="type-card" onclick="toggleType(this)">
+        <div class="type-icon purple"><i class="ti ti-writing"></i></div>
+        <div>
+          <div class="type-label">Question ouverte</div>
+          <div class="type-desc">Réponse libre</div>
+        </div>
+        <div class="type-check"></div>
+      </div>
+      <div class="type-card" onclick="toggleType(this)">
+        <div class="type-icon amber"><i class="ti ti-arrows-sort"></i></div>
+        <div>
+          <div class="type-label">Remise en ordre</div>
+          <div class="type-desc">Ordonner les éléments</div>
+        </div>
+        <div class="type-check"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="ia-box">
+    <i class="ti ti-robot"></i>
+    <div>
+      <p>Génération intelligente par IA</p>
+      <span>Les questions sont adaptées au niveau et au contenu de votre leçon.</span>
+    </div>
+  </div>
+
+  <button class="btn-generate">
+    <i class="ti ti-sparkles"></i>
+    Générer le quiz
+  </button>
+</div>
+
+<script>
+function setDiff(el, level) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active', level);
+}
+function toggleType(el) {
+  el.classList.toggle('selected');
+  const check = el.querySelector('.type-check');
+  if (el.classList.contains('selected')) {
+    check.innerHTML = '<i class="ti ti-check"></i>';
+  } else {
+    check.innerHTML = '';
+  }
+}
+</script>
+</body>
+</html>

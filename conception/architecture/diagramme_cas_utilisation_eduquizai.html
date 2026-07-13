@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Diagramme de cas d'utilisation — EduQuizAI</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: #1a1a1a; }
+  p { font-size: 13px; color: #666; margin-bottom: 32px; }
+  svg { max-width: 800px; width: 100%; }
+  .legende { margin-top: 24px; font-size: 12px; color: #888; }
+</style>
+</head>
+<body>
+<h1>Diagramme de cas d'utilisation — EduQuizAI</h1>
+<p>Acteur : Enseignant · 10 cas d'utilisation · 3 packages</p>
+<svg viewBox="0 0 680 640" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Bordure système -->
+  <rect x="140" y="10" width="520" height="615" rx="14" fill="none" stroke="#888" stroke-width="1.2" stroke-dasharray="7 4"/>
+  <text x="400" y="36" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#1a1a1a">EduQuizAI</text>
+
+  <!-- ── PACKAGE Authentification ── -->
+  <rect x="160" y="55" width="480" height="130" rx="10" fill="#f7f7f5" stroke="#ccc" stroke-width="0.8"/>
+  <text x="175" y="72" dominant-baseline="central" font-size="12" fill="#888">Authentification</text>
+
+  <ellipse cx="290" cy="115" rx="110" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="290" y="115" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">S'inscrire / se connecter</text>
+
+  <ellipse cx="530" cy="115" rx="100" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="530" y="115" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Mot de passe oublié</text>
+
+  <line x1="400" y1="115" x2="430" y2="115" stroke="#bbb" stroke-width="0.8" stroke-dasharray="4 3"/>
+  <text x="415" y="107" text-anchor="middle" font-size="10" fill="#aaa">«extend»</text>
+
+  <!-- ── PACKAGE Gestion des leçons ── -->
+  <rect x="160" y="205" width="480" height="170" rx="10" fill="#f7f7f5" stroke="#ccc" stroke-width="0.8"/>
+  <text x="175" y="222" dominant-baseline="central" font-size="12" fill="#888">Gestion des leçons</text>
+
+  <ellipse cx="255" cy="265" rx="82" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="255" y="265" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Créer une leçon</text>
+
+  <ellipse cx="460" cy="265" rx="95" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="460" y="265" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Modifier une leçon</text>
+
+  <ellipse cx="290" cy="340" rx="95" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="290" y="340" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Supprimer une leçon</text>
+
+  <ellipse cx="510" cy="340" rx="95" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="510" y="340" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Visualiser une leçon</text>
+
+  <!-- ── PACKAGE Gestion des quiz ── -->
+  <rect x="160" y="395" width="480" height="210" rx="10" fill="#f7f7f5" stroke="#ccc" stroke-width="0.8"/>
+  <text x="175" y="412" dominant-baseline="central" font-size="12" fill="#888">Gestion des quiz</text>
+
+  <ellipse cx="290" cy="450" rx="100" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="290" y="450" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Générer un quiz</text>
+
+  <ellipse cx="530" cy="450" rx="110" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="530" y="450" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Visualiser / éditer un quiz</text>
+
+  <ellipse cx="290" cy="520" rx="100" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="290" y="520" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Exporter un quiz</text>
+
+  <ellipse cx="530" cy="520" rx="100" ry="22" fill="#fff" stroke="#aaa" stroke-width="0.8"/>
+  <text x="530" y="520" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#222">Consulter l'historique</text>
+
+  <line x1="390" y1="450" x2="418" y2="450" stroke="#bbb" stroke-width="0.8" stroke-dasharray="4 3"/>
+  <text x="404" y="442" text-anchor="middle" font-size="10" fill="#aaa">«include»</text>
+
+  <!-- ── ACTEUR ── -->
+  <circle cx="56" cy="290" r="16" fill="none" stroke="#555" stroke-width="1.5"/>
+  <line x1="56" y1="306" x2="56" y2="348" stroke="#555" stroke-width="1.5"/>
+  <line x1="34" y1="324" x2="78" y2="324" stroke="#555" stroke-width="1.5"/>
+  <line x1="56" y1="348" x2="38" y2="374" stroke="#555" stroke-width="1.5"/>
+  <line x1="56" y1="348" x2="74" y2="374" stroke="#555" stroke-width="1.5"/>
+  <text x="56" y="392" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#333">Enseignant</text>
+
+  <!-- Lignes acteur -> packages -->
+  <line x1="72" y1="278" x2="178" y2="115" stroke="#777" stroke-width="0.9"/>
+  <line x1="72" y1="290" x2="178" y2="290" stroke="#777" stroke-width="0.9"/>
+  <line x1="72" y1="302" x2="178" y2="450" stroke="#777" stroke-width="0.9"/>
+
+</svg>
+<p class="legende">EduQuizAI — SchoolUp · CD2IA 2025/2026 · Metz Numeric School</p>
+</body>
+</html>

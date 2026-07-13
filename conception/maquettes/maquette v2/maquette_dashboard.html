@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; padding: 1.5rem; }
+
+.page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 1rem; }
+
+.navbar { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.nav-logo i { font-size: 20px; color: #3b82f6; }
+.nav-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #3b82f6; }
+
+.welcome { margin-bottom: 1.5rem; }
+.welcome h1 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.welcome p { font-size: 13px; color: #64748b; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+.stat-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1rem 1.25rem; }
+.stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+.stat-icon.green { background: #f0fdf4; color: #22c55e; }
+.stat-icon.purple { background: #faf5ff; color: #a855f7; }
+.stat-icon i { font-size: 18px; }
+.stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+.stat-value { font-size: 24px; font-weight: 700; color: #1e293b; }
+
+.section { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 1.25rem; margin-bottom: 1rem; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.section-title { font-size: 14px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.section-title i { font-size: 16px; color: #3b82f6; }
+.btn-new { font-size: 12px; font-weight: 500; color: #3b82f6; background: #eff6ff; border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.btn-new i { font-size: 14px; }
+
+.item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+.item:last-child { border-bottom: none; padding-bottom: 0; }
+.item-left { display: flex; align-items: center; gap: 10px; }
+.item-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; }
+.item-dot.green { background: #22c55e; }
+.item-title { font-size: 13px; font-weight: 500; color: #1e293b; }
+.item-date { font-size: 12px; color: #94a3b8; }
+.item-actions { display: flex; gap: 10px; }
+.item-actions i { font-size: 16px; color: #94a3b8; cursor: pointer; }
+.item-actions i:hover { color: #3b82f6; }
+
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.badge.blue { background: #eff6ff; color: #3b82f6; }
+.badge.green { background: #f0fdf4; color: #16a34a; }
+</style>
+</head>
+<body>
+
+<p class="page-label">Maquette 4 / 8 — Dashboard</p>
+
+<div class="navbar">
+  <div class="nav-logo">
+    <i class="ti ti-brain"></i>
+    EduQuizAI
+  </div>
+  <div class="nav-user">
+    <span>Dupont Marie</span>
+    <div class="avatar">MD</div>
+  </div>
+</div>
+
+<div class="welcome">
+  <h1>Bonjour, Marie 👋</h1>
+  <p>Voici un résumé de votre activité pédagogique.</p>
+</div>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="ti ti-book"></i></div>
+    <div class="stat-label">Mes leçons</div>
+    <div class="stat-value">12</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="ti ti-list-check"></i></div>
+    <div class="stat-label">Mes quiz</div>
+    <div class="stat-value">8</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon purple"><i class="ti ti-sparkles"></i></div>
+    <div class="stat-label">Questions IA</div>
+    <div class="stat-value">64</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-title"><i class="ti ti-book"></i> Leçons récentes</span>
+    <button class="btn-new"><i class="ti ti-plus"></i> Nouvelle leçon</button>
+  </div>
+  <div class="item">
+    <div class="item-left">
+      <div class="item-dot"></div>
+      <div>
+        <div class="item-title">La photosynthèse</div>
+        <div class="item-date">01/06/2026</div>
+      </div>
+    </div>
+    <div class="item-actions">
+      <i class="ti ti-edit" title="Modifier"></i>
+      <i class="ti ti-trash" title="Supprimer"></i>
+    </div>
+  </div>
+  <div class="item">
+    <div class="item-left">
+      <div class="item-dot"></div>
+      <div>
+        <div class="item-title">La Révolution française</div>
+        <div class="item-date">28/05/2026</div>
+      </div>
+    </div>
+    <div class="item-actions">
+      <i class="ti ti-edit" title="Modifier"></i>
+      <i class="ti ti-trash" title="Supprimer"></i>
+    </div>
+  </div>
+  <div class="item">
+    <div class="item-left">
+      <div class="item-dot"></div>
+      <div>
+        <div class="item-title">Les fractions</div>
+        <div class="item-date">20/05/2026</div>
+      </div>
+    </div>
+    <div class="item-actions">
+      <i class="ti ti-edit" title="Modifier"></i>
+      <i class="ti ti-trash" title="Supprimer"></i>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-title"><i class="ti ti-list-check"></i> Quiz récents</span>
+    <button class="btn-new"><i class="ti ti-plus"></i> Nouveau quiz</button>
+  </div>
+  <div class="item">
+    <div class="item-left">
+      <div class="item-dot green"></div>
+      <div>
+        <div class="item-title">Quiz — La photosynthèse</div>
+        <div class="item-date">01/06/2026</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge green">10 questions</span>
+      <div class="item-actions">
+        <i class="ti ti-eye" title="Voir"></i>
+        <i class="ti ti-download" title="Exporter"></i>
+      </div>
+    </div>
+  </div>
+  <div class="item">
+    <div class="item-left">
+      <div class="item-dot green"></div>
+      <div>
+        <div class="item-title">Quiz — Révolution française</div>
+        <div class="item-date">29/05/2026</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge blue">8 questions</span>
+      <div class="item-actions">
+        <i class="ti ti-eye" title="Voir"></i>
+        <i class="ti ti-download" title="Exporter"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

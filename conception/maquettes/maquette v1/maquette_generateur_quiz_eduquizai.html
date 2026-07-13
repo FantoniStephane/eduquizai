@@ -1,0 +1,80 @@
+
+<style>
+.screen { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; border: 0.5px solid var(--color-border-tertiary); }
+.navbar { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+.nav-back { font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 4px; }
+.card { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1.5rem; }
+.page-title { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 1.5rem; }
+.field { margin-bottom: 1.25rem; }
+.field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.field input, .field select { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 14px; background: var(--color-background-secondary); color: var(--color-text-primary); }
+.checkboxes { display: flex; flex-direction: column; gap: 8px; }
+.checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-primary); }
+.checkbox-item input { width: auto; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-generate { width: 100%; padding: 10px; background: var(--color-background-info); color: var(--color-text-info); border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.5rem; }
+.page-label { font-size: 11px; color: var(--color-text-tertiary); text-align: center; margin-bottom: 1rem; letter-spacing: 0.05em; }
+</style>
+
+<div class="screen">
+  <p class="page-label">MAQUETTE — GÉNÉRATEUR DE QUIZ</p>
+
+  <div class="navbar">
+    <div class="nav-logo">
+      <i class="ti ti-brain" style="font-size:18px; color: var(--color-text-info);" aria-hidden="true"></i>
+      EduQuizAI
+    </div>
+    <div class="nav-back">
+      <i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i>
+      Retour au dashboard
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="page-title"><i class="ti ti-sparkles" aria-hidden="true"></i> Générer un quiz</p>
+
+    <div class="field">
+      <label>Leçon source</label>
+      <select>
+        <option>Sélectionner une leçon...</option>
+        <option>La photosynthèse</option>
+        <option>La Révolution française</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Titre du quiz</label>
+      <input type="text" placeholder="Ex : Quiz — La photosynthèse" readonly />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Nombre de questions</label>
+        <input type="text" placeholder="Ex : 10" readonly />
+      </div>
+      <div class="field">
+        <label>Niveau de difficulté</label>
+        <select>
+          <option>Facile</option>
+          <option>Moyen</option>
+          <option>Difficile</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Types de questions</label>
+      <div class="checkboxes">
+        <label class="checkbox-item"><input type="checkbox" checked /> QCM</label>
+        <label class="checkbox-item"><input type="checkbox" checked /> Vrai / Faux</label>
+        <label class="checkbox-item"><input type="checkbox" /> Question ouverte</label>
+      </div>
+    </div>
+
+    <button class="btn-generate">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>
+      Générer le quiz
+    </button>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Mot de passe oublié</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+  .page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .card { background: rgba(255,255,255,0.97); border-radius: 16px; border: 1px solid #e2e8f0; padding: 2rem; width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+  .logo { text-align: center; margin-bottom: 1.75rem; }
+  .logo-icon { width: 52px; height: 52px; background: #eff6ff; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .logo-icon i { font-size: 26px; color: #3b82f6; }
+  .logo-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .logo-sub { font-size: 13px; color: #64748b; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: #eff6ff; }
+  .panel-icon i { font-size: 28px; color: #3b82f6; }
+  .panel-title { font-size: 16px; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 6px; }
+  .panel-desc { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 1.5rem; line-height: 1.6; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: #f8fafc; outline: none; }
+  .btn-primary { width: 100%; padding: 11px; background: #3b82f6; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.25rem; }
+  .btn-back { width: 100%; padding: 10px; background: transparent; color: #64748b; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; }
+  .success-check { width: 64px; height: 64px; border-radius: 50%; background: #f0fdf4; border: 2px solid #86efac; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+  .success-check i { font-size: 32px; color: #16a34a; }
+  .info-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #15803d; text-align: center; line-height: 1.6; margin-bottom: 1.25rem; }
+</style>
+</head>
+<body>
+<p class="page-label">Maquette 2 / 8 — Mot de passe oublié</p>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-brain"></i></div>
+    <p class="logo-title">EduQuizAI</p>
+    <p class="logo-sub">Réinitialisation du mot de passe</p>
+  </div>
+  <div class="panel active" id="step1">
+    <div class="panel-icon"><i class="ti ti-mail"></i></div>
+    <p class="panel-title">Mot de passe oublié ?</p>
+    <p class="panel-desc">Saisissez votre adresse email. Nous vous enverrons un lien de réinitialisation.</p>
+    <div class="field">
+      <label>Adresse email</label>
+      <input type="text" placeholder="enseignant@ecole.fr" />
+    </div>
+    <button class="btn-primary" onclick="goStep(2)"><i class="ti ti-send"></i> Envoyer le lien</button>
+    <button class="btn-back" onclick="goLogin()"><i class="ti ti-arrow-left"></i> Retour à la connexion</button>
+  </div>
+  <div class="panel" id="step2">
+    <div class="success-check"><i class="ti ti-mail-check"></i></div>
+    <p class="panel-title">Demande envoyée</p>
+    <div class="info-box">Si cette adresse est associée à un compte, vous recevrez un lien de réinitialisation dans quelques minutes.</div>
+    <p class="panel-desc">Pensez à vérifier vos spams.</p>
+    <button class="btn-back" onclick="goLogin()"><i class="ti ti-arrow-left"></i> Retour à la connexion</button>
+  </div>
+</div>
+<script>
+function goStep(n) {
+  document.getElementById('step1').classList.toggle('active', n === 1);
+  document.getElementById('step2').classList.toggle('active', n === 2);
+}
+function goLogin() { alert('Redirection vers la page de connexion'); }
+</script>
+</body>
+</html>

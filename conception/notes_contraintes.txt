@@ -1,0 +1,49 @@
+====================================================
+NOTES CONTRAINTES BDD — EduQuizAI
+====================================================
+
+TABLE : utilisateur
+----------------------------------------------------
+- email          → NOT NULL, UNIQUE
+- nom            → NOT NULL
+- prenom         → NOT NULL
+- mot_de_passe   → NOT NULL (stocker le HASH, pas le mot de passe en clair)
+
+TABLE : lecon
+----------------------------------------------------
+- titre          → NOT NULL
+- contenu        → NOT NULL
+- Id_utilisateur → NOT NULL (clé étrangère)
+
+TABLE : quizz
+----------------------------------------------------
+- titre          → NOT NULL
+- date_creation  → NOT NULL
+- Id_lecon       → NOT NULL (clé étrangère)
+- description    → nullable (optionnelle, aucune contrainte NOT NULL)
+TABLE : question
+----------------------------------------------------
+- texte          → NOT NULL
+- type_question  → NOT NULL
+                   Valeurs possibles : 'QCM', 'VRAI_FAUX', 'OUVERTE'
+                   → Contrainte d'énumération à définir côté Django ou MPD
+- Id_quizz       → NOT NULL (clé étrangère)
+
+TABLE : reponse
+----------------------------------------------------
+- texte          → NOT NULL
+- est_correcte   → NOT NULL (BOOLEAN : True / False)
+- Id_question    → NOT NULL (clé étrangère)
+
+====================================================
+ADAPTATIONS POSTGRESQL
+====================================================
+- COUNTER  → remplacer par SERIAL
+- LOGICAL  → remplacer par BOOLEAN
+(Looping utilise un dialecte générique — à adapter lors de la phase Django)
+
+====================================================
+
+CARDINALITÉS CORRIGÉES
+- Association genere : 0,n côté lecon (une leçon peut exister sans quiz)
+- Association compose : 0,n côté question (une question ouverte peut n'avoir aucune réponse)

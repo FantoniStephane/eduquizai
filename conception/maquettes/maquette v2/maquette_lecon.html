@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Créer une leçon</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; padding: 1.5rem; }
+
+.page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 1rem; }
+
+.navbar { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.nav-logo i { font-size: 20px; color: #3b82f6; }
+.nav-back { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.nav-back:hover { color: #3b82f6; }
+
+.card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.75rem; max-width: 720px; margin: 0 auto; }
+
+.page-title { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; }
+.page-title i { font-size: 20px; color: #3b82f6; }
+
+.field { margin-bottom: 1.25rem; }
+.field label { display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; background: #f8fafc; outline: none; }
+.field input::placeholder { color: #94a3b8; }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.toolbar { display: flex; gap: 4px; padding: 8px 10px; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 8px 8px 0 0; background: #f8fafc; flex-wrap: wrap; }
+.toolbar-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; cursor: pointer; color: #475569; font-size: 13px; font-weight: 600; }
+.toolbar-btn:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+.toolbar-sep { width: 1px; background: #e2e8f0; margin: 4px 2px; }
+
+.editor { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; font-size: 13px; background: #fff; color: #94a3b8; min-height: 200px; line-height: 1.8; resize: vertical; font-family: inherit; outline: none; }
+
+.char-count { font-size: 12px; color: #94a3b8; text-align: right; margin-top: 4px; }
+
+.tags-field { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; min-height: 40px; align-items: center; }
+.tag { display: flex; align-items: center; gap: 4px; background: #eff6ff; color: #3b82f6; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+.tag i { font-size: 12px; cursor: pointer; }
+.tag-input { border: none; background: transparent; font-size: 13px; color: #1e293b; outline: none; min-width: 80px; }
+.tag-input::placeholder { color: #94a3b8; }
+
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9; }
+.btn-cancel { padding: 9px 18px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 500; background: #fff; color: #64748b; cursor: pointer; }
+.btn-cancel:hover { background: #f8fafc; }
+.btn-draft { padding: 9px 18px; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; font-weight: 500; background: #fff; color: #3b82f6; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.btn-save { padding: 9px 18px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.btn-save:hover { background: #2563eb; }
+</style>
+</head>
+<body>
+
+<p class="page-label">Maquette 5 / 8 — Créer une leçon</p>
+
+<div class="navbar">
+  <div class="nav-logo">
+    <i class="ti ti-brain"></i>
+    EduQuizAI
+  </div>
+  <div class="nav-back">
+    <i class="ti ti-arrow-left"></i>
+    Retour au dashboard
+  </div>
+</div>
+
+<div class="card">
+  <p class="page-title"><i class="ti ti-book"></i> Nouvelle leçon</p>
+
+  <div class="field">
+    <label>Titre de la leçon <span style="color:#ef4444;">*</span></label>
+    <input type="text" placeholder="Ex : La photosynthèse" />
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Matière</label>
+      <select>
+        <option value="">Sélectionner...</option>
+        <option>Sciences de la vie</option>
+        <option>Histoire-Géographie</option>
+        <option>Mathématiques</option>
+        <option>Français</option>
+        <option>Physique-Chimie</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Niveau scolaire</label>
+      <select>
+        <option value="">Sélectionner...</option>
+        <option>CM1 / CM2</option>
+        <option>6ème / 5ème</option>
+        <option>4ème / 3ème</option>
+        <option>Lycée</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Contenu de la leçon <span style="color:#ef4444;">*</span></label>
+    <div class="toolbar">
+      <div class="toolbar-btn" title="Gras">G</div>
+      <div class="toolbar-btn" title="Italique" style="font-style:italic;">I</div>
+      <div class="toolbar-btn" title="Souligné" style="text-decoration:underline;">S</div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-btn" title="Liste à puces"><i class="ti ti-list"></i></div>
+      <div class="toolbar-btn" title="Liste numérotée"><i class="ti ti-list-numbers"></i></div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-btn" title="Lien"><i class="ti ti-link"></i></div>
+      <div class="toolbar-btn" title="Image"><i class="ti ti-photo"></i></div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-btn" title="Titre H2" style="font-size:12px;">H2</div>
+      <div class="toolbar-btn" title="Titre H3" style="font-size:11px;">H3</div>
+    </div>
+    <textarea class="editor" placeholder="Saisissez le contenu de votre leçon ici...&#10;&#10;Vous pouvez structurer votre leçon avec des titres, des listes, des liens et des images."></textarea>
+    <div class="char-count">0 / 10 000 caractères</div>
+  </div>
+
+  <div class="field">
+    <label>Mots-clés <span style="color:#94a3b8; font-weight:400;">(facultatif)</span></label>
+    <div class="tags-field">
+      <div class="tag">photosynthèse <i class="ti ti-x"></i></div>
+      <div class="tag">biologie <i class="ti ti-x"></i></div>
+      <input class="tag-input" placeholder="Ajouter un mot-clé..." />
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-cancel">Annuler</button>
+    <button class="btn-draft"><i class="ti ti-file"></i> Enregistrer en brouillon</button>
+    <button class="btn-save"><i class="ti ti-device-floppy"></i> Enregistrer</button>
+  </div>
+</div>
+
+</body>
+</html>

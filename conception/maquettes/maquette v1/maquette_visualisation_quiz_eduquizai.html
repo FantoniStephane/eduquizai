@@ -1,0 +1,92 @@
+
+<style>
+.screen { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; border: 0.5px solid var(--color-border-tertiary); }
+.navbar { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+.nav-back { font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 4px; }
+.card { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1.5rem; margin-bottom: 1rem; }
+.quiz-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.quiz-title { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+.quiz-meta { font-size: 12px; color: var(--color-text-tertiary); margin: 0; }
+.export-btns { display: flex; gap: 8px; }
+.btn-export { padding: 6px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 12px; background: transparent; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.question-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 1rem; margin-bottom: 1rem; }
+.question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.question-num { font-size: 12px; color: var(--color-text-tertiary); }
+.question-type { font-size: 11px; padding: 3px 8px; border-radius: var(--border-radius-md); background: var(--color-background-info); color: var(--color-text-info); }
+.question-text { font-size: 14px; color: var(--color-text-primary); margin: 0 0 10px; }
+.reponses { display: flex; flex-direction: column; gap: 6px; }
+.reponse { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary); padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+.reponse.correct { border-color: var(--color-border-success); color: var(--color-text-success); background: var(--color-background-success); }
+.question-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.btn-action { font-size: 12px; color: var(--color-text-secondary); background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+.add-btn { width: 100%; padding: 8px; border: 0.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.page-label { font-size: 11px; color: var(--color-text-tertiary); text-align: center; margin-bottom: 1rem; letter-spacing: 0.05em; }
+</style>
+
+<div class="screen">
+  <p class="page-label">MAQUETTE — VISUALISATION / ÉDITION DU QUIZ</p>
+
+  <div class="navbar">
+    <div class="nav-logo">
+      <i class="ti ti-brain" style="font-size:18px; color: var(--color-text-info);" aria-hidden="true"></i>
+      EduQuizAI
+    </div>
+    <div class="nav-back">
+      <i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i>
+      Retour au dashboard
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="quiz-header">
+      <div>
+        <p class="quiz-title">Quiz — La photosynthèse</p>
+        <p class="quiz-meta">3 questions · Généré le 01/06/2026</p>
+      </div>
+      <div class="export-btns">
+        <button class="btn-export"><i class="ti ti-file-type-pdf" aria-hidden="true"></i> PDF</button>
+        <button class="btn-export"><i class="ti ti-file-type-csv" aria-hidden="true"></i> CSV</button>
+        <button class="btn-export"><i class="ti ti-share" aria-hidden="true"></i> Partager</button>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-header">
+        <span class="question-num">Question 1</span>
+        <span class="question-type">QCM</span>
+      </div>
+      <p class="question-text">Quel pigment est responsable de la photosynthèse ?</p>
+      <div class="reponses">
+        <div class="reponse correct"><i class="ti ti-check" style="font-size:14px;" aria-hidden="true"></i> La chlorophylle</div>
+        <div class="reponse">La mélanine</div>
+        <div class="reponse">La kératine</div>
+      </div>
+      <div class="question-actions">
+        <button class="btn-action"><i class="ti ti-edit" aria-hidden="true"></i> Modifier</button>
+        <button class="btn-action"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-header">
+        <span class="question-num">Question 2</span>
+        <span class="question-type">Vrai / Faux</span>
+      </div>
+      <p class="question-text">La photosynthèse produit du dioxyde de carbone.</p>
+      <div class="reponses">
+        <div class="reponse">Vrai</div>
+        <div class="reponse correct"><i class="ti ti-check" style="font-size:14px;" aria-hidden="true"></i> Faux</div>
+      </div>
+      <div class="question-actions">
+        <button class="btn-action"><i class="ti ti-edit" aria-hidden="true"></i> Modifier</button>
+        <button class="btn-action"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>
+      </div>
+    </div>
+
+    <button class="add-btn">
+      <i class="ti ti-plus" aria-hidden="true"></i>
+      Ajouter une question
+    </button>
+  </div>
+</div>

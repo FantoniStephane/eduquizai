@@ -1,0 +1,63 @@
+
+<style>
+.screen { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; border: 0.5px solid var(--color-border-tertiary); }
+.navbar { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.nav-logo { font-size: 15px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+.nav-back { font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.card { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1.5rem; }
+.page-title { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 1.5rem; }
+.field { margin-bottom: 1.25rem; }
+.field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.field input { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 14px; background: var(--color-background-secondary); color: var(--color-text-primary); }
+.toolbar { display: flex; gap: 4px; padding: 8px; border: 0.5px solid var(--color-border-secondary); border-bottom: none; border-radius: var(--border-radius-md) var(--border-radius-md) 0 0; background: var(--color-background-secondary); }
+.toolbar-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); cursor: pointer; color: var(--color-text-secondary); font-size: 13px; font-weight: 500; }
+.editor { width: 100%; box-sizing: border-box; padding: 12px; border: 0.5px solid var(--color-border-secondary); border-radius: 0 0 var(--border-radius-md) var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-tertiary); min-height: 180px; line-height: 1.7; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
+.btn-cancel { padding: 8px 16px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.btn-save { padding: 8px 16px; background: var(--color-background-info); color: var(--color-text-info); border: none; border-radius: var(--border-radius-md); font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.page-label { font-size: 11px; color: var(--color-text-tertiary); text-align: center; margin-bottom: 1rem; letter-spacing: 0.05em; }
+</style>
+
+<div class="screen">
+  <p class="page-label">MAQUETTE — CRÉER UNE LEÇON</p>
+
+  <div class="navbar">
+    <div class="nav-logo">
+      <i class="ti ti-brain" style="font-size:18px; color: var(--color-text-info);" aria-hidden="true"></i>
+      EduQuizAI
+    </div>
+    <div class="nav-back">
+      <i class="ti ti-arrow-left" style="font-size:16px;" aria-hidden="true"></i>
+      Retour au dashboard
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="page-title"><i class="ti ti-book" aria-hidden="true"></i> Nouvelle leçon</p>
+
+    <div class="field">
+      <label>Titre de la leçon</label>
+      <input type="text" placeholder="Ex : La photosynthèse" readonly />
+    </div>
+
+    <div class="field">
+      <label>Contenu</label>
+      <div class="toolbar">
+        <div class="toolbar-btn">G</div>
+        <div class="toolbar-btn">I</div>
+        <div class="toolbar-btn">S</div>
+        <div class="toolbar-btn"><i class="ti ti-list" style="font-size:14px;" aria-hidden="true"></i></div>
+        <div class="toolbar-btn"><i class="ti ti-link" style="font-size:14px;" aria-hidden="true"></i></div>
+      </div>
+      <div class="editor">Saisissez le contenu de votre leçon ici...</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-cancel">Annuler</button>
+      <button class="btn-save">
+        <i class="ti ti-device-floppy" aria-hidden="true"></i>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>

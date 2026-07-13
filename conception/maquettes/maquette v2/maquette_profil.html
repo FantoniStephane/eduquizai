@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduQuizAI — Profil</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%); min-height: 100vh; padding: 1.5rem; }
+  .page-label { font-size: 11px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 1rem; }
+  .navbar { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .nav-logo { font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+  .nav-logo i { font-size: 20px; color: #3b82f6; }
+  .nav-back { font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .nav-back:hover { color: #3b82f6; }
+  .main { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+
+  /* Avatar card */
+  .avatar-card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.75rem; display: flex; align-items: center; gap: 1.25rem; }
+  .avatar-circle { width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #3b82f6; flex-shrink: 0; border: 2px solid #bfdbfe; }
+  .avatar-info h2 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+  .avatar-info p { font-size: 13px; color: #64748b; }
+  .avatar-badge { margin-left: auto; background: #eff6ff; color: #3b82f6; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; flex-shrink: 0; }
+
+  /* Section carte */
+  .card { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.5rem; }
+  .card-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card-title i { font-size: 16px; color: #3b82f6; }
+
+  /* Infos */
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+  .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .info-label { font-size: 13px; color: #64748b; }
+  .info-value { font-size: 13px; font-weight: 500; color: #1e293b; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-item { background: #f8fafc; border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-item .stat-icon { font-size: 22px; margin-bottom: 6px; }
+  .stat-item .stat-value { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+  .stat-item .stat-label { font-size: 12px; color: #64748b; }
+
+  /* Actions */
+  .btn-logout { width: 100%; padding: 11px; background: #fff; color: #475569; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+  .btn-logout:hover { background: #f8fafc; }
+  .btn-delete { width: 100%; padding: 11px; background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-delete:hover { background: #ffe4e6; }
+
+  /* Modal confirmation */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 1.75rem; max-width: 360px; width: 90%; text-align: center; }
+  .modal-icon { width: 52px; height: 52px; border-radius: 50%; background: #fff1f2; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+  .modal-icon i { font-size: 26px; color: #e11d48; }
+  .modal h3 { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+  .modal p { font-size: 13px; color: #64748b; margin-bottom: 1.25rem; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 500; background: #fff; color: #64748b; cursor: pointer; }
+  .btn-confirm-delete { flex: 1; padding: 10px; background: #e11d48; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<p class="page-label">Maquette 8 / 8 — Profil utilisateur</p>
+
+<div class="navbar">
+  <div class="nav-logo">
+    <i class="ti ti-brain"></i>
+    EduQuizAI
+  </div>
+  <div class="nav-back">
+    <i class="ti ti-arrow-left"></i>
+    Retour au dashboard
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Avatar -->
+  <div class="avatar-card">
+    <div class="avatar-circle">MD</div>
+    <div class="avatar-info">
+      <h2>Marie Dupont</h2>
+      <p>Enseignante · Sciences de la vie</p>
+    </div>
+    <span class="avatar-badge">Enseignant</span>
+  </div>
+
+  <!-- Infos personnelles -->
+  <div class="card">
+    <p class="card-title"><i class="ti ti-user"></i> Informations personnelles</p>
+    <div class="info-row">
+      <span class="info-label">Nom complet</span>
+      <span class="info-value">Marie Dupont</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Adresse email</span>
+      <span class="info-value">marie.dupont@ecole.fr</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Rôle</span>
+      <span class="info-value">Enseignant</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Membre depuis</span>
+      <span class="info-value">01 janvier 2026</span>
+    </div>
+  </div>
+
+  <!-- Stats globales -->
+  <div class="card">
+    <p class="card-title"><i class="ti ti-chart-bar"></i> Statistiques globales</p>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-icon">📖</div>
+        <div class="stat-value">24</div>
+        <div class="stat-label">Leçons créées</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Quiz générés</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">❓</div>
+        <div class="stat-value">142</div>
+        <div class="stat-label">Questions générées</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">📤</div>
+        <div class="stat-value">9</div>
+        <div class="stat-label">Exports effectués</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions compte -->
+  <div class="card">
+    <p class="card-title"><i class="ti ti-settings"></i> Gestion du compte</p>
+    <button class="btn-logout" onclick="alert('Déconnexion...')">
+      <i class="ti ti-logout"></i> Se déconnecter
+    </button>
+    <button class="btn-delete" onclick="document.getElementById('modal').classList.add('active')">
+      <i class="ti ti-trash"></i> Supprimer mon compte
+    </button>
+  </div>
+
+</div>
+
+<!-- Modal confirmation suppression -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+    <h3>Supprimer le compte ?</h3>
+    <p>Cette action est irréversible. Toutes vos leçons et quiz seront définitivement supprimés.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('active')">Annuler</button>
+      <button class="btn-confirm-delete">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
