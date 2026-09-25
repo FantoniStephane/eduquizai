@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modifier le quiz · EduQuizAI</title>
+  <link rel="icon" href="assets/logo_icone.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="sans-scroll">
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  <header class="entete">
+    <div class="entete-int">
+      <a href="02_dashboard.html"><img class="logo" src="assets/logo.svg" alt="EduQuizAI, retour au tableau de bord"></a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="02_dashboard.html">Tableau de bord</a>
+        <a href="03_lecons.html">Leçons</a>
+        <a href="06_quiz.html" aria-current="page">Quiz</a>
+      </nav>
+      <div class="utilisateur">
+        <span class="avatar" aria-hidden="true">MD</span><span class="nom">Marie Durand</span>
+        <a class="lien-deco" href="01_connexion.html">Déconnexion</a>
+      </div>
+      <button class="menu-mobile" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </header>
+  <main id="contenu" class="contenu">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane"><ol><li><a href="06_quiz.html">Mes quiz</a></li><li><a href="08_quiz_detail.html">La Révolution française</a></li><li aria-current="page">Modifier</li></ol></nav>
+    <div class="titre-page" style="align-items:center"><h1>Modifier le quiz</h1><span class="badge badge-brouillon">Brouillon</span></div>
+
+    <form class="grille-detail" method="post" action="#" novalidate>
+      <section class="carte" aria-labelledby="t-q" style="padding:0">
+        <h2 id="t-q" class="sr">Questions</h2>
+        <div class="zone-defilante" style="padding:16px">
+          <fieldset class="question q-edit" id="q1">
+            <legend class="sr">Question 1</legend>
+            <div class="question-tete"><div><span class="num" aria-hidden="true">1</span><span class="badge badge-type">QCM</span></div><button class="btn-icone danger" type="button" aria-label="Supprimer la question 1" title="Supprimer la question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>
+            <div class="champ"><label for="q1t">Énoncé</label><textarea id="q1t">En quelle année a eu lieu la prise de la Bastille ?</textarea></div>
+            <p style="font-weight:600;font-size:14px;margin-bottom:6px" id="q1c">Choix <span class="muted" style="font-weight:400">(sélectionnez la bonne réponse)</span></p>
+            <ul class="choix-edit" role="radiogroup" aria-labelledby="q1c">
+              <li><span class="radio-correct"><input type="radio" name="q1ok" id="q1r1" checked><label for="q1r1">✓ Bonne réponse<span class="sr"> : choix 1</span></label></span><input aria-label="Texte du choix 1" value="1789"></li>
+              <li><span class="radio-correct"><input type="radio" name="q1ok" id="q1r2"><label for="q1r2">Marquer correcte<span class="sr"> : choix 2</span></label></span><input aria-label="Texte du choix 2" value="1792"></li>
+              <li><span class="radio-correct"><input type="radio" name="q1ok" id="q1r3"><label for="q1r3">Marquer correcte<span class="sr"> : choix 3</span></label></span><input aria-label="Texte du choix 3" value="1804"></li>
+              <li><span class="radio-correct"><input type="radio" name="q1ok" id="q1r4"><label for="q1r4">Marquer correcte<span class="sr"> : choix 4</span></label></span><input aria-label="Texte du choix 4" value="1815"></li>
+            </ul>
+            <div class="champ" style="margin-bottom:0"><label for="q1e">Explication</label><textarea id="q1e">Le 14 juillet 1789, le peuple de Paris prend la forteresse de la Bastille, symbole de l'arbitraire royal.</textarea></div>
+          </fieldset>          <fieldset class="question q-edit" id="q2">
+            <legend class="sr">Question 2</legend>
+            <div class="question-tete"><div><span class="num" aria-hidden="true">2</span><span class="badge badge-type">Vrai / Faux</span></div><button class="btn-icone danger" type="button" aria-label="Supprimer la question 2" title="Supprimer la question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>
+            <div class="champ"><label for="q2t">Énoncé</label><textarea id="q2t">Louis XVI a été exécuté en 1793.</textarea></div>
+            <p style="font-weight:600;font-size:14px;margin-bottom:6px" id="q2c">Choix <span class="muted" style="font-weight:400">(sélectionnez la bonne réponse)</span></p>
+            <ul class="choix-edit" role="radiogroup" aria-labelledby="q2c">
+              <li><span class="radio-correct"><input type="radio" name="q2ok" id="q2r1" checked><label for="q2r1">✓ Bonne réponse<span class="sr"> : choix 1</span></label></span><input aria-label="Texte du choix 1" value="Vrai"></li>
+              <li><span class="radio-correct"><input type="radio" name="q2ok" id="q2r2"><label for="q2r2">Marquer correcte<span class="sr"> : choix 2</span></label></span><input aria-label="Texte du choix 2" value="Faux"></li>
+            </ul>
+            <div class="champ" style="margin-bottom:0"><label for="q2e">Explication</label><textarea id="q2e">Louis XVI est guillotiné le 21 janvier 1793, place de la Révolution à Paris.</textarea></div>
+          </fieldset>          <fieldset class="question q-edit" id="q4">
+            <legend class="sr">Question 4</legend>
+            <div class="question-tete"><div><span class="num" aria-hidden="true">4</span><span class="badge badge-type">Question ouverte</span></div><button class="btn-icone danger" type="button" aria-label="Supprimer la question 4" title="Supprimer la question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>
+            <div class="champ"><label for="q4t">Énoncé</label><textarea id="q4t">Citez deux causes de la Révolution française.</textarea></div>
+            <div class="champ"><label for="q4a">Réponse attendue</label><textarea id="q4a">La crise financière de l'État, les inégalités entre les trois ordres, la diffusion des idées des Lumières (deux au choix).</textarea></div>
+          </fieldset>
+          <p class="muted" style="text-align:center;padding:8px">… questions 5 à 10</p>
+        </div>
+      </section>
+
+      <aside class="carte">
+        <div class="champ"><label for="titre">Titre du quiz <span class="obligatoire" aria-hidden="true">*</span></label><input id="titre" value="La Révolution française" maxlength="100" required></div>
+        <div class="champ"><label for="dif">Difficulté</label><select id="dif"><option>Facile</option><option selected>Moyen</option><option>Difficile</option></select></div>
+        <p style="font-weight:600;font-size:14px;margin-bottom:8px" id="t-som">Aller à la question</p>
+        <nav aria-labelledby="t-som"><ul class="sommaire"><li><a href="#q1" aria-current="true">1</a></li><li><a href="#q2">2</a></li><li><a href="#q3">3</a></li><li><a href="#q4">4</a></li><li><a href="#q5">5</a></li><li><a href="#q6">6</a></li><li><a href="#q7">7</a></li><li><a href="#q8">8</a></li><li><a href="#q9">9</a></li><li><a href="#q10">10</a></li></ul></nav>
+        <p class="alerte-info" role="note">Le quiz reste en <strong>brouillon</strong> après modification. Pensez à le valider une fois relu.</p>
+        <div class="aside-actions">
+          <button class="btn btn-primaire" type="submit">Enregistrer les modifications</button>
+          <a class="btn btn-secondaire" href="08_quiz_detail.html">Annuler</a>
+        </div>
+      </aside>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,0 +1,17 @@
+:
+:
+UTILISATEUR: id_utilisateur [INTEGER], nom [VARCHAR(50)], prenom [VARCHAR(50)], email [VARCHAR(100)], mot_de_passe [VARCHAR(255)], role [VARCHAR(20)], est_actif [BOOLEAN], date_creation [DATETIME]
+POSSEDE, 0N UTILISATEUR, 11 LECON
+LECON: id_lecon [INTEGER], titre [VARCHAR(100)], matiere [VARCHAR(50)], niveau_scolaire [VARCHAR(20)], contenu [TEXT], date_creation [DATETIME], date_modification [DATETIME]
+
+:
+:
+:
+:
+GENERE, 0N LECON, 11 QUIZ
+
+CHOIX: id_choix [INTEGER], texte [TEXT], est_correct [BOOLEAN]
+PROPOSE, 0N QUESTION, 11 CHOIX
+QUESTION: id_question [INTEGER], texte [TEXT], type_question [VARCHAR(20)], explication [TEXT], reponse_attendue [TEXT], ordre [INTEGER]
+COMPOSE, 1N QUIZ, 11 QUESTION
+QUIZ: id_quiz [INTEGER], titre [VARCHAR(100)], description [TEXT], difficulte [VARCHAR(20)], statut [VARCHAR(20)], date_creation [DATETIME], date_validation [DATETIME]

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Générer un quiz · EduQuizAI</title>
+  <link rel="icon" href="assets/logo_icone.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="sans-scroll">
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  <header class="entete">
+    <div class="entete-int">
+      <a href="02_dashboard.html"><img class="logo" src="assets/logo.svg" alt="EduQuizAI, retour au tableau de bord"></a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="02_dashboard.html">Tableau de bord</a>
+        <a href="03_lecons.html">Leçons</a>
+        <a href="06_quiz.html" aria-current="page">Quiz</a>
+      </nav>
+      <div class="utilisateur">
+        <span class="avatar" aria-hidden="true">MD</span><span class="nom">Marie Durand</span>
+        <a class="lien-deco" href="01_connexion.html">Déconnexion</a>
+      </div>
+      <button class="menu-mobile" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </header>
+  <main id="contenu" class="contenu">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane"><ol><li><a href="06_quiz.html">Mes quiz</a></li><li aria-current="page">Générer un quiz</li></ol></nav>
+    <div class="titre-page" style="align-items:center"><h1>Générer un quiz</h1><p class="muted">Choisissez une leçon et réglez les paramètres.</p></div>
+
+    <form class="grille-gen" method="post" action="#" novalidate>
+      <div class="carte">
+        <div class="grille-form">
+          <div class="champ">
+            <label for="lecon">Leçon <span class="obligatoire" aria-hidden="true">*</span></label>
+            <select id="lecon" name="lecon" required><option value="">Choisir une leçon</option><option selected>La Révolution française (Histoire · 4e)</option><option>Les fractions (Mathématiques · 6e)</option><option>La photosynthèse (SVT · 5e)</option></select>
+          </div>
+          <div class="champ">
+            <label for="titre">Titre du quiz <span class="obligatoire" aria-hidden="true">*</span></label>
+            <input id="titre" name="titre" maxlength="100" value="La Révolution française" required>
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>Difficulté <span class="obligatoire" aria-hidden="true">*</span></legend>
+          <div class="choix-segment">
+            <input type="radio" id="d1" name="difficulte" value="facile"><label for="d1">Facile</label>
+            <input type="radio" id="d2" name="difficulte" value="moyen" checked><label for="d2">Moyen</label>
+            <input type="radio" id="d3" name="difficulte" value="difficile"><label for="d3">Difficile</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Types de questions <span class="obligatoire" aria-hidden="true">*</span> <span class="muted" style="font-weight:400">(au moins un)</span></legend>
+          <div class="choix-cases">
+            <input type="checkbox" id="t1" name="types" value="qcm" checked><label for="t1">QCM<small>4 choix, 1 bonne réponse</small></label>
+            <input type="checkbox" id="t2" name="types" value="vf" checked><label for="t2">Vrai / Faux<small>avec explication</small></label>
+            <input type="checkbox" id="t3" name="types" value="ouverte"><label for="t3">Question ouverte<small>avec réponse attendue</small></label>
+          </div>
+        </fieldset>
+
+        <fieldset style="margin-bottom:8px">
+          <legend id="lg-nb">Nombre de questions <span class="obligatoire" aria-hidden="true">*</span></legend>
+          <div class="nombre">
+            <button class="btn btn-secondaire" type="button" aria-label="Diminuer le nombre de questions">−</button>
+            <input id="nb" name="nombre" type="number" min="3" max="20" value="10" aria-labelledby="lg-nb" aria-describedby="aide-nb">
+            <button class="btn btn-secondaire" type="button" aria-label="Augmenter le nombre de questions">+</button>
+            <span class="aide" id="aide-nb">entre 3 et 20</span>
+          </div>
+        </fieldset>
+
+        <div class="actions-form">
+          <a class="btn btn-secondaire" href="06_quiz.html">Annuler</a>
+          <button class="btn btn-primaire" type="submit">✦ Générer le quiz</button>
+        </div>
+      </div>
+
+      <aside>
+        <div class="carte">
+          <h2 style="font-size:16px">Leçon sélectionnée</h2>
+          <div class="meta"><span class="badge badge-type">Histoire</span><span class="badge badge-type">4e</span><span class="muted">612 caractères</span></div>
+          <p class="apercu">La Révolution française (1789-1799) est une période de bouleversements politiques et sociaux en France. Les causes : une crise financière, des inégalités entre les trois ordres, la diffusion des idées des Lumières. Le 14 juillet 1789, le peuple de Paris prend la Bastille…</p>
+        </div>
+        <div class="encart-ia">
+          <h2><span aria-hidden="true">✦</span> Comment ça marche ?</h2>
+          <ul>
+            <li>L'IA tourne <strong>en local</strong> : votre leçon n'est envoyée à aucun service extérieur.</li>
+            <li>Le quiz est créé en <strong>brouillon</strong>.</li>
+            <li>Vous le relisez, le corrigez puis le <strong>validez</strong> avant de l'utiliser.</li>
+          </ul>
+        </div>
+      </aside>
+    </form>
+  </main>
+</body>
+</html>

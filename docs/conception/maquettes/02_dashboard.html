@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau de bord · EduQuizAI</title>
+  <link rel="icon" href="assets/logo_icone.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="sans-scroll">
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  <header class="entete">
+    <div class="entete-int">
+      <a href="02_dashboard.html"><img class="logo" src="assets/logo.svg" alt="EduQuizAI, retour au tableau de bord"></a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="02_dashboard.html" aria-current="page">Tableau de bord</a>
+        <a href="03_lecons.html">Leçons</a>
+        <a href="06_quiz.html">Quiz</a>
+      </nav>
+      <div class="utilisateur">
+        <span class="avatar" aria-hidden="true">MD</span><span class="nom">Marie Durand</span>
+        <a class="lien-deco" href="01_connexion.html">Déconnexion</a>
+      </div>
+      <button class="menu-mobile" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </header>
+  <main id="contenu" class="contenu">
+    <div class="titre-page">
+      <div><h1>Bonjour Marie</h1><p class="muted">Voici un aperçu de votre activité.</p></div>
+      <a class="btn btn-primaire" href="04_lecon_form.html">+ Nouvelle leçon</a>
+    </div>
+
+    <section class="grille-stats" aria-label="Chiffres clés">
+      <div class="carte stat"><div class="ico" style="background:var(--primaire-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 18.5"/></svg></div><div><div class="val">12</div><div class="lib">Leçons</div></div></div>
+      <div class="carte stat"><div class="ico" style="background:var(--succes-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></div><div><div class="val">8</div><div class="lib">Quiz validés</div></div></div>
+      <div class="carte stat"><div class="ico" style="background:var(--alerte-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><div class="val">3</div><div class="lib">Quiz à valider</div></div></div>
+    </section>
+
+    <div class="grille-2">
+      <section class="carte" aria-labelledby="t-valider">
+        <div class="carte-titre"><h2 id="t-valider">Quiz à valider</h2><a href="06_quiz.html">Voir tous les quiz</a></div>
+        <ul class="liste">
+          <li><div><a class="t" href="08_quiz_detail.html">La Révolution française</a><div class="s">Histoire · 4e · généré le 24/09</div></div><span class="badge badge-brouillon">Brouillon</span></li>
+          <li><div><a class="t" href="08_quiz_detail.html">Les fractions</a><div class="s">Mathématiques · 6e · généré le 23/09</div></div><span class="badge badge-brouillon">Brouillon</span></li>
+          <li><div><a class="t" href="08_quiz_detail.html">La photosynthèse</a><div class="s">SVT · 5e · généré le 22/09</div></div><span class="badge badge-brouillon">Brouillon</span></li>
+        </ul>
+      </section>
+      <section class="carte" aria-labelledby="t-lecons">
+        <div class="carte-titre"><h2 id="t-lecons">Dernières leçons</h2><a href="03_lecons.html">Voir toutes les leçons</a></div>
+        <ul class="liste">
+          <li><div><a class="t" href="05_lecon_detail.html">La Révolution française</a><div class="s">Histoire · 4e</div></div><span class="s">24/09</span></li>
+          <li><div><a class="t" href="05_lecon_detail.html">Les fractions</a><div class="s">Mathématiques · 6e</div></div><span class="s">23/09</span></li>
+          <li><div><a class="t" href="05_lecon_detail.html">La photosynthèse</a><div class="s">SVT · 5e</div></div><span class="s">22/09</span></li>
+          <li><div><a class="t" href="05_lecon_detail.html">Le présent de l'indicatif</a><div class="s">Français · 6e</div></div><span class="s">20/09</span></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

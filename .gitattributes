@@ -1,0 +1,8 @@
+# Fins de ligne : LF partout dans le dépôt (évite les scripts cassés dans les conteneurs Docker Linux)
+* text=auto eol=lf
+
+# Fichiers binaires : jamais modifiés
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary

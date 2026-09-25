@@ -1,0 +1,36 @@
+digraph A {
+  graph [rankdir=TB, bgcolor="white", fontname="Inter", pad=0.4, nodesep=0.5, ranksep=0.55, compound=true,
+         label=<<B>Architecture logicielle — EduQuizAI</B><BR/><FONT POINT-SIZE="11" COLOR="#475569">Application en couches · microservice IA · 5 conteneurs Docker</FONT>>, labelloc=t, fontsize=20];
+  node [fontname="Inter", fontsize=12, shape=box, style="rounded,filled", color="#1E3A8A", fillcolor="#EFF6FF", penwidth=1.4, margin="0.2,0.1"];
+  edge [fontname="Inter", fontsize=10, color="#1E3A8A", fontcolor="#1E3A8A", penwidth=1.5];
+
+  nav [label=<<B>Navigateur de l'enseignant</B>>, shape=box, fillcolor="#FFFFFF"];
+
+  subgraph cluster_web {
+    label=<<B>Conteneur « web » — Application Django</B>>; fontsize=13; style="rounded,dashed"; color="#1D4ED8"; fontcolor="#1D4ED8"; margin=16;
+    pres [label=<<B>PRÉSENTATION</B><BR/><FONT POINT-SIZE="10">Templates HTML · Vues Django · Formulaires</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">CSRF · échappement anti-XSS · @login_required</FONT>>, fillcolor="#DBEAFE"];
+    metier [label=<<B>MÉTIER</B><BR/><FONT POINT-SIZE="10">Services : leçons · quiz · import · export</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">contrôle du propriétaire · statut brouillon/validé · validation des fichiers</FONT>>, fillcolor="#FEF3C7", color="#B45309"];
+    subgraph cluster_donnees { label=""; style=invis;
+      orm [label=<<B>ACCÈS DONNÉES — SQL</B><BR/><FONT POINT-SIZE="10">Modèles Django (ORM)</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">requêtes paramétrées anti-injection</FONT>>, fillcolor="#DCFCE7", color="#15803D"];
+      repo [label=<<B>ACCÈS DONNÉES — NoSQL</B><BR/><FONT POINT-SIZE="10">Repository PyMongo</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">validation du document avant écriture</FONT>>, fillcolor="#DCFCE7", color="#15803D"];
+      client [label=<<B>CLIENT IA</B><BR/><FONT POINT-SIZE="10">Appels à l'API du microservice</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">jeton JWT · délai maximum</FONT>>, fillcolor="#E0E7FF", color="#1E3A8A"];
+    }
+    pres -> metier; metier -> orm; metier -> repo; metier -> client;
+  }
+
+  pg [label=<<B>PostgreSQL</B><BR/><FONT POINT-SIZE="10">utilisateurs · leçons</FONT><BR/><FONT POINT-SIZE="9" COLOR="#475569">conteneur « postgres »</FONT>>, shape=cylinder, fillcolor="#FFFFFF", color="#15803D"];
+  mongo [label=<<B>MongoDB</B><BR/><FONT POINT-SIZE="10">quiz · questions · choix</FONT><BR/><FONT POINT-SIZE="9" COLOR="#475569">conteneur « mongo »</FONT>>, shape=cylinder, fillcolor="#FFFFFF", color="#15803D"];
+
+  subgraph cluster_ia {
+    label=<<B>Conteneur « ia » — Microservice IA</B>>; fontsize=13; style="rounded,dashed"; color="#15803D"; fontcolor="#15803D"; margin=16;
+    api [label=<<B>API REST (Django REST Framework)</B><BR/><FONT POINT-SIZE="10">construit le prompt · vérifie le JSON renvoyé</FONT><BR/><FONT POINT-SIZE="9" COLOR="#B91C1C">authentification JWT · nettoyage anti-prompt injection</FONT>>, fillcolor="#DCFCE7", color="#15803D"];
+  }
+  ollama [label=<<B>Ollama</B><BR/><FONT POINT-SIZE="10">modèle de langage local</FONT><BR/><FONT POINT-SIZE="9" COLOR="#475569">conteneur « ollama »</FONT>>, fillcolor="#FFFFFF", color="#15803D"];
+
+  nav -> pres [label=" HTTPS "];
+  orm -> pg [label=" SQL "];
+  repo -> mongo [label=" requêtes Mongo "];
+  client -> api [label=" HTTP + JWT "];
+  api -> ollama [label=" HTTP local "];
+
+}

@@ -1,0 +1,43 @@
+# ===== Documents confidentiels (CDC « NE PAS DIFFUSER », référentiel, dossier pro) =====
+dossiers_officiels/
+
+# ===== Secrets : ne jamais publier =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# ===== Django =====
+*.log
+db.sqlite3
+media/
+staticfiles/
+
+# ===== Docker / données locales =====
+data/
+*.dump
+
+# ===== Éditeurs et système =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+~$*
+*.tmp
+.DS_Store
+Thumbs.db
+desktop.ini

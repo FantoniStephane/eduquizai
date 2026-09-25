@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Importer un fichier · EduQuizAI</title>
+  <link rel="icon" href="assets/logo_icone.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="sans-scroll">
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  <header class="entete">
+    <div class="entete-int">
+      <a href="02_dashboard.html"><img class="logo" src="assets/logo.svg" alt="EduQuizAI, retour au tableau de bord"></a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="02_dashboard.html">Tableau de bord</a>
+        <a href="03_lecons.html" aria-current="page">Leçons</a>
+        <a href="06_quiz.html">Quiz</a>
+      </nav>
+      <div class="utilisateur">
+        <span class="avatar" aria-hidden="true">MD</span><span class="nom">Marie Durand</span>
+        <a class="lien-deco" href="01_connexion.html">Déconnexion</a>
+      </div>
+      <button class="menu-mobile" aria-label="Ouvrir le menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </header>
+  <main id="contenu" class="contenu" aria-hidden="true">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane"><ol><li><a href="03_lecons.html">Mes leçons</a></li><li aria-current="page">Nouvelle leçon</li></ol></nav>
+    <div class="titre-page" style="align-items:center"><h1>Nouvelle leçon</h1><p class="muted">Les champs marqués d'un <span class="obligatoire">*</span> sont obligatoires.</p></div>
+
+    <form class="carte form-carte form-plein" method="post" action="#" novalidate>
+      <div class="grille-form grille-form-3">
+        <div class="champ">
+        <label for="titre">Titre <span class="obligatoire" aria-hidden="true">*</span></label>
+        <input id="titre" name="titre" maxlength="100" required value="La Révolution française">
+      </div>
+        <div class="champ">
+          <label for="matiere">Matière <span class="obligatoire" aria-hidden="true">*</span></label>
+          <select id="matiere" name="matiere" required><option value="">Choisir une matière</option><option>Français</option><option selected>Histoire</option><option>Mathématiques</option><option>SVT</option><option>Anglais</option></select>
+        </div>
+        <div class="champ">
+          <label for="niveau">Niveau scolaire <span class="obligatoire" aria-hidden="true">*</span></label>
+          <select id="niveau" name="niveau" required><option value="">Choisir un niveau</option><option>6e</option><option>5e</option><option selected>4e</option><option>3e</option></select>
+        </div>
+      </div>
+      <div class="champ champ-extensible">
+        <div class="label-ligne"><label for="contenu-lecon" id="lbl-contenu">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label><a class="btn btn-secondaire btn-petit" href="04c_lecon_import.html">⭱ Importer un fichier texte</a></div>
+        <div class="editeur">
+          <div class="barre-outils" role="toolbar" aria-label="Mise en forme" aria-controls="contenu-lecon">
+            <button type="button" aria-label="Gras">B</button><button type="button" aria-label="Italique"><i>I</i></button><button type="button" aria-label="Titre de section">H</button><button type="button" aria-label="Liste à puces">•≡</button>
+          </div>
+          <textarea id="contenu-lecon" name="contenu" required aria-describedby="aide-contenu">La Révolution française (1789-1799) est une période de bouleversements politiques et sociaux en France.
+
+## Les causes
+- une crise financière : l'État est endetté ;
+- des inégalités entre les trois ordres (clergé, noblesse, tiers état) ;
+- la diffusion des idées des Lumières.
+
+## Les grandes étapes
+Le 14 juillet 1789, le peuple de Paris prend la Bastille. Le 26 août 1789, l'Assemblée adopte la **Déclaration des droits de l'homme et du citoyen**. Louis XVI est exécuté le 21 janvier 1793.</textarea>
+        </div>
+        <div class="compteur aide" id="aide-contenu"><span>Mise en forme Markdown acceptée. C'est ce texte que l'IA utilisera pour générer le quiz.</span><span>612 / 20 000 caractères</span></div>
+      </div>
+      <div class="actions-form">
+        <a class="btn btn-secondaire" href="03_lecons.html">Annuler</a>
+        <button class="btn btn-primaire" type="submit">Enregistrer la leçon</button>
+      </div>
+    </form>
+  </main>
+  <div class="voile">
+    <div class="dialogue dialogue-large" role="dialog" aria-modal="true" aria-labelledby="t-import">
+      <h2 id="t-import">Importer un fichier texte</h2>
+      <p>Le texte du fichier remplacera le contenu actuel de la leçon. Vous pourrez le modifier ensuite.</p>
+      <form method="post" action="#" enctype="multipart/form-data" style="margin-top:16px">
+        <div class="depot">
+          <div class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></div>
+          <p><strong>Glissez votre fichier ici</strong> ou</p>
+          <label for="fichier" class="btn btn-primaire btn-petit" style="margin-top:10px;display:inline-flex">Choisir un fichier</label>
+          <input id="fichier" name="fichier" type="file" accept=".txt,.md" class="sr" aria-describedby="regles-import">
+        </div>
+        <div class="fichier-choisi" role="status"><span aria-hidden="true">✓</span><span><strong>revolution_francaise.txt</strong> · 4 Ko · prêt à importer</span></div>
+        <ul class="regles" id="regles-import"><li>Formats acceptés : <strong>.txt</strong> et <strong>.md</strong> (texte uniquement)</li><li>Taille maximale : <strong>1 Mo</strong> (20 000 caractères)</li></ul>
+        <div class="boutons" style="justify-content:flex-end;margin-top:18px">
+          <a class="btn btn-secondaire" href="04_lecon_form.html">Annuler</a>
+          <button class="btn btn-primaire" type="submit">Importer le texte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

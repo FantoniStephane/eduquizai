@@ -1,0 +1,49 @@
+# EduQuizAI by SchoolUp
+
+Générateur de quiz pédagogiques pour enseignants, piloté par une intelligence artificielle **locale**.
+
+Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications (CDA)** — Metz Numeric School, session 2026.
+
+## Fonctionnalités
+
+- Espace enseignant sécurisé (comptes créés par l'administrateur)
+- Rédaction de leçons ou import d'un fichier texte (.txt, .md)
+- Génération automatique de quiz par IA : QCM, vrai/faux, questions ouvertes
+- Relecture, modification et validation manuelle des quiz
+- Export des quiz en PDF, CSV ou JSON (version élève ou corrigée)
+
+## Stack technique
+
+| Couche | Technologie |
+|---|---|
+| Application | Python · Django (templates) |
+| Microservice IA | Django REST Framework · JWT · Ollama (modèle local) |
+| Bases de données | PostgreSQL (utilisateurs, leçons) · MongoDB (quiz) |
+| DevOps | Docker · Docker Compose · GitHub Actions |
+| Qualité | Ruff · pytest |
+
+## Architecture
+
+Application en couches (présentation → métier → accès aux données) et microservice IA séparé, dans 5 conteneurs Docker.
+Voir `docs/conception/diagrammes/architecture.png`.
+
+## Structure du dépôt
+
+```
+docs/                    Dossier projet, journal de bord
+docs/conception/         Diagrammes (UML, MCD, architecture), charte graphique, maquettes
+```
+
+*(la structure sera complétée au fil du développement)*
+
+## Installation
+
+*(à venir — sprint 1)*
+
+## Conventions
+
+Voir [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Auteur
+
+Stéphane Fantoni — [github.com/FantoniStephane](https://github.com/FantoniStephane)

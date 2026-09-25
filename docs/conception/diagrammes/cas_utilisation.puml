@@ -1,0 +1,49 @@
+@startuml cas_utilisation
+!pragma layout smetana
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam usecase {
+  BackgroundColor #EAF1FB
+  BorderColor #1F4E79
+}
+skinparam actorBorderColor #1F4E79
+title Diagramme de cas d'utilisation — EduQuizAI
+
+actor "Enseignant" as ENS
+actor "Administrateur" as ADM
+actor "IA (Ollama)\n<<système>>" as IA
+
+rectangle "EduQuizAI" {
+  usecase "S'authentifier" as UC_AUTH
+  usecase "Consulter le dashboard" as UC_DASH
+  usecase "Gérer ses leçons\n(créer, consulter,\nmodifier, supprimer)" as UC_LECON
+  usecase "Gérer ses quiz\n(consulter, modifier,\nsupprimer)" as UC_QUIZ
+  usecase "Générer un quiz" as UC_GEN
+  usecase "Valider un quiz" as UC_VAL
+  usecase "Importer un texte" as UC_IMP
+  usecase "Exporter un quiz" as UC_EXP
+  usecase "Créer et gérer\nles comptes enseignants" as UC_COMPTES
+}
+
+ENS --> UC_DASH
+ENS --> UC_LECON
+ENS --> UC_QUIZ
+ENS --> UC_GEN
+ENS --> UC_VAL
+UC_LECON <.. UC_IMP : <<extend>>
+UC_QUIZ <.. UC_EXP : <<extend>>
+ADM --> UC_COMPTES
+UC_GEN --> IA
+
+UC_DASH ..> UC_AUTH : <<include>>
+UC_LECON ..> UC_AUTH : <<include>>
+UC_QUIZ ..> UC_AUTH : <<include>>
+UC_GEN ..> UC_AUTH : <<include>>
+UC_VAL ..> UC_AUTH : <<include>>
+
+
+UC_COMPTES ..> UC_AUTH : <<include>>
+
+@enduml
