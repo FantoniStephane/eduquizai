@@ -1,0 +1,60 @@
+# Environnement de développement — EduQuizAI
+
+Installation réalisée le 27/09/2026 (tâche n°12, compétence C1 « Installer et configurer son environnement de travail en fonction du projet »).
+
+## Poste de travail
+
+| Élément | Détail |
+|---|---|
+| Système | Windows 11 Pro, virtualisation activée (WSL 2) |
+| Carte graphique | NVIDIA GeForce RTX 3050 Laptop, 4 Go de VRAM (pilote 566.07, CUDA 12.7) |
+| Disques | C: système (espace limité) ; E: projet et données Docker |
+
+## Outils installés
+
+| Outil | Version | Rôle |
+|---|---|---|
+| Git | 2.55 | Gestion de versions, repo `github.com/FantoniStephane/eduquizai` |
+| Python | 3.12.10 | Linting, tests et exécution locale ; même version que les images Docker |
+| Docker Desktop | Docker 29.8.0 (moteur WSL 2) | Exécution des 5 conteneurs : web, ia, postgres, mongo, ollama |
+| VS Code | 1.139 | Éditeur de code |
+
+Ollama n'est **pas** installé sous Windows : il tourne dans son propre conteneur Docker (image `ollama/ollama`). On évite ainsi un doublon d'installation et de modèles.
+
+## Configuration de Docker
+
+- **Stockage déplacé sur E:** (Settings → Resources → Advanced → Disk image location) : `E:\S_F\docker`. Les images, les volumes et les modèles d'IA ne saturent pas le disque C:.
+- **Accès GPU** : les conteneurs lancés avec `--gpus all` utilisent la carte NVIDIA.
+- **Volume `ollama_data`** : il conserve les modèles téléchargés d'un conteneur à l'autre.
+
+## Test de l'IA locale (27/09/2026)
+
+```
+docker run -d --gpus all -v ollama_data:/root/.ollama -p 11434:11434 --name ollama-test ollama/ollama
+docker exec ollama-test ollama pull llama3.2:3b
+docker exec ollama-test ollama run llama3.2:3b "Donne une question de QCM sur la photosynthèse, en français."
+docker exec ollama-test ollama ps
+```
+
+| Mesure | Résultat |
+|---|---|
+| Modèle testé | `llama3.2:3b` (2,0 Go téléchargés, 2,9 Go en mémoire) |
+| Répartition | 80 % GPU / 20 % CPU |
+| Réponse | QCM correct, obtenu en quelques secondes |
+
+**Constats :**
+- Avec 4 Go de VRAM, il faut un modèle de 3 à 4 milliards de paramètres pour rester majoritairement sur le GPU (Windows occupe déjà environ 0,5 Go de la carte pour l'affichage).
+- Le petit modèle fait quelques fautes de français (« du chlorophylle »). Le modèle définitif sera choisi après des tests sur de vraies leçons, et la validation manuelle par l'enseignant (US6) reste indispensable.
+
+## Extensions VS Code
+
+Elles sont listées dans `.vscode/extensions.json` : VS Code propose de les installer à l'ouverture du projet.
+
+| Extension | Rôle |
+|---|---|
+| Python (`ms-python.python`) | Autocomplétion, débogage, lancement des tests |
+| Ruff (`charliermarsh.ruff`) | Vérification et formatage du code (le même outil que dans la CI) |
+| Django (`batisteo.vscode-django`) | Coloration des templates Django |
+| Docker (`ms-azuretools.vscode-docker`) | Gestion des conteneurs |
+| MongoDB (`mongodb.mongodb-vscode`) | Exploration des quiz enregistrés |
+| GitHub Actions (`github.vscode-github-actions`) | Suivi de l'intégration continue |
