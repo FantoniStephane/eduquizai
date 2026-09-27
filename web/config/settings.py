@@ -83,11 +83,14 @@ DATABASES = {
         "NAME": config("POSTGRES_DB"),
         "USER": config("POSTGRES_USER"),
         "PASSWORD": config("POSTGRES_PASSWORD"),
-        "HOST": config("POSTGRES_HOST", default="localhost"),
+        "HOST": config("POSTGRES_HOST", default="127.0.0.1"),
         "PORT": config("POSTGRES_PORT", default="5432"),
     }
 }
 
+
+# Modèle utilisateur personnalisé (entité UTILISATEUR du MCD)
+AUTH_USER_MODEL = "comptes.Utilisateur"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
