@@ -1,6 +1,21 @@
 name: eduquizai
 
 services:
+  web:
+    build: ./web
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres      # dans Docker, on joint la base par le nom de son service
+    volumes:
+      - ./web:/app                 # le code est partagé : une modification est prise en compte sans reconstruire
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+
   postgres:
     image: postgres:17
     env_file: .env
