@@ -1,19 +1,45 @@
 {% extends "base_connecte.html" %}
 {% comment %}
-  Maquette 3 (mes leçons), version minimale : la tâche 21 ajoutera
-  la recherche, les filtres, le nombre de quiz et les actions.
+  Maquette 3 (mes leçons) : recherche, filtres, tableau et pagination.
+  Les filtres passent par l'URL (GET) : une recherche peut être mise en favori ou partagée.
+  La colonne Quiz et les actions (voir, modifier, supprimer) viendront avec leurs pages.
 {% endcomment %}
 
 {% block titre %}Mes leçons{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
 
 {% block contenu %}
   <div class="titre-page">
     <div>
       <h1>Mes leçons</h1>
-      <p class="muted">{{ lecons|length }} leçon{% if lecons|length > 1 %}s{% endif %}</p>
+      <p class="muted">{{ paginator.count }} leçon{% if paginator.count > 1 %}s{% endif %}</p>
     </div>
     <a class="btn btn-primaire" href="{% url 'lecons:creer' %}">+ Nouvelle leçon</a>
   </div>
+
+  <form class="filtres" role="search" method="get">
+    <div class="champ recherche">
+      <label for="q">Rechercher</label>
+      <input id="q" name="q" type="search" maxlength="100" placeholder="Titre de la leçon…" value="{{ filtres.q.value|default:'' }}">
+    </div>
+    <div class="champ">
+      <label for="matiere">Matière</label>
+      <select id="matiere" name="matiere">
+        {% for valeur, libelle in filtres.matiere.field.choices %}
+          <option value="{{ valeur }}"{% if filtres.matiere.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="champ">
+      <label for="niveau">Niveau</label>
+      <select id="niveau" name="niveau">
+        {% for valeur, libelle in filtres.niveau.field.choices %}
+          <option value="{{ valeur }}"{% if filtres.niveau.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-secondaire" type="submit">Filtrer</button>
+  </form>
 
   {% if lecons %}
     <div class="carte tableau-carte">
@@ -25,7 +51,7 @@
         <tbody>
           {% for lecon in lecons %}
             <tr>
-              <td>{{ lecon.titre }}</td>
+              <td><span class="t">{{ lecon.titre }}</span></td>
               <td data-l="Matière">{{ lecon.get_matiere_display }}</td>
               <td data-l="Niveau">{{ lecon.get_niveau_scolaire_display }}</td>
               <td data-l="Modifiée le">{{ lecon.date_modification|date:"d/m/Y" }}</td>
@@ -34,6 +60,21 @@
         </tbody>
       </table>
     </div>
+
+    <div class="pagination">
+      <p class="muted">Leçons {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ paginator.count }}</p>
+      {% if is_paginated %}
+        <nav aria-label="Pagination">
+          {% if page_obj.has_previous %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Page précédente">‹</a>{% endif %}
+          {% for numero in paginator.page_range %}
+            {% if numero == page_obj.number %}<span class="cur" aria-current="page">{{ numero }}</span>{% else %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ numero }}" aria-label="Page {{ numero }}">{{ numero }}</a>{% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Page suivante">›</a>{% endif %}
+        </nav>
+      {% endif %}
+    </div>
+  {% elif filtre_actif %}
+    <div class="carte"><p class="muted">Aucune leçon ne correspond à votre recherche. <a href="{% url 'lecons:liste' %}">Afficher toutes mes leçons</a></p></div>
   {% else %}
     <div class="carte"><p class="muted">Vous n'avez pas encore de leçon. Créez la première avec le bouton « Nouvelle leçon ».</p></div>
   {% endif %}

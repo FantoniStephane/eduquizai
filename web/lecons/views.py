@@ -2,22 +2,48 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView
 
-from .forms import LeconForm
+from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
 
 
 class LeconListView(ListView):
-    """Leçons de l'enseignant connecté (maquette 03, version minimale).
+    """Leçons de l'enseignant connecté (maquette 03).
 
-    La tâche 21 ajoutera les filtres, la recherche et la pagination.
+    Recherche par titre, filtres matière et niveau, pagination par 6. La colonne
+    Quiz et les actions (voir, modifier, supprimer) viendront avec leurs pages.
     """
 
     template_name = "lecons/lecon_liste.html"
     context_object_name = "lecons"
+    paginate_by = 6
 
     def get_queryset(self):
-        """Uniquement les leçons de l'utilisateur connecté."""
-        return Lecon.objects.filter(utilisateur=self.request.user)
+        """Uniquement les leçons de l'utilisateur connecté, puis les filtres valides."""
+        lecons = Lecon.objects.filter(utilisateur=self.request.user)
+        self.filtres = LeconFiltreForm(self.request.GET)
+        if self.filtres.is_valid():
+            recherche = self.filtres.cleaned_data["q"]
+            matiere = self.filtres.cleaned_data["matiere"]
+            niveau = self.filtres.cleaned_data["niveau"]
+            if recherche:
+                lecons = lecons.filter(titre__icontains=recherche)
+            if matiere:
+                lecons = lecons.filter(matiere=matiere)
+            if niveau:
+                lecons = lecons.filter(niveau_scolaire=niveau)
+        return lecons
+
+    def get_context_data(self, **kwargs):
+        """Ajoute les filtres et les paramètres à conserver dans la pagination."""
+        contexte = super().get_context_data(**kwargs)
+        parametres = self.request.GET.copy()
+        parametres.pop("page", None)
+        contexte["filtres"] = self.filtres
+        contexte["parametres"] = parametres.urlencode()
+        contexte["filtre_actif"] = any(
+            self.request.GET.get(nom) for nom in ("q", "matiere", "niveau")
+        )
+        return contexte
 
 
 class LeconCreateView(SuccessMessageMixin, CreateView):

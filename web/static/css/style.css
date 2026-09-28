@@ -955,7 +955,8 @@ tr:last-child td {
   border-bottom: 0;
 }
 
-td a.t {
+/* Titre de la ligne : lien vers le détail, ou texte simple tant que la page n'existe pas */
+td .t {
   font-weight: 600;
   color: var(--texte);
   text-decoration: none;

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Lecon
+from .models import Lecon, Matiere, Niveau
 
 CONTENU_MAX = 20_000
 
@@ -40,3 +40,23 @@ class LeconForm(forms.ModelForm):
         self.fields["contenu"].error_messages["required"] = (
             "Le contenu de la leçon est obligatoire."
         )
+
+
+class LeconFiltreForm(forms.Form):
+    """Recherche et filtres de la liste des leçons (maquette 03).
+
+    Les valeurs arrivent par l'URL (méthode GET) : le formulaire les valide,
+    une valeur inconnue est simplement ignorée.
+    """
+
+    q = forms.CharField(label="Rechercher", max_length=100, required=False)
+    matiere = forms.ChoiceField(
+        label="Matière",
+        choices=[("", "Toutes les matières"), *Matiere.choices],
+        required=False,
+    )
+    niveau = forms.ChoiceField(
+        label="Niveau",
+        choices=[("", "Tous les niveaux"), *Niveau.choices],
+        required=False,
+    )
