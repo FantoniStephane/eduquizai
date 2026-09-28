@@ -2,7 +2,7 @@
 {% comment %}
   Maquette 3 (mes leçons) : recherche, filtres, tableau et pagination.
   Les filtres passent par l'URL (GET) : une recherche peut être mise en favori ou partagée.
-  La colonne Quiz et les actions (voir, modifier, supprimer) viendront avec leurs pages.
+  Le titre mène au détail ; la colonne Quiz et les autres actions viendront avec leurs pages.
 {% endcomment %}
 
 {% block titre %}Mes leçons{% endblock %}
@@ -51,7 +51,7 @@
         <tbody>
           {% for lecon in lecons %}
             <tr>
-              <td><span class="t">{{ lecon.titre }}</span></td>
+              <td><a class="t" href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a></td>
               <td data-l="Matière">{{ lecon.get_matiere_display }}</td>
               <td data-l="Niveau">{{ lecon.get_niveau_scolaire_display }}</td>
               <td data-l="Modifiée le">{{ lecon.date_modification|date:"d/m/Y" }}</td>

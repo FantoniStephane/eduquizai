@@ -1,3 +1,5 @@
 Django>=5.2,<5.3
 psycopg[binary]>=3.2
 python-decouple>=3.8
+markdown>=3.7
+nh3>=0.2

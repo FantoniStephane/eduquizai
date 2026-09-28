@@ -1,6 +1,6 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, DetailView, ListView
 
 from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
@@ -59,3 +59,19 @@ class LeconCreateView(SuccessMessageMixin, CreateView):
         """Rattache la leçon à l'enseignant connecté avant l'enregistrement."""
         form.instance.utilisateur = self.request.user
         return super().form_valid(form)
+
+
+class LeconDetailView(DetailView):
+    """Détail d'une leçon (maquette 05).
+
+    La leçon est cherchée uniquement parmi celles de l'utilisateur connecté :
+    l'identifiant d'une leçon d'un autre enseignant donne une erreur 404
+    (protection contre l'accès direct par l'URL, faille IDOR).
+    """
+
+    template_name = "lecons/lecon_detail.html"
+    context_object_name = "lecon"
+
+    def get_queryset(self):
+        """Uniquement les leçons de l'utilisateur connecté."""
+        return Lecon.objects.filter(utilisateur=self.request.user)

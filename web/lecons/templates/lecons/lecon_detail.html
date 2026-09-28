@@ -1,0 +1,43 @@
+{% extends "base_connecte.html" %}
+{% load lecons_extras %}
+{% comment %}
+  Maquette 5 (détail d'une leçon). Le contenu Markdown est converti puis nettoyé
+  par le filtre markdown_sur (liste blanche de balises, protection XSS).
+  Boutons Modifier / Supprimer : tâches 21.2 et 21.3. Liste des quiz de la leçon : S2.
+{% endcomment %}
+
+{% block titre %}{{ lecon.titre }}{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="{% url 'lecons:liste' %}">Mes leçons</a></li>
+      <li aria-current="page">{{ lecon.titre }}</li>
+    </ol>
+  </nav>
+  <div class="titre-page">
+    <div>
+      <h1>{{ lecon.titre }}</h1>
+      <div class="meta">
+        <span class="badge badge-type">{{ lecon.get_matiere_display }}</span>
+        <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
+        <span class="muted">Créée le {{ lecon.date_creation|date:"d/m/Y" }} · modifiée le {{ lecon.date_modification|date:"d/m/Y" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grille-detail">
+    <section class="carte" aria-labelledby="t-contenu">
+      <h2 id="t-contenu" class="sr">Contenu de la leçon</h2>
+      <div class="zone-defilante texte-lecon" tabindex="0" aria-label="Contenu de la leçon">
+        {{ lecon.contenu|markdown_sur }}
+      </div>
+    </section>
+
+    <aside class="carte" aria-labelledby="t-quiz">
+      <div class="carte-titre"><h2 id="t-quiz">Quiz de cette leçon</h2></div>
+      <p class="muted">Aucun quiz n'a encore été généré à partir de cette leçon.</p>
+    </aside>
+  </div>
+{% endblock %}
