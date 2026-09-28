@@ -54,15 +54,17 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     """Enseignant ou administrateur de la plateforme (entité UTILISATEUR du MCD)."""
 
     id = models.BigAutoField(primary_key=True, db_column="id_utilisateur")
-    nom = models.CharField(max_length=50)
-    prenom = models.CharField(max_length=50)
-    email = models.EmailField(max_length=100, unique=True)
-    password = models.CharField(max_length=255, db_column="mot_de_passe")
-    role = models.CharField(
-        max_length=20, choices=Role.choices, default=Role.ENSEIGNANT
+    nom = models.CharField("nom", max_length=50)
+    prenom = models.CharField("prénom", max_length=50)
+    email = models.EmailField("adresse e-mail", max_length=100, unique=True)
+    password = models.CharField(
+        "mot de passe", max_length=255, db_column="mot_de_passe"
     )
-    is_active = models.BooleanField(default=True, db_column="est_actif")
-    date_creation = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(
+        "rôle", max_length=20, choices=Role.choices, default=Role.ENSEIGNANT
+    )
+    is_active = models.BooleanField("actif", default=True, db_column="est_actif")
+    date_creation = models.DateTimeField("date de création", auto_now_add=True)
 
     objects = UtilisateurManager()
 
@@ -71,6 +73,8 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = "utilisateur"
+        verbose_name = "utilisateur"
+        verbose_name_plural = "utilisateurs"
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(role__in=Role.values),
@@ -80,6 +84,11 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.prenom} {self.nom}"
+
+    def save(self, *args, **kwargs):
+        """Aligne les droits d'administration sur le rôle avant l'enregistrement."""
+        self.is_superuser = self.role == Role.ADMIN
+        super().save(*args, **kwargs)
 
     @property
     def is_staff(self):

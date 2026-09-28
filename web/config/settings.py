@@ -133,3 +133,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# E-mails : envoi réel (SMTP) par défaut ; en développement, affichage dans les logs
+EMAIL_BACKEND = config(
+    "DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = config(
+    "DJANGO_DEFAULT_FROM_EMAIL", default="EduQuizAI <no-reply@eduquizai.local>"
+)
+
+# Liens d'activation et de réinitialisation du mot de passe : valables 72 heures
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 72

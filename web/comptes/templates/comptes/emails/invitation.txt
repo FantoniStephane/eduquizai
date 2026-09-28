@@ -1,0 +1,14 @@
+{% autoescape off %}Bonjour {{ utilisateur.prenom }},
+
+Un compte EduQuizAI a été créé pour vous par l'administrateur de la plateforme.
+
+Pour l'activer, choisissez votre mot de passe en ouvrant le lien suivant :
+{{ lien }}
+
+Ce lien est personnel, utilisable une seule fois et valable 72 heures.
+Votre identifiant de connexion est votre adresse e-mail : {{ utilisateur.email }}
+
+Si vous n'attendiez pas ce message, vous pouvez l'ignorer.
+
+L'équipe EduQuizAI
+{% endautoescape %}

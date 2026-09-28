@@ -25,14 +25,17 @@ class Lecon(models.Model):
     """Leçon rédigée par un enseignant (entité LECON du MCD)."""
 
     id = models.BigAutoField(primary_key=True, db_column="id_lecon")
-    titre = models.CharField(max_length=100)
-    matiere = models.CharField(max_length=50, choices=Matiere.choices)
-    niveau_scolaire = models.CharField(max_length=20, choices=Niveau.choices)
-    contenu = models.TextField()
-    date_creation = models.DateTimeField(auto_now_add=True)
-    date_modification = models.DateTimeField(auto_now=True)
+    titre = models.CharField("titre", max_length=100)
+    matiere = models.CharField("matière", max_length=50, choices=Matiere.choices)
+    niveau_scolaire = models.CharField(
+        "niveau scolaire", max_length=20, choices=Niveau.choices
+    )
+    contenu = models.TextField("contenu")
+    date_creation = models.DateTimeField("date de création", auto_now_add=True)
+    date_modification = models.DateTimeField("dernière modification", auto_now=True)
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        verbose_name="enseignant",
         on_delete=models.CASCADE,
         related_name="lecons",
         db_column="id_utilisateur",
@@ -40,6 +43,8 @@ class Lecon(models.Model):
 
     class Meta:
         db_table = "lecon"
+        verbose_name = "leçon"
+        verbose_name_plural = "leçons"
         ordering = ["-date_modification"]
         constraints = [
             models.CheckConstraint(

@@ -33,6 +33,11 @@ input,select,textarea{width:100%;min-height:44px;padding:10px 12px;border:1px so
 .connexion h1{font-size:24px;text-align:center}
 .connexion .muted{text-align:center;margin:6px 0 24px}
 .connexion .pied{text-align:center;margin-top:20px}
+.alerte-succes{background:var(--succes-clair);color:var(--succes);border-left:4px solid var(--succes);padding:12px 14px;border-radius:6px;font-size:14px;margin-bottom:18px}
+.lien-oubli{display:block;text-align:right;font-size:14px;font-weight:600;margin-top:6px}
+.connexion .texte{font-size:15px;margin-bottom:20px}
+.connexion .regles{font-size:13px;color:var(--texte-2);margin:4px 0 0 18px}
+.connexion .lien-retour{display:block;text-align:center;font-size:14px;font-weight:600;margin-top:16px}
 
 /* ===== Structure des pages connectées ===== */
 .lien-evitement{position:absolute;left:-9999px}.lien-evitement:focus{left:16px;top:8px;z-index:10;background:#fff;padding:8px 12px;border-radius:6px}

@@ -1,0 +1,39 @@
+from django import forms
+
+from .models import Utilisateur
+
+
+class UtilisateurCreationForm(forms.ModelForm):
+    """Création d'un compte par l'administrateur, sans mot de passe.
+
+    L'utilisateur choisit lui-même son mot de passe grâce au lien d'invitation :
+    l'administrateur ne le connaît jamais.
+    """
+
+    class Meta:
+        model = Utilisateur
+        fields = ("email", "nom", "prenom", "role")
+
+    def clean_email(self):
+        """Enregistre l'adresse en minuscules pour éviter les doublons."""
+        return self.cleaned_data["email"].lower()
+
+    def save(self, commit=True):
+        """Crée le compte avec un mot de passe inutilisable."""
+        utilisateur = super().save(commit=False)
+        utilisateur.set_unusable_password()
+        if commit:
+            utilisateur.save()
+        return utilisateur
+
+
+class UtilisateurChangeForm(forms.ModelForm):
+    """Modification d'un compte par l'administrateur (sans accès au mot de passe)."""
+
+    class Meta:
+        model = Utilisateur
+        fields = ("email", "nom", "prenom", "role", "is_active")
+
+    def clean_email(self):
+        """Enregistre l'adresse en minuscules pour éviter les doublons."""
+        return self.cleaned_data["email"].lower()
