@@ -1,4 +1,5 @@
 {% extends "base_connecte.html" %}
+{% load static %}
 {% comment %}
   Maquettes 4 (nouvelle leçon) et 4b (erreurs de saisie).
   Chaque champ en erreur reçoit aria-invalid et est relié à son message
@@ -59,12 +60,15 @@
         <label for="contenu-lecon">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label>
       </div>
       <div class="editeur">
-        <textarea id="contenu-lecon" name="contenu" required aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %}>{{ form.contenu.value|default:'' }}</textarea>
+        <div class="barre-outils" role="toolbar" aria-label="Mise en forme" aria-controls="contenu-lecon" hidden>
+          <button type="button" data-action="gras" aria-label="Gras">B</button><button type="button" data-action="italique" aria-label="Italique"><i>I</i></button><button type="button" data-action="titre" aria-label="Titre de section">H</button><button type="button" data-action="liste" aria-label="Liste à puces">•≡</button>
+        </div>
+        <textarea id="contenu-lecon" name="contenu" maxlength="20000" required aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %}>{{ form.contenu.value|default:'' }}</textarea>
       </div>
       {% for erreur in form.contenu.errors %}<p class="msg-erreur" id="err-contenu">⚠ {{ erreur }}</p>{% endfor %}
       <div class="compteur aide" id="aide-contenu">
-        <span>Mise en forme Markdown acceptée. C'est ce texte que l'IA utilisera pour générer le quiz.</span>
-        <span>{{ form.contenu.value|default:''|length }} / 20 000 caractères</span>
+        <span>Utilisez les boutons pour mettre en forme le texte. C'est ce texte que l'IA utilisera pour générer le quiz.</span>
+        <span id="compteur-contenu">{{ form.contenu.value|default:''|length }} / 20 000 caractères</span>
       </div>
     </div>
     <div class="actions-form">
@@ -73,3 +77,5 @@
     </div>
   </form>
 {% endblock %}
+
+{% block scripts %}{{ block.super }}<script src="{% static 'js/editeur.js' %}" defer></script>{% endblock %}

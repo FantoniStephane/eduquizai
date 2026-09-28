@@ -382,6 +382,11 @@ legend {
   background: var(--primaire);
 }
 
+/* Barre masquée tant que editeur.js ne l'a pas activée (sans JavaScript) */
+.barre-outils[hidden] {
+  display: none;
+}
+
 /* Compteur de caractères sous l'éditeur */
 .compteur {
   display: flex;
@@ -390,6 +395,12 @@ legend {
 }
 .compteur span:last-child {
   white-space: nowrap;
+}
+
+/* Compteur proche de la limite (plus de 95 %) */
+.compteur-alerte {
+  color: var(--erreur);
+  font-weight: 600;
 }
 
 @media (max-width: 820px) {
