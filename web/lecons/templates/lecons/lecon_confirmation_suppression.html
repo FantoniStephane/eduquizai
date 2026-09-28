@@ -1,0 +1,24 @@
+{% extends "lecons/lecon_detail.html" %}
+{% comment %}
+  Maquette 10 : confirmation de suppression, affichée par-dessus le détail de la leçon.
+  La suppression n'a lieu qu'à l'envoi du formulaire (POST + jeton CSRF).
+  L'avertissement sur les quiz supprimés avec la leçon viendra au S2.
+{% endcomment %}
+
+{% block titre %}Supprimer la leçon{% endblock %}
+{% block attributs_main %} aria-hidden="true"{% endblock %}
+
+{% block apres_contenu %}
+  <div class="voile">
+    <div class="dialogue" role="alertdialog" aria-modal="true" aria-labelledby="t-suppr" aria-describedby="d-suppr">
+      <div class="ico-danger" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+      <h2 id="t-suppr">Supprimer la leçon « {{ lecon.titre }} » ?</h2>
+      <p id="d-suppr">Cette action est <strong>définitive</strong> et ne peut pas être annulée.</p>
+      <form class="boutons" method="post">
+        {% csrf_token %}
+        <a class="btn btn-secondaire" href="{% url 'lecons:detail' lecon.pk %}" autofocus>Annuler</a>
+        <button class="btn btn-danger" type="submit">Supprimer définitivement</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

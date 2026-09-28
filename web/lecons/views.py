@@ -1,6 +1,12 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
@@ -96,3 +102,23 @@ class LeconUpdateView(SuccessMessageMixin, UpdateView):
     def get_success_url(self):
         """Retour au détail de la leçon modifiée."""
         return reverse("lecons:detail", args=[self.object.pk])
+
+
+class LeconDeleteView(SuccessMessageMixin, DeleteView):
+    """Suppression d'une leçon, après confirmation (maquette 10).
+
+    L'affichage (GET) montre la demande de confirmation ; seule la validation
+    du formulaire (POST, protégé par le jeton CSRF) supprime la leçon.
+    """
+
+    template_name = "lecons/lecon_confirmation_suppression.html"
+    context_object_name = "lecon"
+    success_url = reverse_lazy("lecons:liste")
+
+    def get_queryset(self):
+        """Uniquement les leçons de l'utilisateur connecté."""
+        return Lecon.objects.filter(utilisateur=self.request.user)
+
+    def get_success_message(self, cleaned_data):
+        """Message affiché sur la liste après la suppression."""
+        return f"La leçon « {self.object.titre} » a été supprimée."

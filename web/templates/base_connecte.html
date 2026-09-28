@@ -5,6 +5,8 @@
   messages et contenu (maquettes 2 à 11).
   Les adresses sont calculées avec « url ... as » : un lien reste vide tant que sa vue
   n'existe pas encore, sans provoquer d'erreur.
+  Fenêtre de confirmation (maquette 10) : bloc « apres_contenu », avec aria-hidden sur
+  le contenu principal grâce au bloc « attributs_main ».
 {% endcomment %}
 
 {% block corps %}
@@ -36,10 +38,11 @@
     </div>
   </header>
   {% endwith %}
-  <main id="contenu" class="contenu">
+  <main id="contenu" class="contenu"{% block attributs_main %}{% endblock %}>
     {% include "partials/messages.html" %}
     {% block contenu %}{% endblock %}
   </main>
+  {% block apres_contenu %}{% endblock %}
 {% endblock %}
 
 {% block scripts %}<script src="{% static 'js/menu.js' %}" defer></script>{% endblock %}

@@ -3,7 +3,7 @@
 {% comment %}
   Maquette 5 (détail d'une leçon). Le contenu Markdown est converti puis nettoyé
   par le filtre markdown_sur (liste blanche de balises, protection XSS).
-  Bouton Supprimer : tâche 21.3. Liste des quiz de la leçon : S2.
+  Liste des quiz de la leçon : S2.
 {% endcomment %}
 
 {% block titre %}{{ lecon.titre }}{% endblock %}
@@ -27,6 +27,7 @@
     </div>
     <div class="boutons">
       <a class="btn btn-modifier" href="{% url 'lecons:modifier' lecon.pk %}">Modifier</a>
+      <a class="btn btn-danger" href="{% url 'lecons:supprimer' lecon.pk %}">Supprimer</a>
     </div>
   </div>
 
