@@ -1,0 +1,15 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}{% endblock %} · EduQuizAI</title>
+  <link rel="icon" href="{% static 'img/logo_icone.svg' %}">
+  <link rel="preload" href="{% static 'fonts/InterVariable.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="{% block classe_body %}{% endblock %}">
+{% block corps %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

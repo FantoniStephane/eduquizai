@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+{% comment %}
+  Pages accessibles sans être connecté : connexion, choix et oubli du mot de passe.
+  Mise en page : logo et carte centrée (maquettes 1, 12 et 13).
+{% endcomment %}
+
+{% block classe_body %}page-connexion{% endblock %}
+
+{% block corps %}
+  <main class="connexion">
+    <img class="logo" src="{% static 'img/logo.svg' %}" alt="EduQuizAI by SchoolUp">
+    {% include "partials/messages.html" %}
+    {% block contenu %}{% endblock %}
+  </main>
+{% endblock %}

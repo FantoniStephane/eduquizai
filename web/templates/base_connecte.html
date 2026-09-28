@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+{% comment %}
+  Pages de l'espace enseignant : en-tête, navigation principale, utilisateur connecté,
+  messages et contenu (maquettes 2 à 11).
+  Les adresses sont calculées avec « url ... as » : un lien reste vide tant que sa vue
+  n'existe pas encore, sans provoquer d'erreur.
+{% endcomment %}
+
+{% block corps %}
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  {% url "tableau_de_bord" as url_accueil %}
+  {% url "lecons:liste" as url_lecons %}
+  {% url "quiz:liste" as url_quiz %}
+  {% url "comptes:deconnexion" as url_deconnexion %}
+  {% with app=request.resolver_match.app_name vue=request.resolver_match.url_name %}
+  <header class="entete" id="entete">
+    <div class="entete-int">
+      <a href="{{ url_accueil|default:'/' }}"><img class="logo" src="{% static 'img/logo.svg' %}" alt="EduQuizAI, retour au tableau de bord"></a>
+      <nav class="nav" id="nav-principale" aria-label="Navigation principale">
+        <a href="{{ url_accueil }}"{% if vue == "tableau_de_bord" %} aria-current="page"{% endif %}>Tableau de bord</a>
+        <a href="{{ url_lecons }}"{% if app == "lecons" %} aria-current="page"{% endif %}>Leçons</a>
+        <a href="{{ url_quiz }}"{% if app == "quiz" %} aria-current="page"{% endif %}>Quiz</a>
+      </nav>
+      <div class="utilisateur">
+        <span class="avatar" aria-hidden="true">{{ user.prenom|slice:":1"|upper }}{{ user.nom|slice:":1"|upper }}</span>
+        <span class="nom">{{ user.prenom }} {{ user.nom }}</span>
+        <form class="form-deco" method="post" action="{{ url_deconnexion }}">
+          {% csrf_token %}
+          <button class="lien-deco" type="submit">Déconnexion</button>
+        </form>
+      </div>
+      <button class="menu-mobile" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav-principale">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </header>
+  {% endwith %}
+  <main id="contenu" class="contenu">
+    {% include "partials/messages.html" %}
+    {% block contenu %}{% endblock %}
+  </main>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/menu.js' %}" defer></script>{% endblock %}
