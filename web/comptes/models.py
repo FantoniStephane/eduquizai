@@ -3,6 +3,13 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
+class Role(models.TextChoices):
+    """Rôles possibles d'un utilisateur."""
+
+    ENSEIGNANT = "enseignant", "Enseignant"
+    ADMIN = "admin", "Administrateur"
+
+
 class UtilisateurManager(BaseUserManager):
     """Crée les comptes : l'e-mail sert d'identifiant de connexion."""
 
@@ -38,17 +45,13 @@ class UtilisateurManager(BaseUserManager):
         Returns:
             L'administrateur créé.
         """
-        champs.setdefault("role", Utilisateur.Role.ADMIN)
+        champs.setdefault("role", Role.ADMIN)
         champs.setdefault("is_superuser", True)
         return self.create_user(email, password, **champs)
 
 
 class Utilisateur(AbstractBaseUser, PermissionsMixin):
     """Enseignant ou administrateur de la plateforme (entité UTILISATEUR du MCD)."""
-
-    class Role(models.TextChoices):
-        ENSEIGNANT = "enseignant", "Enseignant"
-        ADMIN = "admin", "Administrateur"
 
     id = models.BigAutoField(primary_key=True, db_column="id_utilisateur")
     nom = models.CharField(max_length=50)
@@ -68,6 +71,12 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = "utilisateur"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(role__in=Role.values),
+                name="utilisateur_role_valide",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.prenom} {self.nom}"
@@ -75,4 +84,4 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         """Seul l'administrateur accède à l'admin Django."""
-        return self.role == self.Role.ADMIN
+        return self.role == Role.ADMIN
