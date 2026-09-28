@@ -3,7 +3,7 @@
 {% comment %}
   Maquette 5 (détail d'une leçon). Le contenu Markdown est converti puis nettoyé
   par le filtre markdown_sur (liste blanche de balises, protection XSS).
-  Boutons Modifier / Supprimer : tâches 21.2 et 21.3. Liste des quiz de la leçon : S2.
+  Bouton Supprimer : tâche 21.3. Liste des quiz de la leçon : S2.
 {% endcomment %}
 
 {% block titre %}{{ lecon.titre }}{% endblock %}
@@ -24,6 +24,9 @@
         <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
         <span class="muted">Créée le {{ lecon.date_creation|date:"d/m/Y" }} · modifiée le {{ lecon.date_modification|date:"d/m/Y" }}</span>
       </div>
+    </div>
+    <div class="boutons">
+      <a class="btn btn-modifier" href="{% url 'lecons:modifier' lecon.pk %}">Modifier</a>
     </div>
   </div>
 

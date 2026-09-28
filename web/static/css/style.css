@@ -350,13 +350,45 @@ legend {
   background: #fff;
 }
 
-.editeur textarea {
+.editeur textarea,
+.editeur trix-editor {
   border: 0;
   border-radius: 0;
   min-height: 320px;
   resize: vertical;
   font-size: 15px;
   line-height: 1.6;
+}
+
+/* Zone de saisie Trix : même aspect que la zone de texte, défilement interne */
+.editeur trix-editor {
+  display: block;
+  padding: 10px 12px;
+  overflow-y: auto;
+  color: var(--texte);
+  outline: none;
+}
+.editeur trix-editor[hidden],
+.editeur textarea[hidden] {
+  display: none;
+}
+.editeur trix-editor:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+/* Mise en forme affichée dans l'éditeur (comme sur la page détail) */
+.editeur trix-editor h1 {
+  font-size: 18px;
+  margin: 12px 0 4px;
+}
+.editeur trix-editor ul,
+.editeur trix-editor ol {
+  margin: 0 0 0 20px;
+}
+
+/* Contenu en erreur : bordure rouge sur tout l'éditeur */
+.editeur-erreur {
+  border: 2px solid var(--erreur);
 }
 
 .barre-outils {
@@ -378,8 +410,13 @@ legend {
   font-weight: 700;
   cursor: pointer;
 }
-.barre-outils button:hover {
+.barre-outils button:hover,
+.barre-outils button[data-trix-active] {
   background: var(--primaire);
+}
+.barre-outils button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Barre masquée tant que editeur.js ne l'a pas activée (sans JavaScript) */
@@ -1099,7 +1136,8 @@ td a.t:hover {
     display: flex;
     flex-direction: column;
   }
-  .form-plein .editeur textarea {
+  .form-plein .editeur textarea,
+  .form-plein .editeur trix-editor {
     flex: 1;
     min-height: 120px;
     resize: none;

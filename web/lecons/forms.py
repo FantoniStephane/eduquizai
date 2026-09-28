@@ -1,5 +1,8 @@
+import re
+
 from django import forms
 
+from .conversion import html_vers_markdown, markdown_vers_html_editeur
 from .models import Lecon, Matiere, Niveau
 
 CONTENU_MAX = 20_000
@@ -13,11 +16,7 @@ class LeconForm(forms.ModelForm):
     leçon au nom d'un autre utilisateur.
     """
 
-    contenu = forms.CharField(
-        label="Contenu de la leçon",
-        max_length=CONTENU_MAX,
-        widget=forms.Textarea,
-    )
+    contenu = forms.CharField(label="Contenu de la leçon", widget=forms.Textarea)
 
     class Meta:
         model = Lecon
@@ -40,6 +39,28 @@ class LeconForm(forms.ModelForm):
         self.fields["contenu"].error_messages["required"] = (
             "Le contenu de la leçon est obligatoire."
         )
+        # Modification : le Markdown enregistré est rechargé mis en forme dans Trix
+        if self.instance.pk and not self.is_bound:
+            self.initial["contenu"] = markdown_vers_html_editeur(self.instance.contenu)
+
+    def clean_contenu(self):
+        """Convertit le contenu en Markdown, le format enregistré en base.
+
+        L'éditeur Trix envoie du HTML : il est nettoyé puis converti. Sans
+        JavaScript, la zone de texte envoie déjà du texte : il est gardé tel quel.
+        """
+        contenu = self.cleaned_data["contenu"]
+        if re.search(r"<[a-zA-Z/][^>]*>", contenu):
+            contenu = html_vers_markdown(contenu)
+        contenu = contenu.strip()
+        if not contenu:
+            raise forms.ValidationError("Le contenu de la leçon est obligatoire.")
+        if len(contenu) > CONTENU_MAX:
+            raise forms.ValidationError(
+                f"Le contenu dépasse {CONTENU_MAX:,} caractères "
+                f"(actuellement {len(contenu):,}).".replace(",", " ")
+            )
+        return contenu
 
 
 class LeconFiltreForm(forms.Form):

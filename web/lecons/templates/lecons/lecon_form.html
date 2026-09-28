@@ -1,23 +1,29 @@
 {% extends "base_connecte.html" %}
 {% load static %}
 {% comment %}
-  Maquettes 4 (nouvelle leçon) et 4b (erreurs de saisie).
+  Maquettes 4 (nouvelle leçon ou modification) et 4b (erreurs de saisie).
+  En modification, la vue fournit « lecon » : titre, fil d'Ariane et boutons s'adaptent.
   Chaque champ en erreur reçoit aria-invalid et est relié à son message
   (aria-describedby) pour les lecteurs d'écran (RGAA 4.1).
 {% endcomment %}
 
-{% block titre %}Nouvelle leçon{% endblock %}
+{% block titre %}{% if lecon %}Modifier la leçon{% else %}Nouvelle leçon{% endif %}{% endblock %}
 {% block classe_body %}sans-scroll{% endblock %}
 
 {% block contenu %}
   <nav class="fil-ariane" aria-label="Fil d'Ariane">
     <ol>
       <li><a href="{% url 'lecons:liste' %}">Mes leçons</a></li>
-      <li aria-current="page">Nouvelle leçon</li>
+      {% if lecon %}
+        <li><a href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a></li>
+        <li aria-current="page">Modifier</li>
+      {% else %}
+        <li aria-current="page">Nouvelle leçon</li>
+      {% endif %}
     </ol>
   </nav>
   <div class="titre-page titre-page-centre">
-    <h1>Nouvelle leçon</h1>
+    <h1>{% if lecon %}Modifier la leçon{% else %}Nouvelle leçon{% endif %}</h1>
     <p class="muted">Les champs marqués d'un <span class="obligatoire">*</span> sont obligatoires.</p>
   </div>
 
@@ -57,13 +63,18 @@
     </div>
     <div class="champ champ-extensible">
       <div class="label-ligne">
-        <label for="contenu-lecon">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label>
+        <label for="contenu-lecon" id="lbl-contenu">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label>
       </div>
-      <div class="editeur">
-        <div class="barre-outils" role="toolbar" aria-label="Mise en forme" aria-controls="contenu-lecon" hidden>
-          <button type="button" data-action="gras" aria-label="Gras">B</button><button type="button" data-action="italique" aria-label="Italique"><i>I</i></button><button type="button" data-action="titre" aria-label="Titre de section">H</button><button type="button" data-action="liste" aria-label="Liste à puces">•≡</button>
+      {% comment %}
+        Éditeur Trix (gras, italique, titre, puces) avec les boutons de la maquette.
+        Sans JavaScript, la zone de texte simple reste utilisable.
+      {% endcomment %}
+      <div class="editeur{% if form.contenu.errors %} editeur-erreur{% endif %}">
+        <div class="barre-outils" id="barre-lecon" role="toolbar" aria-label="Mise en forme" aria-controls="editeur-lecon" hidden>
+          <button type="button" data-trix-attribute="bold" aria-label="Gras">B</button><button type="button" data-trix-attribute="italic" aria-label="Italique"><i>I</i></button><button type="button" data-trix-attribute="heading1" aria-label="Titre de section">H</button><button type="button" data-trix-attribute="bullet" aria-label="Liste à puces">•≡</button>
         </div>
-        <textarea id="contenu-lecon" name="contenu" maxlength="20000" required aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %}>{{ form.contenu.value|default:'' }}</textarea>
+        <textarea id="contenu-lecon" name="contenu" required aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %}>{{ form.contenu.value|default:'' }}</textarea>
+        <trix-editor id="editeur-lecon" input="contenu-lecon" toolbar="barre-lecon" aria-labelledby="lbl-contenu" aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %} hidden></trix-editor>
       </div>
       {% for erreur in form.contenu.errors %}<p class="msg-erreur" id="err-contenu">⚠ {{ erreur }}</p>{% endfor %}
       <div class="compteur aide" id="aide-contenu">
@@ -72,10 +83,15 @@
       </div>
     </div>
     <div class="actions-form">
-      <a class="btn btn-secondaire" href="{% url 'lecons:liste' %}">Annuler</a>
-      <button class="btn btn-primaire" type="submit">Enregistrer la leçon</button>
+      {% if lecon %}
+        <a class="btn btn-secondaire" href="{% url 'lecons:detail' lecon.pk %}">Annuler</a>
+        <button class="btn btn-primaire" type="submit">Enregistrer les modifications</button>
+      {% else %}
+        <a class="btn btn-secondaire" href="{% url 'lecons:liste' %}">Annuler</a>
+        <button class="btn btn-primaire" type="submit">Enregistrer la leçon</button>
+      {% endif %}
     </div>
   </form>
 {% endblock %}
 
-{% block scripts %}{{ block.super }}<script src="{% static 'js/editeur.js' %}" defer></script>{% endblock %}
+{% block scripts %}{{ block.super }}<script src="{% static 'vendor/trix/trix.umd.min.js' %}" defer></script><script src="{% static 'js/editeur.js' %}" defer></script>{% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
@@ -75,3 +75,24 @@ class LeconDetailView(DetailView):
     def get_queryset(self):
         """Uniquement les leçons de l'utilisateur connecté."""
         return Lecon.objects.filter(utilisateur=self.request.user)
+
+
+class LeconUpdateView(SuccessMessageMixin, UpdateView):
+    """Modification d'une leçon (maquette 04, même formulaire que la création).
+
+    Comme pour le détail, la leçon est cherchée parmi celles de l'utilisateur
+    connecté : impossible de modifier la leçon d'un autre enseignant (404).
+    """
+
+    form_class = LeconForm
+    template_name = "lecons/lecon_form.html"
+    context_object_name = "lecon"
+    success_message = "Les modifications ont été enregistrées."
+
+    def get_queryset(self):
+        """Uniquement les leçons de l'utilisateur connecté."""
+        return Lecon.objects.filter(utilisateur=self.request.user)
+
+    def get_success_url(self):
+        """Retour au détail de la leçon modifiée."""
+        return reverse("lecons:detail", args=[self.object.pk])
