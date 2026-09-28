@@ -1,0 +1,41 @@
+{% extends "base_connexion.html" %}
+{% comment %} Maquettes 12 (choix du mot de passe) et 12b (lien invalide ou expiré). {% endcomment %}
+
+{% block titre %}{% if validlink %}Choisir votre mot de passe{% else %}Lien invalide{% endif %}{% endblock %}
+
+{% block contenu %}
+  {% if validlink %}
+    <div class="carte">
+      <h1>Choisir votre mot de passe</h1>
+      <p class="muted">Compte : {{ form.user.email }}</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="champ">
+          <label for="mdp1">Nouveau mot de passe</label>
+          <input id="mdp1" name="new_password1" type="password" autocomplete="new-password" required aria-describedby="regles-mdp{% if form.new_password1.errors %} err-mdp1{% endif %}"{% if form.new_password1.errors %} aria-invalid="true"{% endif %}>
+          {% for erreur in form.new_password1.errors %}<p class="msg-erreur" id="err-mdp1">⚠ {{ erreur }}</p>{% endfor %}
+          <ul class="regles" id="regles-mdp">
+            <li>au moins 8 caractères ;</li>
+            <li>pas uniquement des chiffres ;</li>
+            <li>pas trop courant, ni proche de votre nom ou de votre e-mail.</li>
+          </ul>
+        </div>
+        <div class="champ">
+          <label for="mdp2">Confirmer le mot de passe</label>
+          <input id="mdp2" name="new_password2" type="password" autocomplete="new-password" required{% if form.new_password2.errors %} aria-invalid="true" aria-describedby="err-mdp2"{% endif %}>
+          {% for erreur in form.new_password2.errors %}<p class="msg-erreur" id="err-mdp2">⚠ {{ erreur }}</p>{% endfor %}
+        </div>
+        <button class="btn btn-primaire btn-bloc" type="submit">Enregistrer mon mot de passe</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="carte">
+      <h1>Lien invalide</h1>
+      <p class="muted">Activation ou réinitialisation du mot de passe</p>
+      <div class="alerte-erreur" role="alert">Ce lien n'est plus valable : il a déjà été utilisé ou il a expiré (validité de 72 heures).</div>
+      <p class="texte">Vous pouvez demander un nouveau lien. Si votre compte n'a jamais été activé, contactez l'administrateur de votre établissement.</p>
+      <a class="btn btn-primaire btn-bloc" href="{% url 'comptes:mot_de_passe_oublie' %}">Demander un nouveau lien</a>
+      <a class="lien-retour" href="{% url 'comptes:connexion' %}">Retour à la connexion</a>
+    </div>
+  {% endif %}
+{% endblock %}

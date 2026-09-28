@@ -18,7 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from .views import TableauDeBordView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("comptes/", include("comptes.urls")),
+    path("", TableauDeBordView.as_view(), name="tableau_de_bord"),
 ]

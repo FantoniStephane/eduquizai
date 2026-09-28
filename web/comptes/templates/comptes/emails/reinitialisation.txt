@@ -1,0 +1,14 @@
+{% autoescape off %}Bonjour {{ user.prenom }},
+
+Une demande de réinitialisation du mot de passe a été faite pour votre compte EduQuizAI.
+
+Pour choisir un nouveau mot de passe, ouvrez le lien suivant :
+{{ protocol }}://{{ domain }}{% url 'comptes:definir_mot_de_passe' uidb64=uid token=token %}
+
+Ce lien est personnel, utilisable une seule fois et valable 72 heures.
+Votre identifiant de connexion est votre adresse e-mail : {{ user.email }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe actuel reste valable.
+
+L'équipe EduQuizAI
+{% endautoescape %}

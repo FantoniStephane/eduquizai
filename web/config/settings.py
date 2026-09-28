@@ -51,6 +51,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Toutes les pages exigent d'être connecté, sauf celles déclarées publiques
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -148,3 +150,11 @@ DEFAULT_FROM_EMAIL = config(
 
 # Liens d'activation et de réinitialisation du mot de passe : valables 72 heures
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 72
+
+# Connexion : pages de redirection
+LOGIN_URL = "comptes:connexion"
+LOGIN_REDIRECT_URL = "tableau_de_bord"
+LOGOUT_REDIRECT_URL = "comptes:connexion"
+
+# Session : l'enseignant reste connecté 8 heures au plus
+SESSION_COOKIE_AGE = 60 * 60 * 8

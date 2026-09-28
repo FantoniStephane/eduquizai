@@ -1,0 +1,16 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Tableau de bord provisoire : page d'arrivée après la connexion.
+  Les chiffres clés et les derniers éléments (maquette 2) arriveront avec les leçons et les quiz.
+{% endcomment %}
+
+{% block titre %}Tableau de bord{% endblock %}
+
+{% block contenu %}
+  <div class="titre-page">
+    <div>
+      <h1>Bonjour {{ user.prenom }}</h1>
+      <p class="muted">Bienvenue dans votre espace enseignant.</p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base_connexion.html" %}
+{% comment %} Maquettes 1 (connexion) et 1b (erreur de connexion). {% endcomment %}
+
+{% block titre %}Connexion{% endblock %}
+
+{% block contenu %}
+  <div class="carte">
+    <h1>Connexion</h1>
+    <p class="muted">Espace enseignant</p>
+    {% for erreur in form.non_field_errors %}
+      <div class="alerte-erreur" role="alert">{{ erreur }}</div>
+    {% endfor %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="champ">
+        <label for="email">Adresse e-mail</label>
+        <input id="email" name="username" type="email" autocomplete="email" placeholder="prenom.nom@ecole.fr" value="{{ form.username.value|default:'' }}" required{% if form.username.errors %} aria-invalid="true" aria-describedby="err-email"{% endif %}>
+        {% for erreur in form.username.errors %}<p class="msg-erreur" id="err-email">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+      <div class="champ">
+        <label for="mdp">Mot de passe</label>
+        <input id="mdp" name="password" type="password" autocomplete="current-password" required{% if form.password.errors %} aria-invalid="true" aria-describedby="err-mdp"{% endif %}>
+        {% for erreur in form.password.errors %}<p class="msg-erreur" id="err-mdp">⚠ {{ erreur }}</p>{% endfor %}
+        <a class="lien-oubli" href="{% url 'comptes:mot_de_passe_oublie' %}">Mot de passe oublié ?</a>
+      </div>
+      <button class="btn btn-primaire btn-bloc" type="submit">Se connecter</button>
+    </form>
+  </div>
+  <p class="pied muted">Pas encore de compte ? Votre compte est créé par l'administrateur de votre établissement : vous recevrez un e&#8209;mail pour choisir votre mot de passe.</p>
+{% endblock %}

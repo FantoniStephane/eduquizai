@@ -1,0 +1,14 @@
+{% extends "base_connexion.html" %}
+{% comment %} Maquette 12c (mot de passe enregistré). {% endcomment %}
+
+{% block titre %}Mot de passe enregistré{% endblock %}
+
+{% block contenu %}
+  <div class="carte">
+    <h1>Mot de passe enregistré</h1>
+    <p class="muted">Votre compte est prêt</p>
+    <div class="alerte-succes" role="status">Votre mot de passe a bien été enregistré.</div>
+    <p class="texte">Vous pouvez maintenant vous connecter avec votre adresse e-mail et votre nouveau mot de passe.</p>
+    <a class="btn btn-primaire btn-bloc" href="{% url 'comptes:connexion' %}">Se connecter</a>
+  </div>
+{% endblock %}
