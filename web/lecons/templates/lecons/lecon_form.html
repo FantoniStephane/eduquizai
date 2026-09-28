@@ -1,0 +1,75 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquettes 4 (nouvelle leçon) et 4b (erreurs de saisie).
+  Chaque champ en erreur reçoit aria-invalid et est relié à son message
+  (aria-describedby) pour les lecteurs d'écran (RGAA 4.1).
+{% endcomment %}
+
+{% block titre %}Nouvelle leçon{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="{% url 'lecons:liste' %}">Mes leçons</a></li>
+      <li aria-current="page">Nouvelle leçon</li>
+    </ol>
+  </nav>
+  <div class="titre-page titre-page-centre">
+    <h1>Nouvelle leçon</h1>
+    <p class="muted">Les champs marqués d'un <span class="obligatoire">*</span> sont obligatoires.</p>
+  </div>
+
+  {% if form.errors %}
+    <div class="alerte-erreur alerte-serree" role="alert">
+      Le formulaire contient {{ form.errors|length }} erreur{{ form.errors|length|pluralize }}.
+      Corrigez {{ form.errors|length|pluralize:"le champ indiqué,les champs indiqués" }} ci-dessous.
+    </div>
+  {% endif %}
+
+  <form class="carte form-carte form-plein" method="post" novalidate>
+    {% csrf_token %}
+    <div class="grille-form grille-form-3">
+      <div class="champ">
+        <label for="titre">Titre <span class="obligatoire" aria-hidden="true">*</span></label>
+        <input id="titre" name="titre" maxlength="100" required value="{{ form.titre.value|default:'' }}"{% if form.titre.errors %} aria-invalid="true" aria-describedby="err-titre"{% endif %}>
+        {% for erreur in form.titre.errors %}<p class="msg-erreur" id="err-titre">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+      <div class="champ">
+        <label for="matiere">Matière <span class="obligatoire" aria-hidden="true">*</span></label>
+        <select id="matiere" name="matiere" required{% if form.matiere.errors %} aria-invalid="true" aria-describedby="err-matiere"{% endif %}>
+          {% for valeur, libelle in form.matiere.field.choices %}
+            <option value="{{ valeur }}"{% if form.matiere.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+          {% endfor %}
+        </select>
+        {% for erreur in form.matiere.errors %}<p class="msg-erreur" id="err-matiere">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+      <div class="champ">
+        <label for="niveau">Niveau scolaire <span class="obligatoire" aria-hidden="true">*</span></label>
+        <select id="niveau" name="niveau_scolaire" required{% if form.niveau_scolaire.errors %} aria-invalid="true" aria-describedby="err-niveau"{% endif %}>
+          {% for valeur, libelle in form.niveau_scolaire.field.choices %}
+            <option value="{{ valeur }}"{% if form.niveau_scolaire.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+          {% endfor %}
+        </select>
+        {% for erreur in form.niveau_scolaire.errors %}<p class="msg-erreur" id="err-niveau">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+    </div>
+    <div class="champ champ-extensible">
+      <div class="label-ligne">
+        <label for="contenu-lecon">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label>
+      </div>
+      <div class="editeur">
+        <textarea id="contenu-lecon" name="contenu" required aria-describedby="aide-contenu{% if form.contenu.errors %} err-contenu{% endif %}"{% if form.contenu.errors %} aria-invalid="true"{% endif %}>{{ form.contenu.value|default:'' }}</textarea>
+      </div>
+      {% for erreur in form.contenu.errors %}<p class="msg-erreur" id="err-contenu">⚠ {{ erreur }}</p>{% endfor %}
+      <div class="compteur aide" id="aide-contenu">
+        <span>Mise en forme Markdown acceptée. C'est ce texte que l'IA utilisera pour générer le quiz.</span>
+        <span>{{ form.contenu.value|default:''|length }} / 20 000 caractères</span>
+      </div>
+    </div>
+    <div class="actions-form">
+      <a class="btn btn-secondaire" href="{% url 'lecons:liste' %}">Annuler</a>
+      <button class="btn btn-primaire" type="submit">Enregistrer la leçon</button>
+    </div>
+  </form>
+{% endblock %}

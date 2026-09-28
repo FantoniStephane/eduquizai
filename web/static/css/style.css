@@ -418,6 +418,11 @@ legend {
   margin-bottom: 18px;
 }
 
+/* Variante : alerte au-dessus d'un formulaire pleine page (maquette 4b) */
+.alerte-serree {
+  margin-bottom: 12px;
+}
+
 .alerte-succes {
   background: var(--succes-clair);
   color: var(--succes);
@@ -692,6 +697,11 @@ button.lien-deco:hover {
   flex-wrap: wrap;
 }
 
+/* Variante : titre et texte d'aide alignés au centre (formulaire de leçon) */
+.titre-page-centre {
+  align-items: center;
+}
+
 /* Fil d'Ariane */
 .fil-ariane {
   font-size: 14px;
@@ -719,7 +729,8 @@ button.lien-deco:hover {
   }
   .nav,
   .utilisateur .nom,
-  .lien-deco {
+  .lien-deco,
+  .form-deco {
     display: none;
   }
   .utilisateur {
@@ -771,6 +782,7 @@ button.lien-deco:hover {
     display: flex;
   }
   .entete.menu-ouvert .form-deco {
+    display: flex;
     margin-left: auto;
   }
 }

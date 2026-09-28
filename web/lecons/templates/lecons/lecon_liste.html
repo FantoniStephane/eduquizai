@@ -1,0 +1,40 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 3 (mes leçons), version minimale : la tâche 21 ajoutera
+  la recherche, les filtres, le nombre de quiz et les actions.
+{% endcomment %}
+
+{% block titre %}Mes leçons{% endblock %}
+
+{% block contenu %}
+  <div class="titre-page">
+    <div>
+      <h1>Mes leçons</h1>
+      <p class="muted">{{ lecons|length }} leçon{% if lecons|length > 1 %}s{% endif %}</p>
+    </div>
+    <a class="btn btn-primaire" href="{% url 'lecons:creer' %}">+ Nouvelle leçon</a>
+  </div>
+
+  {% if lecons %}
+    <div class="carte tableau-carte">
+      <table>
+        <caption class="sr">Liste de mes leçons</caption>
+        <thead>
+          <tr><th scope="col">Titre</th><th scope="col">Matière</th><th scope="col">Niveau</th><th scope="col">Modifiée le</th></tr>
+        </thead>
+        <tbody>
+          {% for lecon in lecons %}
+            <tr>
+              <td>{{ lecon.titre }}</td>
+              <td data-l="Matière">{{ lecon.get_matiere_display }}</td>
+              <td data-l="Niveau">{{ lecon.get_niveau_scolaire_display }}</td>
+              <td data-l="Modifiée le">{{ lecon.date_modification|date:"d/m/Y" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="carte"><p class="muted">Vous n'avez pas encore de leçon. Créez la première avec le bouton « Nouvelle leçon ».</p></div>
+  {% endif %}
+{% endblock %}

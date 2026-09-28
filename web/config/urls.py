@@ -23,5 +23,6 @@ from .views import TableauDeBordView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("comptes/", include("comptes.urls")),
+    path("lecons/", include("lecons.urls")),
     path("", TableauDeBordView.as_view(), name="tableau_de_bord"),
 ]
