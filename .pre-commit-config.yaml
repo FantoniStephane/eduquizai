@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace       # espaces en fin de ligne
+      - id: end-of-file-fixer         # ligne vide finale
+      - id: mixed-line-ending         # force les fins de ligne LF
+        args: [--fix=lf]
+      - id: check-yaml                # docker-compose.yml valide
+      - id: check-toml                # pyproject.toml valide
+      - id: check-merge-conflict      # pas de marqueurs de conflit oubliés
+      - id: check-added-large-files   # pas de gros fichiers (modèles d'IA, dumps…)
+      - id: detect-private-key        # pas de clé privée publiée par erreur
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9                      # même version que Ruff dans ton venv
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
