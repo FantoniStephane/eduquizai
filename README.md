@@ -7,7 +7,7 @@ Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications
 ## Fonctionnalités
 
 - Espace enseignant sécurisé (comptes créés par l'administrateur)
-- Rédaction de leçons ou import d'un fichier texte (.txt, .md)
+- Rédaction de leçons dans un éditeur mis en forme, ou import d'un fichier (.docx, .txt)
 - Génération automatique de quiz par IA : QCM, vrai/faux, questions ouvertes
 - Relecture, modification et validation manuelle des quiz
 - Export des quiz en PDF, CSV ou JSON (version élève ou corrigée)
@@ -20,7 +20,7 @@ Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications
 | Microservice IA | Django REST Framework · JWT · Ollama (modèle local) |
 | Bases de données | PostgreSQL (utilisateurs, leçons) · MongoDB (quiz) |
 | DevOps | Docker · Docker Compose · GitHub Actions |
-| Qualité | Ruff · pytest |
+| Qualité | Ruff · pre-commit · tests Django · coverage |
 
 ## Architecture
 
