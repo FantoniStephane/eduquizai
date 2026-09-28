@@ -1,0 +1,14 @@
+# Mesure de la couverture des tests : python -m coverage run manage.py test
+# puis python -m coverage report (lancé depuis le dossier web/).
+[run]
+source = .
+omit =
+    */migrations/*
+    */tests.py
+    manage.py
+    config/asgi.py
+    config/wsgi.py
+
+[report]
+show_missing = True
+skip_empty = True

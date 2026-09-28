@@ -69,6 +69,7 @@ def markdown_vers_html(texte):
 def markdown_vers_html_editeur(texte):
     """HTML à charger dans l'éditeur Trix, qui ne connaît qu'un niveau de titre."""
     html = markdown_vers_html(texte)
-    # Les retours à la ligne entre balises deviendraient des lignes vides dans Trix
-    html = re.sub(r">\s+<", "><", html)
+    # Les retours à la ligne entre blocs deviendraient des lignes vides dans Trix ;
+    # les espaces entre deux mots mis en forme (sans retour à la ligne) sont gardés.
+    html = re.sub(r">\s*\n\s*<", "><", html)
     return re.sub(r"<(/?)h[2-4]>", r"<\1h1>", html)
