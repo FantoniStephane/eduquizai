@@ -238,6 +238,23 @@ class QuizRepositoryTests(SimpleTestCase):
                 id_quiz, 1, titre="", description="", questions=questions
             )
 
+    def test_modifier_repasse_en_brouillon(self):
+        """Un quiz validé puis modifié redevient brouillon, sans date de validation."""
+        id_quiz = creer_quiz(self.repository)
+        self.repository.valider(id_quiz, 1)
+        self.repository.modifier(
+            id_quiz,
+            1,
+            titre="Relu",
+            description="",
+            questions=questions_valides(),
+            difficulte="difficile",
+        )
+        quiz = self.repository.obtenir(id_quiz, 1)
+        self.assertEqual(quiz["statut"], "brouillon")
+        self.assertIsNone(quiz["date_validation"])
+        self.assertEqual(quiz["difficulte"], "difficile")
+
     def test_valider(self):
         """Un brouillon passe à « valide » une seule fois, avec sa date."""
         id_quiz = creer_quiz(self.repository)

@@ -135,8 +135,20 @@ class QuizRepository:
             {"id_lecon": int(id_lecon), "id_utilisateur": int(id_utilisateur)}
         )
 
-    def modifier(self, id_quiz, id_utilisateur, *, titre, description, questions):
-        """Remplace le titre, la description et les questions d'un quiz.
+    def modifier(
+        self,
+        id_quiz,
+        id_utilisateur,
+        *,
+        titre,
+        description,
+        questions,
+        difficulte=None,
+    ):
+        """Remplace le titre, la description, les questions (et la difficulté).
+
+        Un quiz modifié repasse toujours en brouillon : il doit être relu puis
+        validé à nouveau par l'enseignant.
 
         Returns:
             True si le quiz a été trouvé et modifié, False sinon.
@@ -151,7 +163,11 @@ class QuizRepository:
             "titre": titre,
             "description": description,
             "questions": _preparer_questions(questions),
+            "statut": "brouillon",
+            "date_validation": None,
         }
+        if difficulte is not None:
+            modifications["difficulte"] = difficulte
         quiz.pop("id")
         valider_quiz({**quiz, **modifications})
         self.collection.update_one(

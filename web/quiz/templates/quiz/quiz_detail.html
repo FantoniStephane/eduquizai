@@ -1,8 +1,8 @@
 {% extends "base_connecte.html" %}
 {% comment %}
   Maquette 8 (détail d'un quiz). Les textes viennent de l'IA : Django les échappe,
-  aucun n'est marqué comme sûr. Modifier, supprimer, exporter et valider sont
-  désactivés jusqu'à leurs tâches (31.1, 31.2, export). Valider (tâche 31) : formulaire
+  aucun n'est marqué comme sûr. Exporter est désactivé jusqu'à sa tâche ;
+  Modifier et Supprimer (31.1, 31.2) sont des liens. Valider (tâche 31) : formulaire
   POST + CSRF ; avec JavaScript, une fenêtre de confirmation demande d'abord à
   l'enseignant s'il a relu le quiz (sans JavaScript, la validation est directe).
 {% endcomment %}
@@ -40,8 +40,8 @@
         </div>
       </div>
       <div class="boutons">
-        <button class="btn btn-modifier" type="button" disabled title="Disponible prochainement">Modifier</button>
-        <button class="btn btn-danger" type="button" disabled title="Disponible prochainement">Supprimer</button>
+        <a class="btn btn-modifier" href="{% url 'quiz:modifier' quiz.id %}">Modifier</a>
+        <a class="btn btn-danger" href="{% url 'quiz:supprimer' quiz.id %}">Supprimer</a>
         <button class="btn btn-secondaire" type="button" disabled title="Disponible prochainement">⭳ Exporter</button>
         {% if quiz.statut == "brouillon" %}
           <form id="form-validation" method="post" action="{% url 'quiz:valider' quiz.id %}">

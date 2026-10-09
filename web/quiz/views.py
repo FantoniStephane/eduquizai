@@ -16,11 +16,13 @@ from lecons.models import Lecon
 
 from .client_ia import GenerationIAError, generer_questions
 from .forms import (
+    DIFFICULTES,
     TYPES_QUESTION,
     QuizAnnulationForm,
     QuizFiltreForm,
     QuizGenerationForm,
 )
+from .modification import lire_modification, vues_depuis_quiz
 from .repository import QuizRepository
 from .validation import QuizInvalideError
 
@@ -306,3 +308,126 @@ def valider_un_quiz(request, id_quiz):
             request, "Le quiz n'a pas pu être validé. Réessayez dans quelques instants."
         )
     return redirect("quiz:detail", id_quiz=id_quiz)
+
+
+class QuizModificationView(TemplateView):
+    """Modification d'un quiz : titre, difficulté, questions (maquette 09).
+
+    Le quiz est cherché parmi ceux de l'enseignant connecté (404 sinon, faille
+    IDOR). Le formulaire n'est pas cru sur parole : chaque question est
+    reconstruite à partir du quiz enregistré (voir ``modification.py``).
+    Un quiz modifié repasse en brouillon : il doit être relu puis revalidé.
+    """
+
+    template_name = "quiz/quiz_modification.html"
+
+    def _charger(self, id_quiz):
+        """Quiz de l'enseignant ; None si MongoDB ne répond pas ; 404 si absent."""
+        try:
+            quiz = QuizRepository().obtenir(id_quiz, self.request.user.pk)
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : modification d'un quiz")
+            return None
+        if quiz is None:
+            raise Http404("Quiz introuvable")
+        return quiz
+
+    def _afficher(self, quiz, **contexte):
+        """Affiche le formulaire (503 si MongoDB ne répond pas)."""
+        if quiz is None:
+            return self.render_to_response({"mongo_indisponible": True}, status=503)
+        contexte.setdefault("titre_saisi", quiz["titre"])
+        contexte.setdefault("difficulte_saisie", quiz["difficulte"])
+        contexte.setdefault("vues", vues_depuis_quiz(quiz))
+        contexte.setdefault("erreurs", [])
+        return self.render_to_response(
+            {"quiz": quiz, "difficultes": DIFFICULTES, **contexte}
+        )
+
+    def get(self, request, *args, **kwargs):
+        """Formulaire prérempli avec le quiz enregistré."""
+        return self._afficher(self._charger(kwargs["id_quiz"]))
+
+    def post(self, request, *args, **kwargs):
+        """Contrôle la saisie puis enregistre ; sinon réaffiche avec les erreurs."""
+        id_quiz = kwargs["id_quiz"]
+        quiz = self._charger(id_quiz)
+        if quiz is None:
+            return self._afficher(None)
+        saisie = lire_modification(request.POST, quiz)
+        if not saisie["valide"]:
+            return self._afficher(
+                quiz,
+                titre_saisi=saisie["titre"],
+                difficulte_saisie=saisie["difficulte"],
+                vues=saisie["vues"],
+                erreurs=saisie["erreurs"],
+            )
+        etait_valide = quiz["statut"] == "valide"
+        try:
+            QuizRepository().modifier(
+                id_quiz,
+                request.user.pk,
+                titre=saisie["titre"],
+                description=quiz.get("description", ""),
+                questions=saisie["questions"],
+                difficulte=saisie["difficulte"],
+            )
+        except QuizInvalideError:
+            logger.exception("Quiz modifié refusé par la validation")
+            return self._afficher(
+                quiz,
+                titre_saisi=saisie["titre"],
+                difficulte_saisie=saisie["difficulte"],
+                vues=saisie["vues"],
+                erreurs=["Le quiz n'a pas pu être enregistré. Vérifiez votre saisie."],
+            )
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : enregistrement d'un quiz modifié")
+            return self._afficher(
+                quiz,
+                titre_saisi=saisie["titre"],
+                difficulte_saisie=saisie["difficulte"],
+                vues=saisie["vues"],
+                erreurs=[
+                    "Le quiz n'a pas pu être enregistré. "
+                    "Réessayez dans quelques instants."
+                ],
+            )
+        messages.success(request, f"Le quiz « {saisie['titre']} » a été modifié.")
+        if etait_valide:
+            messages.info(
+                request,
+                "Le quiz est repassé en brouillon : relisez-le puis validez-le "
+                "de nouveau.",
+            )
+        return redirect("quiz:detail", id_quiz=id_quiz)
+
+
+class QuizSuppressionView(QuizDetailView):
+    """Suppression d'un quiz, avec confirmation (maquette 10).
+
+    GET affiche la fenêtre de confirmation par-dessus le détail du quiz.
+    Seul le POST (protégé par le jeton CSRF) supprime. Le quiz est cherché parmi
+    ceux de l'enseignant connecté : 404 sinon (faille IDOR).
+    """
+
+    template_name = "quiz/quiz_confirmation_suppression.html"
+
+    def post(self, request, *args, **kwargs):
+        """Supprime le quiz puis retourne à la liste."""
+        id_quiz = kwargs["id_quiz"]
+        repository = QuizRepository()
+        try:
+            quiz = repository.obtenir(id_quiz, request.user.pk)
+            if quiz is None or not repository.supprimer(id_quiz, request.user.pk):
+                raise Http404("Quiz introuvable")
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : suppression d'un quiz")
+            messages.error(
+                request,
+                "Le quiz n'a pas pu être supprimé. Réessayez dans quelques instants.",
+            )
+            return redirect("quiz:detail", id_quiz=id_quiz)
+        messages.success(request, f"Le quiz « {quiz['titre']} » a été supprimé.")
+        return redirect("quiz:liste")

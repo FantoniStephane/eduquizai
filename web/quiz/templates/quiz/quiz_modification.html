@@ -1,0 +1,108 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 9 (modification d'un quiz). Les textes viennent de l'IA ou de la saisie :
+  Django les échappe, aucun n'est marqué comme sûr. Le type d'une question et le
+  nombre de ses choix ne sont pas modifiables. Supprimer une question : bouton
+  affiché par JavaScript (modification.js) ; il coche un champ caché q<i>-supprimer.
+{% endcomment %}
+{% load static %}
+
+{% block titre %}Modifier le quiz{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  {% if mongo_indisponible %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li aria-current="page">Modifier</li>
+      </ol>
+    </nav>
+    <div class="alerte-erreur" role="alert">Ce quiz est momentanément indisponible. Réessayez dans quelques instants.</div>
+  {% else %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li><a href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a></li>
+        <li aria-current="page">Modifier</li>
+      </ol>
+    </nav>
+    <div class="titre-page" style="align-items:center">
+      <h1>Modifier le quiz</h1>
+      {% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}
+    </div>
+
+    {% if erreurs %}
+      <div class="alerte-erreur" role="alert">
+        <strong>Le quiz n'a pas été enregistré.</strong>
+        <ul>{% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+
+    <form id="form-modification" class="grille-detail" method="post" novalidate>
+      {% csrf_token %}
+      <section class="carte" aria-labelledby="t-q" style="padding:0">
+        <h2 id="t-q" class="sr">Questions</h2>
+        <div class="zone-defilante" style="padding:16px">
+          {% for vue in vues %}
+            <fieldset class="question q-edit" id="q{{ forloop.counter }}" data-index="{{ vue.index }}"{% if vue.supprimee %} hidden{% endif %}>
+              <legend class="sr">Question {{ forloop.counter }}</legend>
+              <input type="hidden" name="q{{ vue.index }}-supprimer" value="{% if vue.supprimee %}1{% endif %}" data-supprimer>
+              <div class="question-tete">
+                <div>
+                  <span class="num" aria-hidden="true">{{ forloop.counter }}</span>
+                  <span class="badge badge-type">{{ vue.libelle_type }}</span>
+                </div>
+                <button class="btn-icone danger" type="button" data-supprimer-question hidden aria-label="Supprimer la question {{ forloop.counter }}" title="Supprimer la question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+              </div>
+              {% if vue.erreurs %}
+                <ul class="msg-erreur" id="q{{ vue.index }}-err">{% for erreur in vue.erreurs %}<li>{{ erreur }}</li>{% endfor %}</ul>
+              {% endif %}
+              <div class="champ"><label for="q{{ vue.index }}t">Énoncé</label><textarea id="q{{ vue.index }}t" name="q{{ vue.index }}-texte" maxlength="1000"{% if vue.erreurs %} aria-describedby="q{{ vue.index }}-err"{% endif %}>{{ vue.texte }}</textarea></div>
+              {% if vue.type_question == "ouverte" %}
+                <div class="champ"><label for="q{{ vue.index }}a">Réponse attendue</label><textarea id="q{{ vue.index }}a" name="q{{ vue.index }}-reponse" maxlength="2000">{{ vue.reponse_attendue }}</textarea></div>
+              {% else %}
+                <p style="font-weight:600;font-size:14px;margin-bottom:6px" id="q{{ vue.index }}c">Choix <span class="muted" style="font-weight:400">(sélectionnez la bonne réponse)</span></p>
+                <ul class="choix-edit" role="radiogroup" aria-labelledby="q{{ vue.index }}c">
+                  {% for choix in vue.choix %}
+                    <li>
+                      <span class="radio-correct"><input type="radio" name="q{{ vue.index }}-correct" id="q{{ vue.index }}r{{ choix.numero }}" value="{{ choix.numero }}"{% if choix.est_correct %} checked{% endif %}><label for="q{{ vue.index }}r{{ choix.numero }}">{% if choix.est_correct %}✓ Bonne réponse{% else %}Marquer correcte{% endif %}<span class="sr"> : choix {{ forloop.counter }}</span></label></span>
+                      {% if vue.type_question == "qcm" %}
+                        <input name="q{{ vue.index }}-choix{{ choix.numero }}" value="{{ choix.texte }}" maxlength="1000" aria-label="Texte du choix {{ forloop.counter }}">
+                      {% else %}
+                        <input value="{{ choix.texte }}" readonly aria-label="Texte du choix {{ forloop.counter }}">
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+                <div class="champ" style="margin-bottom:0"><label for="q{{ vue.index }}e">Explication</label><textarea id="q{{ vue.index }}e" name="q{{ vue.index }}-explication" maxlength="2000">{{ vue.explication }}</textarea></div>
+              {% endif %}
+            </fieldset>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="carte">
+        <div class="champ"><label for="titre">Titre du quiz <span class="obligatoire" aria-hidden="true">*</span></label><input id="titre" name="titre" value="{{ titre_saisi }}" maxlength="100" required></div>
+        <div class="champ"><label for="dif">Difficulté</label>
+          <select id="dif" name="difficulte">
+            {% for code, libelle in difficultes %}<option value="{{ code }}"{% if code == difficulte_saisie %} selected{% endif %}>{{ libelle }}</option>{% endfor %}
+          </select>
+        </div>
+        <p style="font-weight:600;font-size:14px;margin-bottom:8px" id="t-som">Aller à la question</p>
+        <nav aria-labelledby="t-som">
+          <ul class="sommaire" id="sommaire">
+            {% for vue in vues %}{% if not vue.supprimee %}<li><a href="#q{{ forloop.counter }}" data-index="{{ vue.index }}">{{ forloop.counter }}</a></li>{% endif %}{% endfor %}
+          </ul>
+        </nav>
+        <p class="alerte-info" role="note">Le quiz repasse en <strong>brouillon</strong> après modification. Pensez à le valider une fois relu.</p>
+        <div class="aside-actions">
+          <button class="btn btn-primaire" type="submit">Enregistrer les modifications</button>
+          <a class="btn btn-secondaire" href="{% url 'quiz:detail' quiz.id %}">Annuler</a>
+        </div>
+      </aside>
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}{{ block.super }}<script src="{% static 'js/modification.js' %}" defer></script>{% endblock %}
