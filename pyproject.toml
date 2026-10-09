@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 88              # longueur de ligne standard (celle de Django et de Black)
 target-version = "py312"
-src = ["web"]                 # code de l'application : ses imports sont « internes » au projet
+src = ["web", "ia"]           # code des deux services : leurs imports sont « internes » au projet
 extend-exclude = ["**/migrations/**"]   # fichiers générés par Django : on n'y touche pas
 
 [tool.ruff.lint]

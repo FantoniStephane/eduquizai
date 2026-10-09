@@ -17,6 +17,18 @@ services:
       mongo:
         condition: service_healthy
 
+  ia:
+    build: ./ia
+    env_file: .env
+    environment:
+      OLLAMA_URL: http://ollama:11434
+    volumes:
+      - ./ia:/app
+    # Aucun port publié : seul le conteneur web joint le microservice,
+    # par le réseau interne de Docker (http://ia:8000)
+    depends_on:
+      - ollama
+
   postgres:
     image: postgres:17
     env_file: .env
