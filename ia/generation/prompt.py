@@ -79,29 +79,57 @@ def construire_messages(contenu, difficulte, types, nombre):
     ]
 
 
+_TEXTE = {"type": "string", "minLength": 1}
+
+
+def _schema_question(type_question):
+    """Schéma d'une question d'un type donné.
+
+    Le nombre de choix, la plage de « bonne_reponse » et la réponse attendue
+    dépendent du type : chaque type a donc sa propre forme. Les champs sont
+    tous obligatoires et jamais « null » : les petits modèles en profitaient
+    pour omettre la réponse attendue ou laisser des textes vides.
+    """
+    nb_choix, derniere_reponse, reponse_attendue = {
+        # QCM : 4 choix, bonne réponse parmi eux, pas de réponse attendue
+        "qcm": (CHOIX_QCM, CHOIX_QCM - 1, {"type": "string", "maxLength": 0}),
+        # Vrai/faux : 2 choix (« Vrai » puis « Faux »)
+        "vrai_faux": (2, 1, {"type": "string", "maxLength": 0}),
+        # Question ouverte : aucun choix, réponse attendue obligatoire
+        "ouverte": (0, 0, _TEXTE),
+    }[type_question]
+    proprietes = {
+        "type_question": {"type": "string", "enum": [type_question]},
+        "texte": _TEXTE,
+        "choix": {
+            "type": "array",
+            "items": _TEXTE,
+            "minItems": nb_choix,
+            "maxItems": nb_choix,
+        },
+        "bonne_reponse": {"type": "integer", "minimum": 0, "maximum": derniere_reponse},
+        "reponse_attendue": reponse_attendue,
+        "explication": _TEXTE,
+    }
+    return {
+        "type": "object",
+        "properties": proprietes,
+        "required": list(proprietes),
+        "additionalProperties": False,
+    }
+
+
 def schema_reponse(types, nombre):
     """Schéma JSON imposé à la réponse du modèle (sorties structurées).
 
     Le modèle ne peut produire que des objets de cette forme : le nombre de
-    questions et les types autorisés y sont fixés. La bonne réponse est un
-    numéro de choix, et non une case à cocher sur chaque choix : le modèle ne
-    peut pas indiquer zéro ou plusieurs bonnes réponses. Tous les champs sont
-    obligatoires et jamais vides de type (pas de « null ») : les petits
-    modèles en profitaient pour omettre la réponse attendue.
+    questions est fixé et chaque question suit la forme d'un des types
+    autorisés (4 choix pour un QCM, 2 pour un vrai/faux, aucun pour une
+    question ouverte). La bonne réponse est un numéro de choix, et non une
+    case à cocher sur chaque choix : le modèle ne peut pas indiquer zéro ou
+    plusieurs bonnes réponses.
     """
-    question = {
-        "type": "object",
-        "properties": {
-            "type_question": {"type": "string", "enum": list(types)},
-            "texte": {"type": "string"},
-            "choix": {"type": "array", "items": {"type": "string"}},
-            "bonne_reponse": {"type": "integer", "minimum": 0, "maximum": 3},
-            "reponse_attendue": {"type": "string"},
-            "explication": {"type": "string"},
-        },
-        "additionalProperties": False,
-    }
-    question["required"] = list(question["properties"])
+    variantes = [_schema_question(t) for t in dict.fromkeys(types)]
     return {
         "type": "object",
         "properties": {
@@ -109,7 +137,7 @@ def schema_reponse(types, nombre):
                 "type": "array",
                 "minItems": nombre,
                 "maxItems": nombre,
-                "items": question,
+                "items": variantes[0] if len(variantes) == 1 else {"anyOf": variantes},
             }
         },
         "required": ["questions"],

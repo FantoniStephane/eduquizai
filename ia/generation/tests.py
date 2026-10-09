@@ -93,6 +93,26 @@ class PromptTests(SimpleTestCase):
             questions["items"]["properties"]["type_question"]["enum"], ["qcm"]
         )
 
+    def test_schema_propre_a_chaque_type(self):
+        """QCM : 4 choix ; vrai/faux : 2 ; ouverte : aucun et réponse attendue."""
+        variantes = schema_reponse(TYPES, 3)["properties"]["questions"]["items"][
+            "anyOf"
+        ]
+        par_type = {v["properties"]["type_question"]["enum"][0]: v for v in variantes}
+        self.assertEqual(set(par_type), {"qcm", "vrai_faux", "ouverte"})
+        for type_question, nb_choix in (("qcm", 4), ("vrai_faux", 2), ("ouverte", 0)):
+            choix = par_type[type_question]["properties"]["choix"]
+            self.assertEqual((choix["minItems"], choix["maxItems"]), (nb_choix,) * 2)
+        self.assertEqual(par_type["qcm"]["properties"]["bonne_reponse"]["maximum"], 3)
+        self.assertEqual(
+            par_type["ouverte"]["properties"]["reponse_attendue"]["minLength"], 1
+        )
+
+    def test_schema_ignore_les_types_en_double(self):
+        """Un type répété ne crée qu'une variante."""
+        items = schema_reponse(["qcm", "qcm"], 3)["properties"]["questions"]["items"]
+        self.assertNotIn("anyOf", items)
+
 
 class ParametresTests(SimpleTestCase):
     """Contrôle de la demande avant tout appel au modèle."""
@@ -346,9 +366,12 @@ class SchemaTests(SimpleTestCase):
 
     def test_tous_les_champs_obligatoires(self):
         """Chaque objet liste tous ses champs et refuse les champs en plus."""
-        question = schema_reponse(TYPES, 3)["properties"]["questions"]["items"]
-        self.assertEqual(set(question["required"]), set(question["properties"]))
-        self.assertFalse(question["additionalProperties"])
+        variantes = schema_reponse(TYPES, 3)["properties"]["questions"]["items"][
+            "anyOf"
+        ]
+        for question in variantes:
+            self.assertEqual(set(question["required"]), set(question["properties"]))
+            self.assertFalse(question["additionalProperties"])
 
 
 @mock.patch("generation.ollama.requests.post")
