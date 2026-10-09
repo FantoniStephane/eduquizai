@@ -15,7 +15,11 @@ main                 version stable, toujours fonctionnelle
 
 ## Messages de commit
 
-Format [Conventional Commits](https://www.conventionalcommits.org/fr/) : `<type>: <description en français>`
+Format [Conventional Commits](https://www.conventionalcommits.org/fr/) : `<type>(<module>): <description en français> (tâche N)`
+
+- `<module>` (facultatif) : la partie du projet concernée, par exemple `quiz`, `lecons`, `ia`, `dashboard`.
+- `(tâche N)` (facultatif) : le numéro de la tâche du backlog, en fin de message.
+- Exemple complet : `feat(quiz): modification et suppression d'un quiz (tâches 31.1 et 31.2)`.
 
 | Type | Utilisation | Exemple |
 |---|---|---|
