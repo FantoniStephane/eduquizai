@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect
@@ -15,6 +17,8 @@ from quiz.repository import QuizRepository
 
 from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
+
+logger = logging.getLogger(__name__)
 
 
 class LeconListView(ListView):
@@ -86,6 +90,23 @@ class LeconDetailView(DetailView):
     def get_queryset(self):
         """Uniquement les leçons de l'utilisateur connecté."""
         return Lecon.objects.filter(utilisateur=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """Ajoute les quiz générés à partir de la leçon (de l'enseignant seulement).
+
+        Si MongoDB ne répond pas, la page s'affiche sans la liste, avec un message.
+        """
+        contexte = super().get_context_data(**kwargs)
+        contexte["quiz_liste"] = []
+        contexte["mongo_indisponible"] = False
+        try:
+            contexte["quiz_liste"] = QuizRepository().lister(
+                self.request.user.pk, id_lecon=self.object.pk
+            )
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : quiz d'une leçon")
+            contexte["mongo_indisponible"] = True
+        return contexte
 
 
 class LeconUpdateView(SuccessMessageMixin, UpdateView):

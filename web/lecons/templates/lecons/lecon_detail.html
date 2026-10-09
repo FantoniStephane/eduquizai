@@ -3,7 +3,7 @@
 {% comment %}
   Maquette 5 (détail d'une leçon). Le contenu Markdown est converti puis nettoyé
   par le filtre markdown_sur (liste blanche de balises, protection XSS).
-  Liste des quiz de la leçon : S2.
+  Liste des quiz de la leçon : lus dans MongoDB, limités à l'enseignant connecté.
 {% endcomment %}
 
 {% block titre %}{{ lecon.titre }}{% endblock %}
@@ -41,7 +41,24 @@
 
     <aside class="carte" aria-labelledby="t-quiz">
       <div class="carte-titre"><h2 id="t-quiz">Quiz de cette leçon</h2></div>
-      <p class="muted">Aucun quiz n'a encore été généré à partir de cette leçon.</p>
+      {% if mongo_indisponible %}
+        <p class="alerte-erreur" role="alert">Les quiz de cette leçon sont momentanément indisponibles. Réessayez dans quelques instants.</p>
+      {% elif quiz_liste %}
+        <ul class="liste">
+          {% for quiz in quiz_liste %}
+            <li>
+              <div>
+                <a class="t" href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a>
+                <div class="s">{{ quiz.questions|length }} question{{ quiz.questions|length|pluralize }} · {{ quiz.difficulte }} · {{ quiz.date_creation|date:"d/m" }}</div>
+              </div>
+              {% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucun quiz n'a encore été généré à partir de cette leçon.</p>
+      {% endif %}
+      <p class="aide" style="margin-top:12px">Pour générer un nouveau quiz, rendez-vous dans l'onglet <a href="{% url 'quiz:liste' %}">Quiz</a>.</p>
     </aside>
   </div>
 {% endblock %}

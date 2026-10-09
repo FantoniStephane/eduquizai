@@ -105,7 +105,9 @@ class QuizRepository:
             return None
         return _vers_python(self.collection.find_one(filtre))
 
-    def lister(self, id_utilisateur, *, statut=None, id_lecon=None, recherche=None):
+    def lister(
+        self, id_utilisateur, *, statut=None, id_lecon=None, recherche=None, limite=None
+    ):
         """Quiz de l'enseignant, du plus récent au plus ancien, filtres facultatifs.
 
         Args:
@@ -113,6 +115,7 @@ class QuizRepository:
             statut: « brouillon » ou « valide ».
             id_lecon: limite aux quiz d'une leçon.
             recherche: texte cherché dans le titre (sans tenir compte de la casse).
+            limite: nombre maximal de quiz renvoyés (tous si absent).
         """
         filtre = {"id_utilisateur": int(id_utilisateur)}
         if statut:
@@ -127,7 +130,16 @@ class QuizRepository:
         curseur = self.collection.find(filtre).sort(
             [("date_creation", DESCENDING), ("_id", DESCENDING)]
         )
+        if limite:
+            curseur = curseur.limit(int(limite))
         return [_vers_python(document) for document in curseur]
+
+    def compter(self, id_utilisateur, statut=None):
+        """Nombre de quiz de l'enseignant, éventuellement d'un seul statut."""
+        filtre = {"id_utilisateur": int(id_utilisateur)}
+        if statut:
+            filtre["statut"] = str(statut)
+        return self.collection.count_documents(filtre)
 
     def compter_par_lecon(self, id_lecon, id_utilisateur):
         """Nombre de quiz générés à partir d'une leçon de l'enseignant."""

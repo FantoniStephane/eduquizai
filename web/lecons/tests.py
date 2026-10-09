@@ -349,6 +349,60 @@ class LeconVuesTests(TestCase):
         self.assertContains(reponse, "a été supprimée.")
         self.assertFalse(Lecon.objects.filter(pk=self.lecon.pk).exists())
 
+    def test_detail_liste_les_quiz_de_la_lecon(self):
+        """Le détail liste les quiz de la leçon avec leur statut, pas ceux d'autrui."""
+        repository = QuizRepository()
+        self.addCleanup(repository.collection.delete_many, {})
+        creer_quiz(
+            repository,
+            id_utilisateur=self.anne.pk,
+            id_lecon=self.lecon.pk,
+            titre="Quiz brouillon",
+        )
+        id_valide = creer_quiz(
+            repository,
+            id_utilisateur=self.anne.pk,
+            id_lecon=self.lecon.pk,
+            titre="Quiz relu",
+        )
+        repository.valider(id_valide, self.anne.pk)
+        creer_quiz(
+            repository,
+            id_utilisateur=self.anne.pk,
+            id_lecon=self.lecon.pk + 1000,
+            titre="Quiz d'une autre leçon",
+        )
+        creer_quiz(
+            repository,
+            id_utilisateur=self.paul.pk,
+            id_lecon=self.lecon.pk,
+            titre="Quiz de Paul",
+        )
+        reponse = self.client.get(reverse("lecons:detail", args=[self.lecon.pk]))
+        self.assertContains(reponse, "Quiz brouillon")
+        self.assertContains(reponse, "Quiz relu")
+        self.assertContains(reponse, reverse("quiz:detail", args=[id_valide]))
+        self.assertContains(reponse, "3 questions")
+        self.assertContains(reponse, "badge-valide")
+        self.assertContains(reponse, "badge-brouillon")
+        self.assertNotContains(reponse, "autre leçon")
+        self.assertNotContains(reponse, "Quiz de Paul")
+        self.assertNotContains(reponse, "Aucun quiz n")
+
+    def test_detail_sans_quiz(self):
+        """Une leçon sans quiz affiche le message habituel."""
+        reponse = self.client.get(reverse("lecons:detail", args=[self.lecon.pk]))
+        self.assertContains(reponse, "Aucun quiz n")
+
+    def test_detail_si_mongodb_ne_repond_pas(self):
+        """Panne MongoDB : la leçon s'affiche, avec un message à la place des quiz."""
+        url = reverse("lecons:detail", args=[self.lecon.pk])
+        with mock.patch.object(QuizRepository, "lister", side_effect=PyMongoError):
+            reponse = self.client.get(url)
+        self.assertEqual(reponse.status_code, 200)
+        self.assertContains(reponse, self.lecon.titre)
+        self.assertContains(reponse, "momentanément indisponibles")
+
     def test_suppression_bloquee_si_la_lecon_a_des_quiz(self):
         """Une leçon qui a servi à générer un quiz n'est pas supprimée."""
         repository = QuizRepository()
