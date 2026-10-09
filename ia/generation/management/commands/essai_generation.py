@@ -3,8 +3,8 @@ import time
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from generation.ollama import ErreurIAError
-from generation.service import generer_quiz
+from generation.erreurs import ErreurIAError
+from generation.service import FOURNISSEURS, generer_quiz
 from generation.validation import (
     DIFFICULTES,
     TYPES_QUESTION,
@@ -42,10 +42,18 @@ class Command(BaseCommand):
         parser.add_argument(
             "--types", nargs="+", choices=TYPES_QUESTION, default=list(TYPES_QUESTION)
         )
+        parser.add_argument("--fournisseur", choices=sorted(FOURNISSEURS))
+        parser.add_argument(
+            "--modele", help="Modèle à utiliser (par défaut : réglages)"
+        )
 
     def handle(self, *args, **options):
         """Lance la génération et affiche le résultat."""
-        self.stdout.write(f"Modèle : {settings.OLLAMA['MODELE']}")
+        fournisseur = options["fournisseur"] or settings.IA_FOURNISSEUR
+        modele = options["modele"] or settings.OLLAMA["MODELE"]
+        if fournisseur == "mistral":
+            modele = options["modele"] or settings.MISTRAL["MODELE"]
+        self.stdout.write(f"Fournisseur : {fournisseur} — modèle : {modele}")
         debut = time.perf_counter()
         try:
             questions = generer_quiz(
@@ -53,6 +61,8 @@ class Command(BaseCommand):
                 difficulte=options["difficulte"],
                 types=options["types"],
                 nombre=options["nombre"],
+                fournisseur=fournisseur,
+                modele=modele,
             )
         except (ErreurIAError, ParametresInvalidesError, ReponseInvalideError) as exc:
             self.stderr.write(self.style.ERROR(f"Échec : {exc}"))

@@ -1,34 +1,31 @@
-"""Appel au modèle de langage local (API HTTP d'Ollama).
+"""Fournisseur « ollama » : modèle de langage local (API HTTP d'Ollama).
 
-Chaque problème technique est traduit en une erreur explicite, que
-l'application transforme en message compréhensible pour l'enseignant.
+Choix par défaut : les leçons ne quittent pas l'infrastructure.
 """
 
 import requests
 from django.conf import settings
 
+from .erreurs import DelaiDepasseError, IAIndisponibleError
+
 # Délai pour établir la connexion avec Ollama (secondes)
 DELAI_CONNEXION = 3
+# Contexte de 2 048 jetons : assez pour la plus longue leçon (20 000
+# caractères) et assez petit pour que tout le modèle tienne dans les 4 Go de
+# la carte graphique (avec 4 096, 20 % du calcul passait par le processeur).
+CONTEXTE = 2048
+# Le modèle reste chargé 30 minutes après le dernier appel (5 par défaut) :
+# on évite de le recharger à chaque génération.
+GARDER_EN_MEMOIRE = "30m"
 
 
-class ErreurIAError(Exception):
-    """Erreur commune à tous les problèmes de génération."""
-
-
-class IAIndisponibleError(ErreurIAError):
-    """Ollama ne répond pas ou refuse la demande (service arrêté, modèle absent)."""
-
-
-class DelaiDepasseError(ErreurIAError):
-    """Ollama n'a pas répondu dans le délai maximum."""
-
-
-def appeler_ollama(messages, schema):
-    """Envoie les messages au modèle et retourne le texte de sa réponse.
+def appeler_ollama(messages, schema, modele=None):
+    """Envoie les messages au modèle local et retourne le texte de sa réponse.
 
     Args:
         messages: consignes et demande (voir prompt.construire_messages).
-        schema: schéma JSON imposé à la réponse.
+        schema: schéma JSON imposé à la réponse (sorties structurées).
+        modele: nom du modèle ; par défaut, celui des réglages.
 
     Returns:
         Le texte produit par le modèle (normalement du JSON).
@@ -42,12 +39,13 @@ def appeler_ollama(messages, schema):
         reponse = requests.post(
             f"{reglages['URL']}/api/chat",
             json={
-                "model": reglages["MODELE"],
+                "model": modele or reglages["MODELE"],
                 "messages": messages,
                 "format": schema,
                 "stream": False,
+                "keep_alive": GARDER_EN_MEMOIRE,
                 # Peu de hasard : des réponses plus régulières et plus fiables
-                "options": {"temperature": 0.2},
+                "options": {"temperature": 0.2, "num_ctx": CONTEXTE},
             },
             timeout=(DELAI_CONNEXION, reglages["DELAI"]),
         )

@@ -46,6 +46,28 @@ docker exec ollama-test ollama ps
 - Avec 4 Go de VRAM, il faut un modèle de 3 à 4 milliards de paramètres pour rester majoritairement sur le GPU (Windows occupe déjà environ 0,5 Go de la carte pour l'affichage).
 - Le petit modèle fait quelques fautes de français (« du chlorophylle »). Le modèle définitif sera choisi après des tests sur de vraies leçons, et la validation manuelle par l'enseignant (US6) reste indispensable.
 
+## Modèles d'IA et fournisseur (sprint 2)
+
+Le microservice `ia` utilise par défaut le modèle local d'Ollama. Modèles comparés :
+
+```
+docker compose exec ollama ollama pull qwen2.5:3b
+docker compose exec ollama ollama pull llama3.2:1b
+docker compose exec ia python manage.py mesure_generation llama3.2:3b qwen2.5:3b llama3.2:1b
+docker compose exec ollama ollama ps
+```
+
+`ollama ps` doit afficher `100% GPU` dans la colonne PROCESSOR : le contexte est limité à 2 048 jetons pour que le modèle tienne entièrement dans les 4 Go de la carte graphique.
+
+**Alternative : API Mistral.** Créer une clé sur la console de Mistral AI, puis la renseigner dans `.env` (jamais dans le code ni dans Git) :
+
+```
+IA_FOURNISSEUR=mistral
+MISTRAL_API_KEY=<clé personnelle>
+```
+
+puis `docker compose up -d --force-recreate ia`. Mesure : `docker compose exec ia python manage.py mesure_generation --fournisseur mistral ministral-3b-2512`.
+
 ## Extensions VS Code
 
 Elles sont listées dans `.vscode/extensions.json` : VS Code propose de les installer à l'ouverture du projet.

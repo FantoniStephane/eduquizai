@@ -7,7 +7,7 @@ web, sur le réseau interne de Docker (aucun port publié).
 
 from pathlib import Path
 
-from decouple import Csv, config
+from decouple import Choices, Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,10 +38,24 @@ TIME_ZONE = "Europe/Paris"
 USE_I18N = True
 USE_TZ = True
 
+# Fournisseur d'IA : « ollama » (modèle local, par défaut : les leçons ne
+# quittent pas l'infrastructure) ou « mistral » (API externe, plus rapide)
+IA_FOURNISSEUR = config(
+    "IA_FOURNISSEUR", default="ollama", cast=Choices(["ollama", "mistral"])
+)
+
 # Modèle de langage local (conteneur « ollama »)
 OLLAMA = {
     "URL": config("OLLAMA_URL", default="http://127.0.0.1:11434"),
     "MODELE": config("OLLAMA_MODELE", default="llama3.2:3b"),
     # Délai maximum d'une génération, en secondes
     "DELAI": config("OLLAMA_DELAI", default=60, cast=int),
+}
+
+# API de Mistral AI (la clé est un secret : uniquement dans le fichier .env)
+MISTRAL = {
+    "URL": config("MISTRAL_URL", default="https://api.mistral.ai"),
+    "CLE": config("MISTRAL_API_KEY", default=""),
+    "MODELE": config("MISTRAL_MODELE", default="ministral-3b-2512"),
+    "DELAI": config("MISTRAL_DELAI", default=30, cast=int),
 }

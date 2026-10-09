@@ -3,10 +3,13 @@ from io import StringIO
 from unittest import mock
 
 import requests
+from django.conf import settings
 from django.core.management import call_command
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
-from .ollama import DelaiDepasseError, IAIndisponibleError, appeler_ollama
+from .erreurs import DelaiDepasseError, IAIndisponibleError
+from .mistral import appeler_mistral
+from .ollama import appeler_ollama
 from .prompt import construire_messages, schema_reponse
 from .service import generer_quiz
 from .validation import ParametresInvalidesError, ReponseInvalideError
@@ -15,29 +18,26 @@ LECON = "## Les volcans\n\nUn volcan est une ouverture de la croûte terrestre."
 
 
 def qcm(correct=0, nb_choix=4):
-    """Question QCM au format renvoyé par le modèle."""
+    """Question QCM au format renvoyé par le modèle (numéro de la bonne réponse)."""
     return {
         "type_question": "qcm",
         "texte": "Qu'est-ce qu'un volcan ?",
+        "choix": [f"Réponse {i}" for i in range(nb_choix)],
+        "bonne_reponse": correct,
+        "reponse_attendue": "",
         "explication": "C'est la définition donnée dans la leçon.",
-        "reponse_attendue": None,
-        "choix": [
-            {"texte": f"Réponse {i}", "est_correct": i == correct}
-            for i in range(nb_choix)
-        ],
     }
 
 
-def vrai_faux(libelles=("vrai", "FAUX"), vrai_correct=True):
+def vrai_faux(libelles=("vrai", "FAUX."), bonne_reponse=0):
     """Question vrai/faux, avec des libellés que le modèle écrit mal parfois."""
     return {
         "type_question": "vrai_faux",
         "texte": "Un volcan est une ouverture de la croûte terrestre.",
+        "choix": list(libelles),
+        "bonne_reponse": bonne_reponse,
+        "reponse_attendue": "",
         "explication": "La leçon le dit dès la première phrase.",
-        "choix": [
-            {"texte": libelles[0], "est_correct": vrai_correct},
-            {"texte": libelles[1], "est_correct": not vrai_correct},
-        ],
     }
 
 
@@ -46,9 +46,10 @@ def ouverte(reponse="Une ouverture de la croûte terrestre."):
     return {
         "type_question": "ouverte",
         "texte": "Définissez un volcan.",
-        "explication": "Définition de la leçon.",
-        "reponse_attendue": reponse,
         "choix": [],
+        "bonne_reponse": 0,
+        "reponse_attendue": reponse,
+        "explication": "Définition de la leçon.",
     }
 
 
@@ -143,9 +144,32 @@ class GenerationTests(SimpleTestCase):
             ],
         )
         self.assertEqual(questions[0]["reponse_attendue"], None)
+        # Numéro de la bonne réponse converti en « est_correct » sur chaque choix
+        self.assertEqual(
+            [c["est_correct"] for c in questions[0]["choix"]],
+            [True, False, False, False],
+        )
+        self.assertEqual(questions[2]["choix"], [])
         envoi = post.call_args.kwargs["json"]
         self.assertFalse(envoi["stream"])
         self.assertIn("format", envoi)
+        # Modèle gardé en mémoire et contexte réduit pour tenir dans le GPU
+        self.assertEqual(envoi["keep_alive"], "30m")
+        self.assertEqual(envoi["options"]["num_ctx"], 2048)
+        self.assertEqual(envoi["model"], settings.OLLAMA["MODELE"])
+
+    def test_vrai_faux_dans_le_desordre(self, post):
+        """« Faux » donné en premier : la bonne réponse suit son libellé."""
+        affirmation_fausse = vrai_faux(("Faux", "Vrai"), bonne_reponse=0)
+        post.return_value = reponse_ollama([qcm(), affirmation_fausse, ouverte()])
+        choix = self.generer()[1]["choix"]
+        self.assertEqual(
+            choix,
+            [
+                {"texte": "Vrai", "est_correct": False},
+                {"texte": "Faux", "est_correct": True},
+            ],
+        )
 
     def test_nouvelle_tentative_si_reponse_invalide(self, post):
         """Une réponse invalide est suivie d'un seul nouvel essai."""
@@ -166,26 +190,30 @@ class GenerationTests(SimpleTestCase):
     def test_reponses_invalides(self, post):
         """Chaque erreur du modèle est détectée."""
         cas = {
-            "deux bonnes réponses": [
-                qcm(),
-                qcm(),
-                {
-                    **qcm(),
-                    "choix": [
-                        {"texte": "A", "est_correct": True},
-                        {"texte": "B", "est_correct": True},
-                        {"texte": "C", "est_correct": False},
-                        {"texte": "D", "est_correct": False},
-                    ],
-                },
-            ],
+            "numéro de bonne réponse hors limites": [qcm(), qcm(), qcm(correct=4)],
+            "numéro de bonne réponse booléen": [qcm(), qcm(), qcm(correct=True)],
+            "vrai/faux sans numéro valide": [qcm(), qcm(), vrai_faux(bonne_reponse=2)],
             "QCM à trois choix": [qcm(), qcm(), qcm(nb_choix=3)],
             "vrai/faux mal libellé": [qcm(), qcm(), vrai_faux(("Oui", "Non"))],
             "ouverte sans réponse": [qcm(), qcm(), ouverte(reponse="")],
             "type non demandé": [qcm(), qcm(), {**qcm(), "type_question": "dessin"}],
             "énoncé vide": [qcm(), qcm(), {**qcm(), "texte": " "}],
             "choix mal formé": [qcm(), qcm(), {**qcm(), "choix": [{"texte": "A"}]}],
+            "choix absents": [qcm(), qcm(), {**qcm(), "choix": None}],
             "question non objet": [qcm(), qcm(), "Quelle question ?"],
+            "choix en double (mêmes mots)": [
+                qcm(),
+                qcm(),
+                {
+                    **qcm(),
+                    "choix": [
+                        "Le clergé, la noblesse",
+                        "La noblesse, le clergé",
+                        "Le tiers état",
+                        "Les Lumières",
+                    ],
+                },
+            ],
         }
         for nom, questions in cas.items():
             with self.subTest(nom):
@@ -244,3 +272,106 @@ class EssaiGenerationTests(SimpleTestCase):
         erreurs = StringIO()
         call_command("essai_generation", stdout=StringIO(), stderr=erreurs)
         self.assertIn("Échec", erreurs.getvalue())
+
+
+def reponse_mistral(questions, status=200):
+    """Fausse réponse HTTP de l'API Mistral contenant les questions en JSON."""
+    reponse = mock.Mock(status_code=status)
+    reponse.json.return_value = {
+        "choices": [{"message": {"content": json.dumps({"questions": questions})}}]
+    }
+    return reponse
+
+
+MISTRAL_TEST = {**settings.MISTRAL, "CLE": "cle-de-test"}
+
+
+@override_settings(MISTRAL=MISTRAL_TEST)
+@mock.patch("generation.mistral.requests.post")
+class MistralTests(SimpleTestCase):
+    """Fournisseur « mistral » (API simulée, aucun appel réel)."""
+
+    def generer(self, **options):
+        """Génère 3 questions avec l'API Mistral."""
+        return generer_quiz(LECON, difficulte="moyen", types=TYPES, nombre=3, **options)
+
+    def test_generation_reussie(self, post):
+        """Même résultat qu'avec Ollama ; clé envoyée dans l'en-tête."""
+        post.return_value = reponse_mistral([qcm(), vrai_faux(), ouverte()])
+        questions = self.generer(fournisseur="mistral")
+        self.assertEqual([q["type_question"] for q in questions], TYPES)
+        appel = post.call_args
+        self.assertTrue(appel.args[0].endswith("/v1/chat/completions"))
+        self.assertEqual(appel.kwargs["headers"]["Authorization"], "Bearer cle-de-test")
+        format_reponse = appel.kwargs["json"]["response_format"]
+        self.assertEqual(format_reponse["type"], "json_schema")
+        self.assertTrue(format_reponse["json_schema"]["strict"])
+
+    @override_settings(IA_FOURNISSEUR="mistral")
+    def test_fournisseur_choisi_dans_les_reglages(self, post):
+        """Sans précision, le fournisseur des réglages est utilisé."""
+        post.return_value = reponse_mistral([qcm(), vrai_faux(), ouverte()])
+        self.generer()
+        self.assertIn("api.mistral.ai", post.call_args.args[0])
+
+    @override_settings(MISTRAL={**MISTRAL_TEST, "CLE": ""})
+    def test_sans_cle_aucun_appel(self, post):
+        """Sans clé d'API, aucune requête n'est envoyée."""
+        with self.assertRaises(IAIndisponibleError):
+            appeler_mistral([], {})
+        post.assert_not_called()
+
+    def test_erreurs(self, post):
+        """Clé refusée, quota, erreur serveur, réponse inattendue, réseau."""
+        for status in (401, 429, 500):
+            with self.subTest(status=status):
+                post.return_value = reponse_mistral([], status=status)
+                with self.assertRaises(IAIndisponibleError):
+                    appeler_mistral([], {})
+        reponse = mock.Mock(status_code=200)
+        reponse.json.return_value = {"choices": []}
+        post.return_value = reponse
+        with self.assertRaises(IAIndisponibleError):
+            appeler_mistral([], {})
+        post.side_effect = requests.ConnectionError
+        with self.assertRaises(IAIndisponibleError):
+            appeler_mistral([], {})
+        post.side_effect = requests.ReadTimeout
+        with self.assertRaises(DelaiDepasseError):
+            appeler_mistral([], {})
+
+
+class SchemaTests(SimpleTestCase):
+    """Schéma compatible avec le mode strict des sorties structurées."""
+
+    def test_tous_les_champs_obligatoires(self):
+        """Chaque objet liste tous ses champs et refuse les champs en plus."""
+        question = schema_reponse(TYPES, 3)["properties"]["questions"]["items"]
+        self.assertEqual(set(question["required"]), set(question["properties"]))
+        self.assertFalse(question["additionalProperties"])
+
+
+@mock.patch("generation.ollama.requests.post")
+class MesureGenerationTests(SimpleTestCase):
+    """Commande mesure_generation (avec un faux Ollama)."""
+
+    def test_tableau_des_mesures(self, post):
+        """Une ligne par modèle, avec le nombre de générations valides."""
+        valide = reponse_ollama([qcm(), vrai_faux(), ouverte(), qcm(), qcm(1)])
+        post.side_effect = [valide, valide, requests.ConnectionError, requests.Timeout]
+        sortie = StringIO()
+        call_command(
+            "mesure_generation", "modele-a", "modele-b", essais=1, stdout=sortie
+        )
+        texte = sortie.getvalue()
+        self.assertIn("| modele-a |", texte)
+        self.assertIn("2/2 |", texte)
+        self.assertIn("modele-b : erreur : Le service d'IA ne répond pas.", texte)
+        self.assertIn(
+            "modele-b : erreur : La génération a dépassé le délai maximum.", texte
+        )
+        self.assertIn("0/2 |", texte)
+        self.assertEqual(
+            [appel.kwargs["json"]["model"] for appel in post.call_args_list],
+            ["modele-a", "modele-a", "modele-b", "modele-b"],
+        )

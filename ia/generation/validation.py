@@ -7,6 +7,7 @@ avant de l'enregistrer.
 """
 
 import json
+import re
 
 DIFFICULTES = ("facile", "moyen", "difficile")
 TYPES_QUESTION = ("qcm", "vrai_faux", "ouverte")
@@ -66,23 +67,40 @@ def _texte(valeur, maximum, champ, numero):
 
 
 def _choix(question, numero):
-    """Liste des choix (texte nettoyé et booléen), ou erreur si mal formés."""
+    """Liste des textes des choix, nettoyés, ou erreur si mal formés."""
     choix = question.get("choix")
     if not isinstance(choix, list):
         raise ReponseInvalideError(f"Question {numero} : choix manquants.")
-    resultat = []
-    for element in choix:
-        if not isinstance(element, dict) or not isinstance(
-            element.get("est_correct"), bool
-        ):
-            raise ReponseInvalideError(f"Question {numero} : choix mal formé.")
-        texte = _texte(element.get("texte"), TEXTE_MAX, "choix", numero)
-        resultat.append({"texte": texte, "est_correct": element["est_correct"]})
-    return resultat
+    return [_texte(element, TEXTE_MAX, "choix", numero) for element in choix]
+
+
+def _bonne_reponse(question, numero, nb_choix):
+    """Numéro de la bonne réponse (0 = premier choix), ou erreur s'il est invalide."""
+    bonne = question.get("bonne_reponse")
+    if (
+        not isinstance(bonne, int)
+        or isinstance(bonne, bool)
+        or not (0 <= bonne < nb_choix)
+    ):
+        raise ReponseInvalideError(
+            f"Question {numero} : numéro de bonne réponse invalide."
+        )
+    return bonne
+
+
+def _mots(texte):
+    """Ensemble des mots d'un texte, sans tenir compte de l'ordre ni de la casse."""
+    return frozenset(re.findall(r"\w+", texte.lower()))
 
 
 def _question(question, numero, types):
-    """Contrôle et met en forme une question selon son type."""
+    """Contrôle une question et la convertit au format de l'application.
+
+    Le modèle donne les choix sous forme de textes et le numéro de la bonne
+    réponse : une seule bonne réponse est ainsi imposée par la structure. Le
+    microservice renvoie ensuite le format de l'application (liste de choix
+    avec « est_correct »).
+    """
     if not isinstance(question, dict):
         raise ReponseInvalideError(f"Question {numero} : format invalide.")
     type_question = question.get("type_question")
@@ -107,24 +125,26 @@ def _question(question, numero, types):
         return propre
 
     choix = _choix(question, numero)
-    if sum(c["est_correct"] for c in choix) != 1:
-        raise ReponseInvalideError(
-            f"Question {numero} : il faut exactement une bonne réponse."
-        )
     if type_question == "qcm":
         if len(choix) != CHOIX_QCM:
             raise ReponseInvalideError(
                 f"Question {numero} : un QCM propose {CHOIX_QCM} choix."
             )
-        propre["choix"] = choix
-    else:  # vrai/faux : libellés remis dans la forme attendue
-        if sorted(c["texte"].lower() for c in choix) != ["faux", "vrai"]:
+        # Choix en double, même écrits dans un autre ordre (« A et B » / « B et A »)
+        if len({_mots(texte) for texte in choix}) != len(choix):
+            raise ReponseInvalideError(f"Question {numero} : choix en double.")
+        bonne = _bonne_reponse(question, numero, len(choix))
+        propre["choix"] = [
+            {"texte": texte, "est_correct": rang == bonne}
+            for rang, texte in enumerate(choix)
+        ]
+    else:  # vrai/faux : libellés remis dans la forme attendue (« vrai. » → « Vrai »)
+        libelles = [" ".join(sorted(_mots(texte))) for texte in choix]
+        if sorted(libelles) != ["faux", "vrai"]:
             raise ReponseInvalideError(
                 f"Question {numero} : un vrai/faux propose « Vrai » et « Faux »."
             )
-        vrai_correct = next(c for c in choix if c["texte"].lower() == "vrai")[
-            "est_correct"
-        ]
+        vrai_correct = libelles[_bonne_reponse(question, numero, 2)] == "vrai"
         propre["choix"] = [
             {"texte": "Vrai", "est_correct": vrai_correct},
             {"texte": "Faux", "est_correct": not vrai_correct},
