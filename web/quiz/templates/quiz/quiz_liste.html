@@ -3,7 +3,7 @@
   Maquette 6 (mes quiz) : recherche, filtres, tableau et pagination.
   Les filtres passent par l'URL (GET) : une recherche peut être mise en favori ou partagée.
   Le bouton « Générer un quiz » mène à la page de génération (tâche 29) ;
-  les liens voir, modifier et supprimer viendront avec leurs pages (tâches 30 à 31.2).
+  le titre mène au détail (tâche 30) ; modifier et supprimer viendront avec leurs pages (31.1 et 31.2).
 {% endcomment %}
 
 {% block titre %}Mes quiz{% endblock %}
@@ -56,7 +56,7 @@
         <tbody>
           {% for quiz in quiz_liste %}
             <tr>
-              <td><span class="t">{{ quiz.titre }}</span></td>
+              <td><a class="t" href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a></td>
               <td data-l="Leçon">{{ quiz.lecon_titre }}</td>
               <td data-l="Questions">{{ quiz.questions|length }}</td>
               <td data-l="Difficulté">{{ quiz.difficulte|capfirst }}</td>

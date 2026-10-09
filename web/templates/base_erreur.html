@@ -1,0 +1,17 @@
+{% extends "base_connexion.html" %}
+{% comment %}
+  Pages d'erreur (404, 403, 500, formulaire expiré) : logo, carte centrée, message
+  clair et lien de retour. Aucun code ni détail technique n'est montré à l'utilisateur.
+  Mise en page autonome (celle de la connexion) : elle ne dépend ni de la session
+  ni de la base de données, pour fonctionner même en cas de panne (page 500).
+{% endcomment %}
+
+{% block titre %}{% block titre_erreur %}{% endblock %}{% endblock %}
+
+{% block contenu %}
+  <div class="carte page-erreur">
+    <h1>{% block titre_page %}{% endblock %}</h1>
+    <p class="muted">{% block message %}{% endblock %}</p>
+    <a class="btn btn-primaire btn-bloc" href="/">Retour à l'accueil</a>
+  </div>
+{% endblock %}

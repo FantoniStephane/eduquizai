@@ -1885,3 +1885,23 @@ td a.t:hover {
   margin-top: 12px;
   padding-left: 18px;
 }
+
+/* Détail d'un quiz : carte des questions sans marge, la zone défilante porte la marge */
+.carte-questions {
+  padding: 0;
+}
+.carte-questions .zone-defilante {
+  padding: 16px;
+}
+.titre-recap {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+/* Pages d'erreur : texte centré dans la carte */
+.page-erreur {
+  text-align: center;
+}
+.page-erreur .muted {
+  margin: 8px 0 20px;
+}

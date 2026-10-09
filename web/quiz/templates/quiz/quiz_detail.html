@@ -1,0 +1,94 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 8 (détail d'un quiz). Les textes viennent de l'IA : Django les échappe,
+  aucun n'est marqué comme sûr. Modifier, supprimer, exporter et valider sont
+  désactivés jusqu'à leurs tâches (31.1, 31.2, export, 31).
+{% endcomment %}
+
+{% block titre %}{% if quiz %}{{ quiz.titre }}{% else %}Quiz{% endif %}{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  {% if mongo_indisponible %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li aria-current="page">Quiz</li>
+      </ol>
+    </nav>
+    <div class="alerte-erreur" role="alert">Ce quiz est momentanément indisponible. Réessayez dans quelques instants.</div>
+  {% else %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li aria-current="page">{{ quiz.titre }}</li>
+      </ol>
+    </nav>
+    <div class="titre-page">
+      <div>
+        <h1>{{ quiz.titre }}</h1>
+        <div class="meta">
+          {% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}
+          {% if lecon %}
+            <span class="badge badge-type">{{ lecon.get_matiere_display }}</span>
+            <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
+          {% endif %}
+          <span class="badge badge-type">{{ quiz.difficulte|capfirst }}</span>
+          <span class="muted">Généré le {{ quiz.date_creation|date:"d/m/Y" }}{% if lecon %} à partir de la leçon <a href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a>{% endif %}</span>
+        </div>
+      </div>
+      <div class="boutons">
+        <button class="btn btn-modifier" type="button" disabled title="Disponible prochainement">Modifier</button>
+        <button class="btn btn-danger" type="button" disabled title="Disponible prochainement">Supprimer</button>
+        <button class="btn btn-secondaire" type="button" disabled title="Disponible prochainement">⭳ Exporter</button>
+        <button class="btn btn-succes" type="button" disabled title="Disponible prochainement">✓ Valider le quiz</button>
+      </div>
+    </div>
+
+    <div class="grille-detail">
+      <section class="carte carte-questions" aria-labelledby="t-questions">
+        <h2 id="t-questions" class="sr">Questions du quiz</h2>
+        <div class="zone-defilante" tabindex="0" aria-label="Questions du quiz">
+          {% for question in quiz.questions %}
+            <article class="question" aria-labelledby="q{{ forloop.counter }}">
+              <div class="question-tete">
+                <span class="num" aria-hidden="true">{{ forloop.counter }}</span>
+                <span class="badge badge-type">{% if question.type_question == "qcm" %}QCM{% elif question.type_question == "vrai_faux" %}Vrai / Faux{% else %}Question ouverte{% endif %}</span>
+              </div>
+              <h3 id="q{{ forloop.counter }}"><span class="sr">Question {{ forloop.counter }} : </span>{{ question.texte }}</h3>
+              {% if question.type_question == "ouverte" %}
+                <p class="reponse-attendue"><strong>Réponse attendue :</strong> {{ question.reponse_attendue }}</p>
+              {% else %}
+                <ul class="choix">
+                  {% for choix in question.choix %}
+                    {% if choix.est_correct %}
+                      <li class="correct"><span>{{ choix.texte }}</span><span class="etiq">✓ Bonne réponse</span></li>
+                    {% else %}
+                      <li>{{ choix.texte }}</li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {% if question.explication %}
+                <p class="explication"><strong>Explication :</strong> {{ question.explication }}</p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="carte recap" aria-labelledby="t-recap">
+        <h2 id="t-recap" class="titre-recap">Récapitulatif</h2>
+        <dl>
+          <dt>Questions</dt><dd>{{ recap.total }}</dd>
+          <dt>QCM</dt><dd>{{ recap.qcm }}</dd>
+          <dt>Vrai / Faux</dt><dd>{{ recap.vrai_faux }}</dd>
+          <dt>Questions ouvertes</dt><dd>{{ recap.ouverte }}</dd>
+        </dl>
+        {% if quiz.statut != "valide" %}
+          <p class="alerte-info" role="note"><strong>À relire avant validation.</strong> Ce quiz a été généré par une IA : vérifiez l'exactitude des questions et des réponses. Une fois validé, il pourra être utilisé avec vos élèves.</p>
+        {% endif %}
+      </aside>
+    </div>
+  {% endif %}
+{% endblock %}

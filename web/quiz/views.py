@@ -6,10 +6,10 @@ import re
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
-from django.views.generic import FormView, ListView
+from django.views.generic import FormView, ListView, TemplateView
 from pymongo.errors import PyMongoError
 
 from lecons.models import Lecon
@@ -233,3 +233,46 @@ class QuizGenerationView(FormView):
         contexte["erreur_ia"] = kwargs.get("erreur_ia", "")
         contexte["ia_locale"] = settings.IA["FOURNISSEUR"] == "ollama"
         return contexte
+
+
+class QuizDetailView(TemplateView):
+    """Détail d'un quiz : questions, bonnes réponses, explications (maquette 08).
+
+    Le quiz est cherché uniquement parmi ceux de l'utilisateur connecté : un
+    identifiant d'un autre enseignant, invalide ou inconnu donne la même erreur
+    404 (faille IDOR). La leçon source est elle aussi limitée à son propriétaire.
+    """
+
+    template_name = "quiz/quiz_detail.html"
+
+    def get_context_data(self, **kwargs):
+        """Quiz, leçon d'origine et récapitulatif par type de question."""
+        contexte = super().get_context_data(**kwargs)
+        try:
+            quiz = QuizRepository().obtenir(kwargs["id_quiz"], self.request.user.pk)
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : détail d'un quiz")
+            contexte["mongo_indisponible"] = True
+            return contexte
+        if quiz is None:
+            raise Http404("Quiz introuvable")
+        types = [question["type_question"] for question in quiz["questions"]]
+        contexte.update(
+            quiz=quiz,
+            lecon=Lecon.objects.filter(
+                utilisateur=self.request.user, pk=quiz["id_lecon"]
+            ).first(),
+            recap={
+                "total": len(types),
+                "qcm": types.count("qcm"),
+                "vrai_faux": types.count("vrai_faux"),
+                "ouverte": types.count("ouverte"),
+            },
+        )
+        return contexte
+
+    def render_to_response(self, context, **kwargs):
+        """Répond 503 quand MongoDB ne répond pas (page avec message)."""
+        if context.get("mongo_indisponible"):
+            kwargs["status"] = 503
+        return super().render_to_response(context, **kwargs)
