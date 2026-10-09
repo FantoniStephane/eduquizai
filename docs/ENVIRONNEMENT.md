@@ -90,3 +90,11 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
 Après l'ajout ou le changement du secret : `docker compose up -d --force-recreate web ia`. Tests : `docker compose exec ia python manage.py test` et `docker compose exec web python manage.py test quiz`.
+
+## Génération d'un quiz depuis l'application web (tâche 29)
+
+- Page : `/quiz/generer/` (bouton « Générer un quiz » de la liste). L'appel au service `ia` est synchrone.
+- `IA_DELAI` (défaut 130 s) : attente maximale côté web, à garder supérieure au délai du modèle (60 s) pour laisser place à la nouvelle tentative.
+- `IA_FOURNISSEUR` est aussi lu par le web, uniquement pour l'encart d'information (« IA locale » ou API Mistral).
+- Le paquet `requests` est installé dans l'image `web` : après changement de `requirements.txt`, `docker compose up -d --build web`.
+- Annulation : retenue dans le cache en mémoire de Django (un seul processus en développement).
