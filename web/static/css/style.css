@@ -139,6 +139,12 @@ h2 {
   text-decoration: none;
 }
 
+/* Bouton désactivé : action pas encore disponible */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Variantes de couleur (toujours en couleur pleine) */
 .btn-primaire {
   background: var(--primaire);

@@ -1,0 +1,89 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 6 (mes quiz) : recherche, filtres, tableau et pagination.
+  Les filtres passent par l'URL (GET) : une recherche peut être mise en favori ou partagée.
+  Le bouton « Générer un quiz » est désactivé jusqu'à la page de génération (tâche 29) ;
+  les liens voir, modifier et supprimer viendront avec leurs pages (tâches 30 à 31.2).
+{% endcomment %}
+
+{% block titre %}Mes quiz{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  <div class="titre-page">
+    <div>
+      <h1>Mes quiz</h1>
+      <p class="muted">{{ paginator.count }} quiz · {{ nb_a_valider }} à valider</p>
+    </div>
+    <button class="btn btn-primaire" type="button" disabled title="Disponible prochainement">✦ Générer un quiz</button>
+  </div>
+
+  {% if mongo_indisponible %}
+    <div class="alerte-erreur" role="alert">Vos quiz sont momentanément indisponibles. Réessayez dans quelques instants.</div>
+  {% endif %}
+
+  <form class="filtres" role="search" method="get">
+    <div class="champ recherche">
+      <label for="q">Rechercher</label>
+      <input id="q" name="q" type="search" maxlength="100" placeholder="Titre du quiz…" value="{{ filtres.q.value|default:'' }}">
+    </div>
+    <div class="champ">
+      <label for="lecon">Leçon</label>
+      <select id="lecon" name="lecon">
+        {% for valeur, libelle in filtres.lecon.field.choices %}
+          <option value="{{ valeur }}"{% if filtres.lecon.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="champ">
+      <label for="statut">Statut</label>
+      <select id="statut" name="statut">
+        {% for valeur, libelle in filtres.statut.field.choices %}
+          <option value="{{ valeur }}"{% if filtres.statut.value == valeur %} selected{% endif %}>{{ libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-secondaire" type="submit">Filtrer</button>
+  </form>
+
+  {% if quiz_liste %}
+    <div class="carte tableau-carte">
+      <table>
+        <caption class="sr">Liste de mes quiz</caption>
+        <thead>
+          <tr><th scope="col">Titre</th><th scope="col">Leçon</th><th scope="col">Questions</th><th scope="col">Difficulté</th><th scope="col">Statut</th><th scope="col">Généré le</th></tr>
+        </thead>
+        <tbody>
+          {% for quiz in quiz_liste %}
+            <tr>
+              <td><span class="t">{{ quiz.titre }}</span></td>
+              <td data-l="Leçon">{{ quiz.lecon_titre }}</td>
+              <td data-l="Questions">{{ quiz.questions|length }}</td>
+              <td data-l="Difficulté">{{ quiz.difficulte|capfirst }}</td>
+              <td data-l="Statut">{% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}</td>
+              <td data-l="Généré le">{{ quiz.date_creation|date:"d/m/Y" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <p class="muted">Quiz {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ paginator.count }}</p>
+      {% if is_paginated %}
+        <nav aria-label="Pagination">
+          {% if page_obj.has_previous %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Page précédente">‹</a>{% endif %}
+          {% for numero in paginator.page_range %}
+            {% if numero == page_obj.number %}<span class="cur" aria-current="page">{{ numero }}</span>{% else %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ numero }}" aria-label="Page {{ numero }}">{{ numero }}</a>{% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}<a href="?{% if parametres %}{{ parametres }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Page suivante">›</a>{% endif %}
+        </nav>
+      {% endif %}
+    </div>
+  {% elif mongo_indisponible %}
+  {% elif filtre_actif %}
+    <div class="carte"><p class="muted">Aucun quiz ne correspond à votre recherche. <a href="{% url 'quiz:liste' %}">Afficher tous mes quiz</a></p></div>
+  {% else %}
+    <div class="carte"><p class="muted">Vous n'avez pas encore de quiz. Ils apparaîtront ici dès que vous en aurez généré à partir d'une leçon.</p></div>
+  {% endif %}
+{% endblock %}

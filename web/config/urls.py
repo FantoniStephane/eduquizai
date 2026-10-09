@@ -24,5 +24,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("comptes/", include("comptes.urls")),
     path("lecons/", include("lecons.urls")),
+    path("quiz/", include("quiz.urls")),
     path("", TableauDeBordView.as_view(), name="tableau_de_bord"),
 ]
