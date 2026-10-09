@@ -6,3 +6,7 @@ class QuizConfig(AppConfig):
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "quiz"
+
+    def ready(self):
+        """Branche les signaux (suppression des quiz d'un compte supprimé)."""
+        from . import signals  # noqa: F401

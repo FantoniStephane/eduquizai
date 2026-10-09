@@ -6,6 +6,7 @@ services:
     env_file: .env
     environment:
       POSTGRES_HOST: postgres      # dans Docker, on joint la base par le nom de son service
+      MONGO_HOST: mongo
     volumes:
       - ./web:/app                 # le code est partagé : une modification est prise en compte sans reconstruire
     ports:

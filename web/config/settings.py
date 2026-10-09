@@ -92,6 +92,19 @@ DATABASES = {
 }
 
 
+# MongoDB : base des quiz, utilisée par le repository PyMongo de l'application quiz
+MONGO = {
+    "HOST": config("MONGO_HOST", default="127.0.0.1"),
+    "PORT": config("MONGO_PORT", default=27017, cast=int),
+    "USER": config("MONGO_INITDB_ROOT_USERNAME"),
+    "PASSWORD": config("MONGO_INITDB_ROOT_PASSWORD"),
+    "NAME": config("MONGO_DB"),
+}
+
+# Tests : bases de test PostgreSQL (Django) et MongoDB (même principe)
+TEST_RUNNER = "config.test_runner.EduQuizTestRunner"
+
+
 # Modèle utilisateur personnalisé (entité UTILISATEUR du MCD)
 AUTH_USER_MODEL = "comptes.Utilisateur"
 
