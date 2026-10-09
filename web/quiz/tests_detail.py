@@ -76,8 +76,8 @@ class QuizDetailTests(TestCase):
         self.assertNotContains(reponse, "À relire avant validation")
 
     def test_boutons_non_disponibles_desactives(self):
-        """Modifier, supprimer, exporter et valider sont désactivés pour l'instant."""
-        self.assertContains(self.client.get(self.url), "disabled", count=4)
+        """Modifier, supprimer et exporter sont désactivés pour l'instant."""
+        self.assertContains(self.client.get(self.url), "disabled", count=3)
 
     def test_quiz_d_un_autre_enseignant_introuvable(self):
         """Faille IDOR : le quiz de Paul donne une 404 chez Anne."""

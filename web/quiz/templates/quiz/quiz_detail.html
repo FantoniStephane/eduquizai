@@ -2,7 +2,9 @@
 {% comment %}
   Maquette 8 (détail d'un quiz). Les textes viennent de l'IA : Django les échappe,
   aucun n'est marqué comme sûr. Modifier, supprimer, exporter et valider sont
-  désactivés jusqu'à leurs tâches (31.1, 31.2, export, 31).
+  désactivés jusqu'à leurs tâches (31.1, 31.2, export). Valider (tâche 31) : formulaire
+  POST + CSRF ; avec JavaScript, une fenêtre de confirmation demande d'abord à
+  l'enseignant s'il a relu le quiz (sans JavaScript, la validation est directe).
 {% endcomment %}
 
 {% block titre %}{% if quiz %}{{ quiz.titre }}{% else %}Quiz{% endif %}{% endblock %}
@@ -34,14 +36,19 @@
             <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
           {% endif %}
           <span class="badge badge-type">{{ quiz.difficulte|capfirst }}</span>
-          <span class="muted">Généré le {{ quiz.date_creation|date:"d/m/Y" }}{% if lecon %} à partir de la leçon <a href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a>{% endif %}</span>
+          <span class="muted">Généré le {{ quiz.date_creation|date:"d/m/Y" }}{% if quiz.statut == "valide" and quiz.date_validation %}, validé le {{ quiz.date_validation|date:"d/m/Y" }}{% endif %}{% if lecon %} à partir de la leçon <a href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a>{% endif %}</span>
         </div>
       </div>
       <div class="boutons">
         <button class="btn btn-modifier" type="button" disabled title="Disponible prochainement">Modifier</button>
         <button class="btn btn-danger" type="button" disabled title="Disponible prochainement">Supprimer</button>
         <button class="btn btn-secondaire" type="button" disabled title="Disponible prochainement">⭳ Exporter</button>
-        <button class="btn btn-succes" type="button" disabled title="Disponible prochainement">✓ Valider le quiz</button>
+        {% if quiz.statut == "brouillon" %}
+          <form id="form-validation" method="post" action="{% url 'quiz:valider' quiz.id %}">
+            {% csrf_token %}
+            <button class="btn btn-succes" type="submit">✓ Valider le quiz</button>
+          </form>
+        {% endif %}
       </div>
     </div>
 
@@ -92,3 +99,21 @@
     </div>
   {% endif %}
 {% endblock %}
+
+{% block apres_contenu %}
+  {% if quiz and quiz.statut == "brouillon" %}
+    <div class="voile" id="voile-validation" hidden>
+      <div class="dialogue" role="alertdialog" aria-modal="true" aria-labelledby="t-valid" aria-describedby="d-valid">
+        <div class="ico-succes" aria-hidden="true">✓</div>
+        <h2 id="t-valid">Valider le quiz « {{ quiz.titre }} » ?</h2>
+        <p id="d-valid">Ce quiz a été généré par une IA. Confirmez que vous avez <strong>relu les questions et les réponses</strong> avant de le valider.</p>
+        <div class="boutons">
+          <button class="btn btn-secondaire" type="button" id="valid-annuler">Revoir le quiz</button>
+          <button class="btn btn-succes" type="button" id="valid-confirmer">Oui, je l'ai relu : valider</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}{{ block.super }}{% load static %}<script src="{% static 'js/validation.js' %}" defer></script>{% endblock %}

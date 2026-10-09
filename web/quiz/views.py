@@ -276,3 +276,33 @@ class QuizDetailView(TemplateView):
         if context.get("mongo_indisponible"):
             kwargs["status"] = 503
         return super().render_to_response(context, **kwargs)
+
+
+@require_POST
+def valider_un_quiz(request, id_quiz):
+    """Valide un quiz relu par l'enseignant (vérification humaine, CDC).
+
+    Seule la méthode POST (protégée par le jeton CSRF) change le statut : un
+    simple lien ne peut jamais valider un quiz. Le quiz est cherché parmi ceux
+    de l'enseignant connecté (404 sinon, faille IDOR).
+    """
+    repository = QuizRepository()
+    try:
+        quiz = repository.obtenir(id_quiz, request.user.pk)
+        if quiz is None:
+            raise Http404("Quiz introuvable")
+        if quiz["statut"] == "valide" or not repository.valider(
+            id_quiz, request.user.pk
+        ):
+            messages.info(request, "Ce quiz est déjà validé.")
+        else:
+            messages.success(
+                request,
+                f"Le quiz « {quiz['titre']} » a été validé. Il est prêt à servir.",
+            )
+    except PyMongoError:
+        logger.exception("MongoDB indisponible : validation d'un quiz")
+        messages.error(
+            request, "Le quiz n'a pas pu être validé. Réessayez dans quelques instants."
+        )
+    return redirect("quiz:detail", id_quiz=id_quiz)

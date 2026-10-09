@@ -7,6 +7,7 @@ from .views import (
     QuizGenerationView,
     QuizListView,
     annuler_generation,
+    valider_un_quiz,
 )
 
 app_name = "quiz"
@@ -16,4 +17,5 @@ urlpatterns = [
     path("generer/", QuizGenerationView.as_view(), name="generer"),
     path("generer/annuler/", annuler_generation, name="annuler_generation"),
     path("<str:id_quiz>/", QuizDetailView.as_view(), name="detail"),
+    path("<str:id_quiz>/valider/", valider_un_quiz, name="valider"),
 ]

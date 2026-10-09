@@ -1905,3 +1905,18 @@ td a.t:hover {
 .page-erreur .muted {
   margin: 8px 0 20px;
 }
+
+/* Fenêtre de validation d'un quiz : icône de confirmation */
+.dialogue .ico-succes {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--succes);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  font-size: 26px;
+  font-weight: 700;
+}
