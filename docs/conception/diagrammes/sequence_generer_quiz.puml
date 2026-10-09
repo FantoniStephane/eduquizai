@@ -38,13 +38,10 @@ deactivate PG
 alt Leçon inexistante ou d'un autre enseignant
   WEB --> NAV : 404 Page introuvable
 else Leçon trouvée
-  opt Aucun jeton JWT valide en cache
-    WEB -> IA : POST /api/token/ (identifiants du compte de service)
-    IA --> WEB : Jeton JWT (durée limitée)
-  end
-  WEB -> IA : POST /api/quiz/generer/\nAuthorization: Bearer <JWT>\n(contenu de la leçon + paramètres, délai maximum)
+  WEB -> WEB : Signe un jeton JWT de 2 minutes\n(secret partagé avec le service IA)
+  WEB -> IA : POST /api/generer-quiz/\nAuthorization: Bearer <JWT>\n(contenu de la leçon + paramètres, délai maximum)
   activate IA
-  IA -> IA : Vérifie le jeton JWT et les paramètres
+  IA -> IA : Vérifie le jeton JWT (signature, durée,\németteur, destinataire) et les paramètres
   IA -> IA : Construit le prompt\n(consignes + contenu de la leçon délimité)
   IA -> OLL : Demande de génération au format JSON
   activate OLL
@@ -67,7 +64,7 @@ else Leçon trouvée
     WEB --> NAV : Page « Détail du quiz » (écran 8)
     NAV --> ENS : Affiche le quiz en brouillon
   else Délai dépassé, IA indisponible ou JSON invalide
-    IA --> WEB : Erreur (401, 502 ou délai dépassé)
+    IA --> WEB : Erreur (400, 401, 502, 503 ou 504)
     WEB --> NAV : Formulaire réaffiché avec un message d'erreur\n(aucun quiz enregistré)
     NAV --> ENS : Propose de relancer la génération
   end

@@ -101,6 +101,15 @@ MONGO = {
     "NAME": config("MONGO_DB"),
 }
 
+# Microservice IA : adresse sur le réseau interne de Docker et secret partagé
+# qui sert à signer les jetons JWT (uniquement dans le fichier .env)
+IA = {
+    "URL": config("IA_URL", default="http://ia:8000"),
+    "JWT_SECRET": config("IA_JWT_SECRET"),
+    # Durée de vie d'un jeton, en secondes : juste assez pour un appel
+    "JWT_DUREE": config("IA_JWT_DUREE", default=120, cast=int),
+}
+
 # Tests : bases de test PostgreSQL (Django) et MongoDB (même principe)
 TEST_RUNNER = "config.test_runner.EduQuizTestRunner"
 

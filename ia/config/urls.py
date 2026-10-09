@@ -1,3 +1,7 @@
-"""Adresses du microservice IA : l'API de génération arrive à la tâche 28."""
+"""Adresses du microservice IA : une seule API, sous /api/."""
 
-urlpatterns = []
+from django.urls import include, path
+
+urlpatterns = [
+    path("api/", include("generation.urls")),
+]

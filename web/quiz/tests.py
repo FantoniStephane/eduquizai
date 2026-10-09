@@ -1,9 +1,12 @@
+import jwt
+from django.conf import settings
 from django.core.management import call_command
 from django.test import SimpleTestCase, TestCase
 from pymongo.errors import WriteError
 
 from comptes.models import Utilisateur
 
+from .jeton_ia import DESTINATAIRE, EMETTEUR, creer_jeton_ia
 from .mongo import get_db
 from .repository import QuizRepository
 from .schema import NOM_COLLECTION
@@ -293,3 +296,36 @@ class SuppressionCompteTests(TestCase):
             repository.collection.count_documents({"id_utilisateur": anne.pk}), 0
         )
         self.assertEqual(repository.collection.count_documents({}), 1)
+
+
+class JetonIATests(SimpleTestCase):
+    """Le jeton signé par le web doit être accepté par le service IA."""
+
+    def decoder(self, jeton, cle=None):
+        """Décode le jeton comme le fait le service IA (signature, émetteur…)."""
+        return jwt.decode(
+            jeton,
+            cle or settings.IA["JWT_SECRET"],
+            algorithms=["HS256"],
+            audience=DESTINATAIRE,
+            issuer=EMETTEUR,
+        )
+
+    def test_contenu_du_jeton(self):
+        """Les informations attendues par le service IA sont présentes."""
+        contenu = self.decoder(creer_jeton_ia(7))
+        self.assertEqual(contenu["token_type"], "access")
+        self.assertEqual(contenu["user_id"], 7)
+        self.assertEqual(contenu["exp"] - contenu["iat"], settings.IA["JWT_DUREE"])
+
+    def test_jetons_distincts(self):
+        """Chaque jeton a son propre identifiant."""
+        self.assertNotEqual(
+            self.decoder(creer_jeton_ia(7))["jti"],
+            self.decoder(creer_jeton_ia(7))["jti"],
+        )
+
+    def test_mauvais_secret_refuse(self):
+        """Un jeton ne se vérifie qu'avec le secret partagé."""
+        with self.assertRaises(jwt.InvalidSignatureError):
+            self.decoder(creer_jeton_ia(7), cle="x" * 48)

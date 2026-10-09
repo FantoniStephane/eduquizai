@@ -5,6 +5,7 @@ session, pas d'administration. Il n'est joignable que par l'application
 web, sur le réseau interne de Docker (aucun port publié).
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import Choices, Csv, config
@@ -18,6 +19,7 @@ ALLOWED_HOSTS = config("IA_ALLOWED_HOSTS", default="ia,localhost,127.0.0.1", cas
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
+    "rest_framework",
     "generation",
 ]
 
@@ -29,8 +31,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Pas de base de données pour l'instant : l'authentification de l'API
-# (tâche 28) précisera ce besoin.
+# Pas de base de données : le jeton JWT suffit à identifier l'appelant
+# (voir SIMPLE_JWT), aucun utilisateur n'est enregistré dans ce service.
 DATABASES = {}
 
 LANGUAGE_CODE = "fr-fr"
@@ -58,4 +60,27 @@ MISTRAL = {
     "CLE": config("MISTRAL_API_KEY", default=""),
     "MODELE": config("MISTRAL_MODELE", default="ministral-3b-2512"),
     "DELAI": config("MISTRAL_DELAI", default=30, cast=int),
+}
+
+# API REST : toutes les routes exigent un jeton JWT valide, rien n'est public.
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # « Stateless » : lit l'identifiant dans le jeton, sans base de données
+        "rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+}
+
+# Jetons JWT : signés par l'application web avec un secret partagé (dans le
+# fichier .env, jamais dans Git), de courte durée ; émetteur et destinataire
+# sont vérifiés pour refuser un jeton fabriqué pour un autre usage.
+SIMPLE_JWT = {
+    "SIGNING_KEY": config("IA_JWT_SECRET"),
+    "ALGORITHM": "HS256",
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "ISSUER": "eduquizai-web",
+    "AUDIENCE": "eduquizai-ia",
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=2),
 }

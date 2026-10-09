@@ -80,3 +80,13 @@ Elles sont listées dans `.vscode/extensions.json` : VS Code propose de les inst
 | Docker (`ms-azuretools.vscode-docker`) | Gestion des conteneurs |
 | MongoDB (`mongodb.mongodb-vscode`) | Exploration des quiz enregistrés |
 | GitHub Actions (`github.vscode-github-actions`) | Suivi de l'intégration continue |
+
+## API du microservice IA et jeton JWT (sprint 2)
+
+Le service `ia` n'accepte que les appels munis d'un jeton JWT signé par l'application web. Les deux conteneurs partagent un secret, `IA_JWT_SECRET`, à définir dans `.env` (32 caractères minimum, jamais dans Git) :
+
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Après l'ajout ou le changement du secret : `docker compose up -d --force-recreate web ia`. Tests : `docker compose exec ia python manage.py test` et `docker compose exec web python manage.py test quiz`.
