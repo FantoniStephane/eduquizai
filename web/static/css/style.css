@@ -1427,6 +1427,10 @@ td a.t:hover {
   z-index: 20;
 }
 
+.attente .btn {
+  margin-top: 16px;
+}
+
 .attente {
   background: #fff;
   border-radius: 14px;
@@ -1485,6 +1489,11 @@ td a.t:hover {
   color: var(--texte-2);
 }
 
+/* Écran d'attente masqué tant qu'aucune génération n'est lancée */
+.voile[hidden] {
+  display: none;
+}
+
 /* Barre de progression */
 .barre-prog {
   height: 8px;
@@ -1498,6 +1507,25 @@ td a.t:hover {
   height: 100%;
   width: 60%;
   background: var(--primaire);
+}
+/* Durée inconnue (appel synchrone) : la barre va et vient au lieu de se remplir */
+.barre-prog-indeterminee span {
+  width: 35%;
+  animation: barre-va-et-vient 1.6s ease-in-out infinite alternate;
+}
+@keyframes barre-va-et-vient {
+  from {
+    margin-left: 0;
+  }
+  to {
+    margin-left: 65%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barre-prog-indeterminee span {
+    width: 100%;
+    animation: none;
+  }
 }
 
 @media (max-width: 820px) {

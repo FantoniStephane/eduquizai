@@ -2,7 +2,7 @@
 {% comment %}
   Maquette 6 (mes quiz) : recherche, filtres, tableau et pagination.
   Les filtres passent par l'URL (GET) : une recherche peut être mise en favori ou partagée.
-  Le bouton « Générer un quiz » est désactivé jusqu'à la page de génération (tâche 29) ;
+  Le bouton « Générer un quiz » mène à la page de génération (tâche 29) ;
   les liens voir, modifier et supprimer viendront avec leurs pages (tâches 30 à 31.2).
 {% endcomment %}
 
@@ -15,7 +15,7 @@
       <h1>Mes quiz</h1>
       <p class="muted">{{ paginator.count }} quiz · {{ nb_a_valider }} à valider</p>
     </div>
-    <button class="btn btn-primaire" type="button" disabled title="Disponible prochainement">✦ Générer un quiz</button>
+    <a class="btn btn-primaire" href="{% url 'quiz:generer' %}">✦ Générer un quiz</a>
   </div>
 
   {% if mongo_indisponible %}

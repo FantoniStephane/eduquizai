@@ -108,6 +108,12 @@ IA = {
     "JWT_SECRET": config("IA_JWT_SECRET"),
     # Durée de vie d'un jeton, en secondes : juste assez pour un appel
     "JWT_DUREE": config("IA_JWT_DUREE", default=120, cast=int),
+    # Attente maximale d'une génération, en secondes : plus que le délai du
+    # modèle (60 s) pour laisser place à la nouvelle tentative du microservice
+    "DELAI": config("IA_DELAI", default=130, cast=int),
+    # « ollama » (modèle local) ou « mistral » (API externe) : choisi pour le
+    # microservice, repris ici pour informer l'enseignant
+    "FOURNISSEUR": config("IA_FOURNISSEUR", default="ollama"),
 }
 
 # Tests : bases de test PostgreSQL (Django) et MongoDB (même principe)

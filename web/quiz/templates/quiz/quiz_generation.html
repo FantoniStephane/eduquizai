@@ -1,0 +1,143 @@
+{% extends "base_connecte.html" %}
+{% load static %}
+{% comment %}
+  Maquettes 7 (paramètres de génération) et 7b (écran d'attente).
+  Fonctionne sans JavaScript : le formulaire est envoyé en POST et la page se recharge
+  quand l'IA a répondu. Le script ajoute les boutons − / +, l'aperçu de la leçon et
+  l'écran d'attente. Chaque champ en erreur est relié à son message (RGAA 4.1).
+{% endcomment %}
+
+{% block titre %}Générer un quiz{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+      <li aria-current="page">Générer un quiz</li>
+    </ol>
+  </nav>
+  <div class="titre-page">
+    <div>
+      <h1>Générer un quiz</h1>
+      <p class="muted">Les champs marqués d'un <span class="obligatoire">*</span> sont obligatoires.</p>
+    </div>
+  </div>
+
+  {% if erreur_ia %}
+    <div class="alerte-erreur" role="alert">{{ erreur_ia }}</div>
+  {% endif %}
+  {% if form.errors %}
+    <div class="alerte-erreur alerte-serree" role="alert">
+      Le formulaire contient {{ form.errors|length }} erreur{{ form.errors|length|pluralize }}.
+      Corrigez {{ form.errors|length|pluralize:"le champ indiqué,les champs indiqués" }} ci-dessous.
+    </div>
+  {% endif %}
+
+  <div class="grille-gen">
+    <form class="carte form-carte" id="form-generation" method="post" novalidate data-url-annuler="{% url 'quiz:annuler_generation' %}">
+      {% csrf_token %}
+      <input type="hidden" name="id_generation" id="id-generation" value="">
+      <div class="champ">
+        <label for="lecon">Leçon <span class="obligatoire" aria-hidden="true">*</span></label>
+        <select id="lecon" name="lecon" required{% if form.lecon.errors %} aria-invalid="true" aria-describedby="err-lecon"{% endif %}>
+          <option value="">Choisir une leçon…</option>
+          {% for lecon in lecons %}
+            <option value="{{ lecon.pk }}"{% if selection.pk == lecon.pk %} selected{% endif %}>{{ lecon.titre }}</option>
+          {% endfor %}
+        </select>
+        {% for erreur in form.lecon.errors %}<p class="msg-erreur" id="err-lecon">⚠ {{ erreur }}</p>{% endfor %}
+        {% if not lecons %}<p class="aide">Vous n'avez pas encore de leçon. <a href="{% url 'lecons:creer' %}">Créer une leçon</a></p>{% endif %}
+      </div>
+
+      <div class="champ">
+        <label for="titre">Titre du quiz <span class="obligatoire" aria-hidden="true">*</span></label>
+        <input id="titre" name="titre" maxlength="100" required value="{{ form.titre.value|default:'' }}"{% if form.titre.errors %} aria-invalid="true" aria-describedby="err-titre"{% endif %}>
+        {% for erreur in form.titre.errors %}<p class="msg-erreur" id="err-titre">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+
+      <fieldset class="champ">
+        <legend>Difficulté <span class="obligatoire" aria-hidden="true">*</span></legend>
+        <div class="choix-segment">
+          <input type="radio" id="diff-facile" name="difficulte" value="facile"{% if difficulte_choisie == "facile" %} checked{% endif %}><label for="diff-facile">Facile</label>
+          <input type="radio" id="diff-moyen" name="difficulte" value="moyen"{% if difficulte_choisie == "moyen" %} checked{% endif %}><label for="diff-moyen">Moyen</label>
+          <input type="radio" id="diff-difficile" name="difficulte" value="difficile"{% if difficulte_choisie == "difficile" %} checked{% endif %}><label for="diff-difficile">Difficile</label>
+        </div>
+        {% for erreur in form.difficulte.errors %}<p class="msg-erreur">⚠ {{ erreur }}</p>{% endfor %}
+      </fieldset>
+
+      <fieldset class="champ">
+        <legend>Types de questions <span class="obligatoire" aria-hidden="true">*</span></legend>
+        <div class="choix-cases">
+          <input type="checkbox" id="type-qcm" name="types" value="qcm"{% if "qcm" in types_choisis %} checked{% endif %}><label for="type-qcm">QCM <small>4 propositions</small></label>
+          <input type="checkbox" id="type-vf" name="types" value="vrai_faux"{% if "vrai_faux" in types_choisis %} checked{% endif %}><label for="type-vf">Vrai / Faux <small>2 propositions</small></label>
+          <input type="checkbox" id="type-ouverte" name="types" value="ouverte"{% if "ouverte" in types_choisis %} checked{% endif %}><label for="type-ouverte">Question ouverte <small>réponse attendue</small></label>
+        </div>
+        {% for erreur in form.types.errors %}<p class="msg-erreur" id="err-types">⚠ {{ erreur }}</p>{% endfor %}
+      </fieldset>
+
+      <div class="champ">
+        <label for="nombre">Nombre de questions <span class="obligatoire" aria-hidden="true">*</span></label>
+        <div class="nombre">
+          <button class="btn btn-secondaire" type="button" data-pas="-1" aria-label="Une question de moins" hidden>−</button>
+          <input id="nombre" name="nombre" type="number" min="3" max="20" required value="{{ form.nombre.value|default:'' }}"{% if form.nombre.errors %} aria-invalid="true" aria-describedby="aide-nombre err-nombre"{% else %} aria-describedby="aide-nombre"{% endif %}>
+          <button class="btn btn-secondaire" type="button" data-pas="1" aria-label="Une question de plus" hidden>+</button>
+        </div>
+        <p class="aide" id="aide-nombre">Entre 3 et 20 questions.</p>
+        {% for erreur in form.nombre.errors %}<p class="msg-erreur" id="err-nombre">⚠ {{ erreur }}</p>{% endfor %}
+      </div>
+
+      <div class="actions-form">
+        <a class="btn btn-secondaire" href="{% url 'quiz:liste' %}">Annuler</a>
+        <button class="btn btn-primaire" type="submit" id="bouton-generer">Lancer la génération</button>
+      </div>
+    </form>
+
+    <aside aria-label="Aide à la génération">
+      <section class="carte" aria-labelledby="t-selection" aria-live="polite">
+        <div class="carte-titre"><h2 id="t-selection">Leçon sélectionnée</h2></div>
+        <div id="apercu-lecon">
+          {% if selection %}
+            <p><strong>{{ selection.titre }}</strong></p>
+            <p class="muted">{{ selection.matiere }} · {{ selection.niveau }} · {{ selection.nb_car }} caractères</p>
+            <p class="apercu">{{ selection.apercu }}</p>
+          {% else %}
+            <p class="muted">Choisissez une leçon pour en voir un aperçu.</p>
+          {% endif %}
+        </div>
+      </section>
+      <section class="encart-ia" aria-labelledby="t-ia">
+        <h2 id="t-ia">✦ À savoir</h2>
+        <ul>
+          {% if ia_locale %}
+            <li>L'IA tourne en local : le contenu de vos leçons ne quitte pas votre serveur.</li>
+          {% else %}
+            <li>Le texte de la leçon est envoyé à l'API Mistral, hébergée en Europe.</li>
+          {% endif %}
+          <li>Le quiz est créé en brouillon : relisez-le avant de le valider.</li>
+          <li>La génération peut prendre une à deux minutes.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+
+  <div class="voile" id="voile-attente" role="dialog" aria-modal="true" aria-labelledby="t-attente" hidden>
+    <div class="attente">
+      <div class="spinner" aria-hidden="true"></div>
+      <h2 id="t-attente">Génération du quiz en cours…</h2>
+      <p class="muted">Cela peut prendre une à deux minutes. Ne fermez pas cette page.</p>
+      <div class="barre-prog barre-prog-indeterminee" aria-hidden="true"><span></span></div>
+      <ul class="etapes">
+        <li class="encours">Lecture de la leçon et envoi à l'IA</li>
+        <li class="attend">Rédaction des questions</li>
+        <li class="attend">Vérification et enregistrement du brouillon</li>
+      </ul>
+      <button class="btn btn-secondaire" type="button" id="bouton-annuler">Annuler</button>
+      <p class="aide" id="aide-annuler" hidden>Si vous annulez, aucun quiz ne sera enregistré.</p>
+    </div>
+  </div>
+
+  {{ lecons|json_script:"donnees-lecons" }}
+{% endblock %}
+
+{% block scripts %}{{ block.super }}<script src="{% static 'js/generation.js' %}" defer></script>{% endblock %}

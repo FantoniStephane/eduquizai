@@ -1,14 +1,57 @@
 """Vues des quiz : liste (tâche 28.5), puis génération et détail (tâches 29 à 31)."""
 
 import logging
+import re
 
-from django.views.generic import ListView
+from django.conf import settings
+from django.contrib import messages
+from django.core.cache import cache
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+from django.views.generic import FormView, ListView
 from pymongo.errors import PyMongoError
 
 from lecons.models import Lecon
 
-from .forms import QuizFiltreForm
+from .client_ia import GenerationIAError, generer_questions
+from .forms import (
+    TYPES_QUESTION,
+    QuizAnnulationForm,
+    QuizFiltreForm,
+    QuizGenerationForm,
+)
 from .repository import QuizRepository
+from .validation import QuizInvalideError
+
+LONGUEUR_APERCU = 260
+# Durée pendant laquelle une annulation est retenue (secondes) : plus que l'attente
+# maximale d'une génération
+DUREE_ANNULATION = 600
+
+
+def _cle_annulation(id_utilisateur, id_generation):
+    """Clé de cache d'une génération annulée (propre à l'enseignant)."""
+    return f"generation-annulee:{id_utilisateur}:{id_generation}"
+
+
+@require_POST
+def annuler_generation(request):
+    """Note qu'une génération est annulée : son quiz ne sera pas enregistré.
+
+    L'enseignant ne peut annuler que ses propres générations : l'identifiant
+    est rattaché à son compte dans la clé.
+    """
+    form = QuizAnnulationForm(request.POST)
+    if not form.is_valid():
+        return HttpResponse(status=400)
+    cache.set(
+        _cle_annulation(request.user.pk, form.cleaned_data["id_generation"]),
+        True,
+        DUREE_ANNULATION,
+    )
+    return HttpResponse(status=204)
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,4 +111,125 @@ class QuizListView(ListView):
             1 for quiz in self.object_list if quiz["statut"] == "brouillon"
         )
         contexte["mongo_indisponible"] = self.mongo_indisponible
+        return contexte
+
+
+def _apercu(texte):
+    """Début de la leçon en texte brut (sans les marques Markdown)."""
+    brut = re.sub(r"[#*_`>\-]+", " ", texte or "")
+    brut = re.sub(r"\s+", " ", brut).strip()
+    if len(brut) > LONGUEUR_APERCU:
+        return brut[:LONGUEUR_APERCU].rstrip() + "…"
+    return brut
+
+
+class QuizGenerationView(FormView):
+    """Génération d'un quiz par l'IA à partir d'une leçon (maquettes 07 et 07b).
+
+    L'appel au microservice IA est synchrone : la page affiche un écran d'attente
+    pendant la requête. Le quiz créé est un brouillon, à relire avant validation.
+    """
+
+    template_name = "quiz/quiz_generation.html"
+    form_class = QuizGenerationForm
+
+    def get_form_kwargs(self):
+        """Limite le choix des leçons à celles de l'enseignant connecté."""
+        kwargs = super().get_form_kwargs()
+        kwargs["utilisateur"] = self.request.user
+        return kwargs
+
+    def get_initial(self):
+        """Présélectionne la leçon de ?lecon=<id> si elle appartient à l'enseignant."""
+        initial = super().get_initial()
+        identifiant = self.request.GET.get("lecon", "")
+        if identifiant.isdigit():
+            lecon = Lecon.objects.filter(
+                utilisateur=self.request.user, pk=int(identifiant)
+            ).first()
+            if lecon:
+                initial["lecon"] = lecon.pk
+                initial["titre"] = f"Quiz — {lecon.titre}"[:100]
+        return initial
+
+    def form_valid(self, form):
+        """Appelle l'IA, enregistre le quiz en brouillon puis revient à la liste."""
+        donnees = form.cleaned_data
+        lecon = donnees["lecon"]
+        # Types dans l'ordre de l'interface, pas dans celui de la requête
+        types = [code for code, _ in TYPES_QUESTION if code in donnees["types"]]
+        try:
+            questions = generer_questions(
+                self.request.user.pk,
+                lecon.contenu,
+                donnees["difficulte"],
+                types,
+                donnees["nombre"],
+            )
+            if self._annulee(donnees["id_generation"]):
+                return self._echec(form, "Génération annulée : aucun quiz enregistré.")
+            QuizRepository().creer(
+                id_utilisateur=self.request.user.pk,
+                id_lecon=lecon.pk,
+                titre=donnees["titre"],
+                difficulte=donnees["difficulte"],
+                questions=questions,
+            )
+        except GenerationIAError as erreur:
+            return self._echec(form, str(erreur))
+        except QuizInvalideError:
+            logger.exception("Quiz généré refusé par la validation")
+            return self._echec(
+                form, "Le quiz généré n'est pas utilisable. Relancez la génération."
+            )
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : enregistrement du quiz")
+            return self._echec(
+                form,
+                "Le quiz n'a pas pu être enregistré. Réessayez dans quelques instants.",
+            )
+        messages.success(
+            self.request,
+            f"Le quiz « {donnees['titre']} » a été généré en brouillon. "
+            "Relisez-le avant de le valider.",
+        )
+        return redirect("quiz:liste")
+
+    def _annulee(self, id_generation):
+        """Vrai si l'enseignant a annulé cette génération pendant l'attente."""
+        return bool(
+            id_generation
+            and cache.get(_cle_annulation(self.request.user.pk, id_generation))
+        )
+
+    def _echec(self, form, message):
+        """Réaffiche le formulaire avec son contenu et le message d'erreur."""
+        return self.render_to_response(
+            self.get_context_data(form=form, erreur_ia=message)
+        )
+
+    def get_context_data(self, **kwargs):
+        """Ajoute les leçons (pour l'aperçu), la sélection et l'état de l'IA."""
+        contexte = super().get_context_data(**kwargs)
+        form = contexte["form"]
+        lecons = [
+            {
+                "pk": lecon.pk,
+                "titre": lecon.titre,
+                "matiere": lecon.get_matiere_display(),
+                "niveau": lecon.get_niveau_scolaire_display(),
+                "nb_car": len(lecon.contenu),
+                "apercu": _apercu(lecon.contenu),
+            }
+            for lecon in form.fields["lecon"].queryset
+        ]
+        choisie = str(form["lecon"].value() or "")
+        contexte["lecons"] = lecons
+        contexte["selection"] = next(
+            (lecon for lecon in lecons if str(lecon["pk"]) == choisie), None
+        )
+        contexte["types_choisis"] = [str(t) for t in (form["types"].value() or [])]
+        contexte["difficulte_choisie"] = form["difficulte"].value()
+        contexte["erreur_ia"] = kwargs.get("erreur_ia", "")
+        contexte["ia_locale"] = settings.IA["FOURNISSEUR"] == "ollama"
         return contexte

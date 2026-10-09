@@ -145,11 +145,12 @@ class QuizListeTests(TestCase):
         reponse = self.client.get(self.url, {"q": "Fractions"})
         self.assertContains(reponse, "?q=Fractions&amp;page=2")
 
-    def test_bouton_generer_desactive(self):
-        """Le bouton est visible mais désactivé jusqu'à la tâche 29."""
+    def test_bouton_generer_mene_a_la_generation(self):
+        """Le bouton « Générer un quiz » est un lien vers la page de génération."""
         reponse = self.client.get(self.url)
-        self.assertContains(reponse, "✦ Générer un quiz")
-        self.assertContains(reponse, "disabled")
+        self.assertContains(
+            reponse, f'href="{reverse("quiz:generer")}">✦ Générer un quiz'
+        )
 
     def test_mongodb_indisponible(self):
         """Sans MongoDB, la page répond avec un message, pas une erreur 500."""
