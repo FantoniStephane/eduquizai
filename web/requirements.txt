@@ -7,3 +7,4 @@ markdownify>=1.2
 pymongo>=4.10
 PyJWT>=2.9
 requests>=2.32
+mammoth>=1.8

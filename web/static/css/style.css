@@ -1848,6 +1848,10 @@ td a.t:hover {
   text-align: center;
   color: var(--primaire-fonce);
 }
+.depot.survol {
+  border-style: solid;
+  background: #DBEAFE;
+}
 .depot .ico {
   width: 52px;
   height: 52px;
@@ -1876,6 +1880,18 @@ td a.t:hover {
   margin-top: 14px;
   font-size: 14px;
   color: #14532D;
+}
+
+.fichier-choisi[hidden] {
+  display: none;
+}
+
+/* Fichier refusé : même bandeau que le fichier accepté, en rouge */
+.fichier-refuse {
+  background: var(--erreur-clair);
+  border-left-color: var(--erreur);
+  color: var(--erreur);
+  font-weight: 600;
 }
 
 /* Règles d'import (formats, taille maximale) */

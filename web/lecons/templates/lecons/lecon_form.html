@@ -64,6 +64,7 @@
     <div class="champ champ-extensible">
       <div class="label-ligne">
         <label for="contenu-lecon" id="lbl-contenu">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label>
+        <button class="btn btn-secondaire btn-petit" type="button" id="ouvrir-import" data-url="{% url 'lecons:importer' %}" hidden>⭱ Importer un fichier texte</button>
       </div>
       {% comment %}
         Éditeur Trix (gras, italique, titre, puces) avec les boutons de la maquette.
@@ -94,4 +95,28 @@
   </form>
 {% endblock %}
 
-{% block scripts %}{{ block.super }}<script src="{% static 'vendor/trix/trix.umd.min.js' %}" defer></script><script src="{% static 'js/editeur.js' %}" defer></script>{% endblock %}
+{% block apres_contenu %}
+  <div class="voile" id="voile-import" hidden>
+    <div class="dialogue dialogue-large" role="dialog" aria-modal="true" aria-labelledby="t-import" aria-describedby="d-import">
+      <h2 id="t-import">Importer un fichier texte</h2>
+      <p id="d-import">Le texte du fichier remplacera le contenu actuel de la leçon. Vous pourrez le modifier ensuite.</p>
+      <form id="form-import" enctype="multipart/form-data" style="margin-top:16px" novalidate>
+        <div class="depot" id="depot">
+          <div class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></div>
+          <p><strong>Glissez votre fichier ici</strong> ou</p>
+          <label for="fichier" id="choisir-fichier" class="btn btn-primaire btn-petit" tabindex="0" style="margin-top:10px;display:inline-flex">Choisir un fichier</label>
+          <input id="fichier" name="fichier" type="file" accept=".txt,.docx" class="sr" tabindex="-1" aria-describedby="regles-import">
+        </div>
+        <div class="fichier-choisi" id="fichier-choisi" role="status" hidden><span aria-hidden="true">✓</span><span id="fichier-choisi-texte"></span></div>
+        <div class="fichier-choisi fichier-refuse" id="erreur-import" role="alert" hidden><span aria-hidden="true">⚠</span><span id="erreur-import-texte"></span></div>
+        <ul class="regles" id="regles-import"><li>Formats acceptés : <strong>.docx</strong> (Word, LibreOffice) et <strong>.txt</strong> ; les images sont ignorées</li><li>Taille maximale : <strong>5 Mo</strong> (20 000 caractères de texte)</li></ul>
+        <div class="boutons" style="justify-content:flex-end;margin-top:18px">
+          <button class="btn btn-secondaire" type="button" id="import-annuler">Annuler</button>
+          <button class="btn btn-primaire" type="submit" id="import-valider" disabled>Importer le texte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}{{ block.super }}<script src="{% static 'vendor/trix/trix.umd.min.js' %}" defer></script><script src="{% static 'js/editeur.js' %}" defer></script><script src="{% static 'js/importation.js' %}" defer></script>{% endblock %}

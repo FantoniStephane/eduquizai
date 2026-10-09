@@ -2,8 +2,10 @@ import logging
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -15,7 +17,9 @@ from pymongo.errors import PyMongoError
 
 from quiz.repository import QuizRepository
 
+from .conversion import markdown_vers_html_editeur
 from .forms import LeconFiltreForm, LeconForm
+from .importation import TAILLE_MAX, ImportInvalideError, extraire_texte
 from .models import Lecon
 
 logger = logging.getLogger(__name__)
@@ -185,3 +189,22 @@ class LeconDeleteView(SuccessMessageMixin, DeleteView):
     def get_success_message(self, cleaned_data):
         """Message affiché sur la liste après la suppression."""
         return f"La leçon « {self.object.titre} » a été supprimée."
+
+
+@require_POST
+def importer_un_texte(request):
+    """Extrait le texte d'un fichier .txt ou .docx pour l'éditeur de leçon.
+
+    Rien n'est enregistré : la réponse (JSON) contient le texte mis en forme, que
+    le navigateur charge dans l'éditeur. L'enseignant doit être connecté et le
+    jeton CSRF est exigé. Le fichier est contrôlé par ``extraire_texte``.
+    """
+    fichier = request.FILES.get("fichier")
+    if fichier is None:
+        return JsonResponse({"erreur": "Choisissez un fichier à importer."}, status=400)
+    try:
+        # Lecture bornée : jamais plus que la taille maximale en mémoire
+        texte = extraire_texte(fichier.name, fichier.read(TAILLE_MAX + 1))
+    except ImportInvalideError as erreur:
+        return JsonResponse({"erreur": str(erreur)}, status=400)
+    return JsonResponse({"html": markdown_vers_html_editeur(texte)})
