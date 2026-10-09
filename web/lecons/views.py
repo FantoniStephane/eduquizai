@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -7,6 +9,9 @@ from django.views.generic import (
     ListView,
     UpdateView,
 )
+from pymongo.errors import PyMongoError
+
+from quiz.repository import QuizRepository
 
 from .forms import LeconFiltreForm, LeconForm
 from .models import Lecon
@@ -109,6 +114,9 @@ class LeconDeleteView(SuccessMessageMixin, DeleteView):
 
     L'affichage (GET) montre la demande de confirmation ; seule la validation
     du formulaire (POST, protégé par le jeton CSRF) supprime la leçon.
+    Une leçon qui a servi à générer des quiz ne peut pas être supprimée : ses
+    quiz (dans MongoDB, sans clé étrangère vers PostgreSQL) doivent d'abord
+    être supprimés. Si MongoDB ne répond pas, la suppression est refusée.
     """
 
     template_name = "lecons/lecon_confirmation_suppression.html"
@@ -118,6 +126,40 @@ class LeconDeleteView(SuccessMessageMixin, DeleteView):
     def get_queryset(self):
         """Uniquement les leçons de l'utilisateur connecté."""
         return Lecon.objects.filter(utilisateur=self.request.user)
+
+    def nombre_de_quiz(self):
+        """Nombre de quiz issus de la leçon (None si MongoDB ne répond pas)."""
+        try:
+            return QuizRepository().compter_par_lecon(
+                self.object.pk, self.request.user.pk
+            )
+        except PyMongoError:
+            return None
+
+    def get_context_data(self, **kwargs):
+        """Ajoute le nombre de quiz : la fenêtre change s'il y en a."""
+        contexte = super().get_context_data(**kwargs)
+        contexte["nb_quiz"] = self.nombre_de_quiz()
+        return contexte
+
+    def form_valid(self, form):
+        """Supprime la leçon seulement si aucun quiz n'en dépend."""
+        nb_quiz = self.nombre_de_quiz()
+        if nb_quiz == 0:
+            return super().form_valid(form)
+        if nb_quiz is None:
+            messages.error(
+                self.request,
+                "Impossible de vérifier les quiz de cette leçon pour le moment. "
+                "Réessayez plus tard.",
+            )
+        else:
+            messages.error(
+                self.request,
+                f"Cette leçon a servi à générer {nb_quiz} quiz : supprimez-les "
+                "avant de supprimer la leçon.",
+            )
+        return redirect("lecons:detail", pk=self.object.pk)
 
     def get_success_message(self, cleaned_data):
         """Message affiché sur la liste après la suppression."""

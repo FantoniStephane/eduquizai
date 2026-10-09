@@ -1,12 +1,15 @@
 from datetime import timedelta
-from unittest import skipUnless
+from unittest import mock, skipUnless
 
 from django.db import IntegrityError, connection, transaction
 from django.test import Client, SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
+from pymongo.errors import PyMongoError
 
 from comptes.models import Utilisateur
+from quiz.repository import QuizRepository
+from quiz.tests import creer_quiz
 
 from .conversion import (
     html_vers_markdown,
@@ -345,6 +348,31 @@ class LeconVuesTests(TestCase):
         self.assertRedirects(reponse, reverse("lecons:liste"))
         self.assertContains(reponse, "a été supprimée.")
         self.assertFalse(Lecon.objects.filter(pk=self.lecon.pk).exists())
+
+    def test_suppression_bloquee_si_la_lecon_a_des_quiz(self):
+        """Une leçon qui a servi à générer un quiz n'est pas supprimée."""
+        repository = QuizRepository()
+        self.addCleanup(repository.collection.delete_many, {})
+        creer_quiz(repository, id_utilisateur=self.anne.pk, id_lecon=self.lecon.pk)
+        url = reverse("lecons:supprimer", args=[self.lecon.pk])
+        confirmation = self.client.get(url)
+        self.assertContains(confirmation, "Impossible de supprimer la leçon")
+        self.assertNotContains(confirmation, "Supprimer définitivement")
+        reponse = self.client.post(url, follow=True)
+        self.assertRedirects(reponse, reverse("lecons:detail", args=[self.lecon.pk]))
+        self.assertContains(reponse, "supprimez-les avant de supprimer la leçon")
+        self.assertTrue(Lecon.objects.filter(pk=self.lecon.pk).exists())
+
+    def test_suppression_refusee_si_mongodb_ne_repond_pas(self):
+        """Sans réponse de MongoDB, la leçon est conservée par précaution."""
+        url = reverse("lecons:supprimer", args=[self.lecon.pk])
+        with mock.patch.object(
+            QuizRepository, "compter_par_lecon", side_effect=PyMongoError
+        ):
+            self.assertContains(self.client.get(url), "ne peuvent pas être vérifiés")
+            reponse = self.client.post(url, follow=True)
+        self.assertContains(reponse, "Réessayez plus tard.")
+        self.assertTrue(Lecon.objects.filter(pk=self.lecon.pk).exists())
 
     def test_lecon_d_un_autre_enseignant_introuvable(self):
         """Faille IDOR : la leçon de Paul donne une 404, en lecture comme en envoi."""
