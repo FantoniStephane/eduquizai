@@ -327,7 +327,8 @@ class LeconVuesTests(TestCase):
     def test_detail_affiche_le_contenu_mis_en_forme(self):
         """Le Markdown enregistré est affiché en HTML."""
         reponse = self.client.get(reverse("lecons:detail", args=[self.lecon.pk]))
-        self.assertContains(reponse, "<h2>Les causes</h2>", html=True)
+        # Titres du contenu en h3, sous la section « Contenu de la leçon » (h2)
+        self.assertContains(reponse, "<h3>Les causes</h3>", html=True)
 
     def test_modification_de_ma_lecon(self):
         """Anne modifie sa leçon et revient au détail avec un message."""

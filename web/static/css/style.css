@@ -1210,11 +1210,11 @@ td a.t:hover {
 }
 
 /* Mise en forme du texte de la leçon */
-.texte-lecon h2 {
+.texte-lecon h3 {
   font-size: 18px;
   margin: 18px 0 6px;
 }
-.texte-lecon h2:first-child {
+.texte-lecon h3:first-child {
   margin-top: 0;
 }
 .texte-lecon p {
