@@ -1945,8 +1945,12 @@ body:has(> .pied) {
   display: flex;
   flex-direction: column;
 }
+/* Le contenu grandit pour pousser le pied en bas, et peut rétrécir : sur les pages
+   « sans défilement » (section 13), il garde ainsi la hauteur de l'écran et seules
+   ses zones internes défilent. Ailleurs, min-height: auto l'empêche de rétrécir
+   sous la hauteur de son contenu. */
 body:has(> .pied) > .contenu {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   width: 100%;
 }
 .pied {
