@@ -1,4 +1,4 @@
-# Intégration continue d'EduQuizAI (tâche 41).
+# Intégration continue d'EduQuizAI (tâches 41 et 42).
 #
 # À chaque push sur develop ou main, et à chaque pull request vers main,
 # GitHub Actions vérifie le projet sur une machine neuve. Les jobs
@@ -218,3 +218,43 @@ jobs:
           name: couverture-web
           path: web/htmlcov/
           retention-days: 14
+
+  image:
+    name: Images Docker (construction et démarrage)
+    # Seulement si tous les tests sont passés
+    needs: [tests-ia, tests-web]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      # Mêmes Dockerfiles que docker-compose.yml : ce qui est construit ici
+      # est ce qui sera déployé (tâche 46)
+      - name: Construire l'image web
+        run: docker build --tag eduquizai-web:ci ./web
+
+      - name: Construire l'image ia
+        run: docker build --tag eduquizai-ia:ci ./ia
+
+      # L'application démarre-t-elle dans l'image ? (dépendance manquante,
+      # fichier écarté par .dockerignore…) ; aucune base n'est nécessaire
+      - name: Démarrage de l'application dans l'image web
+        run: |
+          docker run --rm \
+            -e DJANGO_SECRET_KEY -e IA_JWT_SECRET \
+            -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD \
+            -e MONGO_DB -e MONGO_APP_USER -e MONGO_APP_PASSWORD \
+            eduquizai-web:ci python manage.py check
+
+      - name: Démarrage du microservice dans l'image ia
+        run: |
+          docker run --rm -e IA_SECRET_KEY -e IA_JWT_SECRET \
+            eduquizai-ia:ci python manage.py check
+
+      - name: Taille des images
+        run: |
+          echo "### Images Docker" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | Taille |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          docker image ls --filter "reference=eduquizai-*:ci" \
+            --format "| {{.Repository}} | {{.Size}} |" >> "$GITHUB_STEP_SUMMARY"
