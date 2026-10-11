@@ -110,10 +110,10 @@ jobs:
           pip install -r requirements.txt coverage
 
       # Ollama et l'API Mistral sont remplacés par des doublures dans les tests
-      # Échoue sous le seuil de couverture (fail_under dans .coveragerc)
       - name: Tests avec mesure de la couverture
         run: python -m coverage run manage.py test
 
+      # « coverage report » échoue sous le seuil (fail_under dans .coveragerc)
       - name: Rapport de couverture
         if: always()
         run: |
@@ -199,10 +199,10 @@ jobs:
           pip install -r requirements.txt coverage
 
       # Le microservice IA est remplacé par des doublures dans les tests
-      # Échoue sous le seuil de couverture (fail_under dans .coveragerc)
       - name: Tests avec mesure de la couverture
         run: python -m coverage run manage.py test
 
+      # « coverage report » échoue sous le seuil (fail_under dans .coveragerc)
       - name: Rapport de couverture
         if: always()
         run: |
