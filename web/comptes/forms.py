@@ -1,6 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
+from .limitation import (
+    MESSAGE_BLOCAGE,
+    adresse_ip,
+    effacer_echecs,
+    enregistrer_echec,
+    est_bloque,
+)
 from .models import Utilisateur
 
 
@@ -44,7 +51,10 @@ class ConnexionForm(AuthenticationForm):
     """Formulaire de connexion par adresse e-mail et mot de passe.
 
     Le message d'erreur reste volontairement général : il ne précise pas si
-    c'est l'adresse ou le mot de passe qui est faux.
+    c'est l'adresse ou le mot de passe qui est faux. Les essais sont limités
+    (voir ``limitation.py``) : après trop d'échecs, la connexion est refusée
+    sans même vérifier le mot de passe, avec le même message que le compte
+    existe ou non.
     """
 
     error_messages = {
@@ -55,3 +65,18 @@ class ConnexionForm(AuthenticationForm):
     def clean_username(self):
         """Compare l'adresse en minuscules, comme elle est enregistrée."""
         return self.cleaned_data["username"].lower()
+
+    def clean(self):
+        """Refuse si trop d'échecs, sinon vérifie et compte le résultat."""
+        adresse = self.cleaned_data.get("username", "")
+        ip = adresse_ip(self.request)
+        if est_bloque(adresse, ip):
+            raise forms.ValidationError(MESSAGE_BLOCAGE, code="trop_de_tentatives")
+        try:
+            donnees = super().clean()
+        except forms.ValidationError:
+            enregistrer_echec(adresse, ip)
+            raise
+        if self.get_user() is not None:
+            effacer_echecs(adresse, ip)
+        return donnees

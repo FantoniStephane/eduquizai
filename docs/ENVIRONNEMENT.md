@@ -98,3 +98,38 @@ Après l'ajout ou le changement du secret : `docker compose up -d --force-recrea
 - `IA_FOURNISSEUR` est aussi lu par le web, uniquement pour l'encart d'information (« IA locale » ou API Mistral).
 - Le paquet `requests` est installé dans l'image `web` : après changement de `requirements.txt`, `docker compose up -d --build web`.
 - Annulation : retenue dans le cache en mémoire de Django (un seul processus en développement).
+
+## Sécurité de l'environnement (tâche 33)
+
+### Compte MongoDB de l'application
+
+L'application ne se connecte pas avec le compte root de MongoDB : elle utilise un compte dédié, limité à la base `eduquizai` et à la base de test `test_eduquizai`. À ajouter dans `.env` :
+
+```
+MONGO_APP_USER=eduquizai_app
+MONGO_APP_PASSWORD=<mot de passe généré>
+```
+
+Mot de passe : `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+
+- **Nouvelle installation** (volume `mongo_data` vide) : le compte est créé automatiquement au premier démarrage par `docker/mongo/initdb/01_utilisateur_app.js`.
+- **Base existante** : lancer une fois le script avec le compte root (il crée ou met à jour le compte, sans toucher aux données) :
+
+```powershell
+docker compose up -d --force-recreate mongo web
+docker compose exec mongo sh -c 'mongosh --quiet -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin /docker-entrypoint-initdb.d/01_utilisateur_app.js'
+docker compose exec web python manage.py init_mongo
+```
+
+### Variables par conteneur
+
+`docker-compose.yml` n'utilise plus `env_file` : chaque service liste les seules variables qu'il reçoit (un nom seul reprend la valeur de `.env`). Après l'ajout d'une variable dans `settings.py`, il faut aussi l'ajouter au service concerné dans `docker-compose.yml`. Vérification :
+
+```powershell
+docker compose exec ia env | Select-String "POSTGRES|MONGO|DJANGO"   # rien ne doit s'afficher
+docker compose exec web env | Select-String "ROOT|MISTRAL"           # rien ne doit s'afficher
+```
+
+### Limitation des essais de connexion
+
+Après 5 échecs (même adresse et même IP) ou 20 échecs (même IP), la connexion est bloquée 15 minutes. En développement, pour débloquer tout de suite : `docker compose restart web` (le cache est en mémoire).
