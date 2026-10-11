@@ -1,5 +1,7 @@
 # EduQuizAI by SchoolUp
 
+[![CI](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml)
+
 Générateur de quiz pédagogiques pour enseignants, piloté par une intelligence artificielle **locale**.
 
 Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications (CDA)** — Metz Numeric School, session 2026.

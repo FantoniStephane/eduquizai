@@ -5,6 +5,9 @@
 # s'enchaînent avec « needs » : si une étape échoue, les suivantes ne sont
 # pas lancées (plus tard, aucun déploiement d'un code qui ne passe pas).
 #
+# Machine fixée (ubuntu-24.04) plutôt que « ubuntu-latest » : l'environnement
+# ne change pas sans qu'on le décide (reproductibilité).
+#
 # Aucun vrai secret ici : les variables obligatoires reçoivent des valeurs de
 # test, qui ne servent que sur la machine temporaire de GitHub.
 
@@ -43,7 +46,7 @@ env:
 jobs:
   qualite:
     name: Qualité (dépendances, Ruff, configuration Django)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v5
@@ -86,7 +89,7 @@ jobs:
   tests-ia:
     name: Tests du microservice IA (+ couverture)
     needs: qualite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ia
@@ -107,6 +110,7 @@ jobs:
           pip install -r requirements.txt coverage
 
       # Ollama et l'API Mistral sont remplacés par des doublures dans les tests
+      # Échoue sous le seuil de couverture (fail_under dans .coveragerc)
       - name: Tests avec mesure de la couverture
         run: python -m coverage run manage.py test
 
@@ -120,7 +124,7 @@ jobs:
 
       - name: Publier le rapport HTML
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: couverture-ia
           path: ia/htmlcov/
@@ -129,7 +133,7 @@ jobs:
   tests-web:
     name: Tests de l'application web (+ couverture)
     needs: qualite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: web
@@ -195,6 +199,7 @@ jobs:
           pip install -r requirements.txt coverage
 
       # Le microservice IA est remplacé par des doublures dans les tests
+      # Échoue sous le seuil de couverture (fail_under dans .coveragerc)
       - name: Tests avec mesure de la couverture
         run: python -m coverage run manage.py test
 
@@ -208,7 +213,7 @@ jobs:
 
       - name: Publier le rapport HTML
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: couverture-web
           path: web/htmlcov/

@@ -15,6 +15,9 @@ omit =
     config/wsgi.py
 
 [report]
+# La CI échoue si la couverture passe sous ce seuil (taux mesurés le 11/10 :
+# web 97,6 %, ia 98,0 %)
+fail_under = 95
 show_missing = True
 skip_empty = True
 precision = 1

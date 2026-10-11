@@ -187,3 +187,10 @@ pyftsubset InterVariable.woff2 --unicodes="U+0000-00FF,U+0131,U+0152-0153,U+02BB
 ```
 
 Un caractère absent de la police réduite (alphabet non latin, par exemple) s'affiche quand même, avec la police de secours du système.
+
+## Intégration continue (tâche 41)
+
+- Fichier `.github/workflows/ci.yml`, lancé à chaque push sur `develop` / `main` et à chaque pull request vers `main` : job « Qualité » (pip-audit, Ruff, `manage.py check`), puis en parallèle « Tests IA » et « Tests web » (PostgreSQL 17 et MongoDB 8 en services, compte MongoDB applicatif créé par `docker/mongo/initdb/01_utilisateur_app.js`).
+- Résultats : onglet **Actions** du dépôt ; les tableaux de couverture sont dans le résumé du run, les rapports HTML dans « Artifacts » (14 jours).
+- Couverture en local, depuis `web/` (venv) : `python -m coverage run manage.py test` puis `python -m coverage report` (réglages dans `web/.coveragerc` ; le rapport échoue sous 95 %).
+- Aucun vrai secret dans le workflow : valeurs de test uniquement.
