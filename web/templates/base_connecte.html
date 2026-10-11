@@ -43,6 +43,7 @@
     {% block contenu %}{% endblock %}
   </main>
   {% block apres_contenu %}{% endblock %}
+  <footer class="pied"><a href="{% url 'donnees_personnelles' %}">Données personnelles</a></footer>
 {% endblock %}
 
 {% block scripts %}<script src="{% static 'js/menu.js' %}" defer></script>{% endblock %}

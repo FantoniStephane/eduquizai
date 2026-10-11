@@ -1,7 +1,9 @@
-"""Vues générales : tableau de bord de l'enseignant (maquette 02)."""
+"""Vues générales : tableau de bord (maquette 02) et page des données personnelles."""
 
 import logging
 
+from django.contrib.auth.decorators import login_not_required
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from pymongo.errors import PyMongoError
 
@@ -57,3 +59,14 @@ class TableauDeBordView(TemplateView):
             quiz["lecon"] = lecons_des_quiz.get(quiz["id_lecon"])
         contexte["quiz_a_valider"] = a_valider
         return contexte
+
+
+@method_decorator(login_not_required, name="dispatch")
+class DonneesPersonnellesView(TemplateView):
+    """Information des utilisateurs sur leurs données personnelles (RGPD).
+
+    Page publique : elle doit pouvoir être lue avant la première connexion,
+    depuis la page de connexion comme depuis toutes les pages de l'application.
+    """
+
+    template_name = "donnees_personnelles.html"

@@ -1936,3 +1936,55 @@ td a.t:hover {
   font-size: 26px;
   font-weight: 700;
 }
+
+/* Lien « Données personnelles » (RGPD) : pied des pages connectées et des pages
+   de connexion ; page d'information plus large que la carte de connexion */
+/* Pied de page toujours en bas de l'écran, quelle que soit la hauteur du contenu */
+body:has(> .pied) {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+body:has(> .pied) > .contenu {
+  flex: 1 0 auto;
+  width: 100%;
+}
+.pied {
+  padding: 6px 16px 10px;
+  text-align: center;
+  font-size: 13px;
+}
+.pied a,
+.pied-connexion a {
+  color: var(--texte-2);
+}
+.pied-connexion {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+.connexion.large {
+  max-width: 760px;
+}
+.donnees-perso h2 {
+  font-size: 18px;
+  margin: 22px 0 8px;
+}
+.donnees-perso p,
+.donnees-perso li {
+  margin-bottom: 8px;
+}
+.donnees-perso ul {
+  padding-left: 20px;
+}
+.donnees-perso table {
+  width: 100%;
+  margin: 8px 0 12px;
+}
+@media (min-width: 821px) {
+  body.sans-scroll .zone-donnees-perso {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
