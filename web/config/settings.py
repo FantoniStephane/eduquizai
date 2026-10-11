@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # En-tête Content-Security-Policy : seuls nos propres scripts s'exécutent
+    "config.middleware.PolitiqueSecuriteContenuMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
