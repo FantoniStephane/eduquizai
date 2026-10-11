@@ -1,12 +1,33 @@
 name: eduquizai
 
 services:
+  # Chaque service ne reçoit que les variables dont il a besoin (moindre
+  # privilège) : un nom seul reprend la valeur du fichier .env, sans la
+  # recopier ici. Ainsi, ia ne connaît ni les mots de passe des bases ni la
+  # clé de Django, et web ne connaît ni le compte root MongoDB ni la clé Mistral.
   web:
     build: ./web
-    env_file: .env
     environment:
-      POSTGRES_HOST: postgres      # dans Docker, on joint la base par le nom de son service
-      MONGO_HOST: mongo
+      - DJANGO_SECRET_KEY
+      - DJANGO_DEBUG
+      - DJANGO_ALLOWED_HOSTS
+      - DJANGO_EMAIL_BACKEND
+      - DJANGO_DEFAULT_FROM_EMAIL
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST=postgres     # dans Docker, on joint la base par le nom de son service
+      - POSTGRES_PORT
+      - MONGO_DB
+      - MONGO_APP_USER
+      - MONGO_APP_PASSWORD
+      - MONGO_HOST=mongo
+      - MONGO_PORT
+      - IA_URL
+      - IA_JWT_SECRET
+      - IA_JWT_DUREE
+      - IA_DELAI
+      - IA_FOURNISSEUR
     volumes:
       - ./web:/app                 # le code est partagé : une modification est prise en compte sans reconstruire
     ports:
@@ -19,9 +40,19 @@ services:
 
   ia:
     build: ./ia
-    env_file: .env
     environment:
-      OLLAMA_URL: http://ollama:11434
+      - IA_SECRET_KEY
+      - IA_DEBUG
+      - IA_ALLOWED_HOSTS
+      - IA_JWT_SECRET
+      - IA_FOURNISSEUR
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODELE
+      - OLLAMA_DELAI
+      - MISTRAL_URL
+      - MISTRAL_API_KEY
+      - MISTRAL_MODELE
+      - MISTRAL_DELAI
     volumes:
       - ./ia:/app
     # Aucun port publié : seul le conteneur web joint le microservice,
@@ -31,7 +62,10 @@ services:
 
   postgres:
     image: postgres:17
-    env_file: .env
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -43,7 +77,13 @@ services:
 
   mongo:
     image: mongo:8
-    env_file: .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+      # Pour le script de création du compte applicatif (initdb)
+      - MONGO_DB
+      - MONGO_APP_USER
+      - MONGO_APP_PASSWORD
     volumes:
       - mongo_data:/data/db
       # Création du compte applicatif au premier démarrage (lecture seule)
