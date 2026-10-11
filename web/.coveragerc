@@ -1,10 +1,15 @@
-# Mesure de la couverture des tests : python -m coverage run manage.py test
-# puis python -m coverage report (lancé depuis le dossier web/).
+# Mesure de la couverture des tests (coverage), lancée depuis ce dossier :
+#   python -m coverage run manage.py test
+#   python -m coverage report
+# Le code des tests, les migrations générées par Django et les points
+# d'entrée du serveur ne sont pas comptés : seul le code applicatif l'est.
+
 [run]
 source = .
 omit =
     */migrations/*
     */tests.py
+    */tests_*.py
     manage.py
     config/asgi.py
     config/wsgi.py
@@ -12,3 +17,4 @@ omit =
 [report]
 show_missing = True
 skip_empty = True
+precision = 1

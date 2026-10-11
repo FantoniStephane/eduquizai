@@ -37,6 +37,8 @@ env:
   MONGO_DB: eduquizai
   MONGO_APP_USER: eduquizai_app
   MONGO_APP_PASSWORD: mot-de-passe-de-test
+  MONGO_ROOT_USER: root
+  MONGO_ROOT_PASSWORD: mot-de-passe-root-de-test
 
 jobs:
   qualite:
@@ -80,3 +82,134 @@ jobs:
       - name: Configuration Django (ia)
         working-directory: ia
         run: python manage.py check
+
+  tests-ia:
+    name: Tests du microservice IA (+ couverture)
+    needs: qualite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ia
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: ia/requirements.txt
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt coverage
+
+      # Ollama et l'API Mistral sont remplacés par des doublures dans les tests
+      - name: Tests avec mesure de la couverture
+        run: python -m coverage run manage.py test
+
+      - name: Rapport de couverture
+        if: always()
+        run: |
+          python -m coverage report
+          python -m coverage html
+          echo "### Couverture du microservice IA" >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publier le rapport HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture-ia
+          path: ia/htmlcov/
+          retention-days: 14
+
+  tests-web:
+    name: Tests de l'application web (+ couverture)
+    needs: qualite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    # Vraies bases de données, comme dans docker-compose.yml
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eduquizai -d eduquizai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mongo:
+        image: mongo:8
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_ROOT_USER }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_ROOT_PASSWORD }}
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      MONGO_HOST: localhost
+      MONGO_PORT: "27017"
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      # Le compte MongoDB de l'application est créé par le même script qu'en
+      # développement : la CI le vérifie aussi
+      - name: Créer le compte MongoDB applicatif
+        working-directory: .
+        run: |
+          docker cp docker/mongo/initdb/01_utilisateur_app.js \
+            ${{ job.services.mongo.id }}:/tmp/01_utilisateur_app.js
+          docker exec \
+            -e MONGO_DB -e MONGO_APP_USER -e MONGO_APP_PASSWORD \
+            ${{ job.services.mongo.id }} \
+            mongosh --quiet -u "$MONGO_ROOT_USER" -p "$MONGO_ROOT_PASSWORD" \
+            --authenticationDatabase admin /tmp/01_utilisateur_app.js
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: web/requirements.txt
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt coverage
+
+      # Le microservice IA est remplacé par des doublures dans les tests
+      - name: Tests avec mesure de la couverture
+        run: python -m coverage run manage.py test
+
+      - name: Rapport de couverture
+        if: always()
+        run: |
+          python -m coverage report
+          python -m coverage html
+          echo "### Couverture de l'application web" >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publier le rapport HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture-web
+          path: web/htmlcov/
+          retention-days: 14
