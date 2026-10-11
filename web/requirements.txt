@@ -8,3 +8,4 @@ pymongo>=4.10
 PyJWT>=2.9
 requests>=2.32
 mammoth>=1.8
+reportlab>=4.2
