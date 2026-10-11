@@ -87,13 +87,19 @@ def version_eleve(quiz):
 def nom_fichier(quiz):
     """Nom du fichier téléchargé, tiré du titre (ex. ``quiz-les-volcans.pdf``).
 
+    Le préfixe « quiz- » n'est pas doublé quand le titre commence déjà par
+    « Quiz » (titres proposés par la génération : « Quiz — … »).
+
     Args:
         quiz: quiz lu dans MongoDB.
 
     Returns:
         str: nom sans accent ni caractère spécial.
     """
-    return f"quiz-{slugify(quiz['titre'])[:80] or 'eleve'}.pdf"
+    nom = slugify(quiz["titre"])[:80].strip("-") or "eleve"
+    if nom != "quiz" and not nom.startswith("quiz-"):
+        nom = f"quiz-{nom}"
+    return f"{nom}.pdf"
 
 
 def _texte(valeur):

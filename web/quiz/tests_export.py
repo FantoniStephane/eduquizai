@@ -2,10 +2,16 @@
 
 from unittest import mock
 
-from django.test import SimpleTestCase
+from django.contrib.messages import get_messages
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+from pymongo.errors import PyMongoError
+
+from lecons.tests import creer_enseignant, creer_lecon
 
 from .export import generer_pdf_eleve, nom_fichier, version_eleve
-from .tests import questions_valides
+from .repository import QuizRepository
+from .tests import creer_quiz, questions_valides
 
 
 def quiz_stocke(**champs):
@@ -68,6 +74,12 @@ class NomFichierTests(SimpleTestCase):
             "quiz-la-revolution-francaise.pdf",
         )
 
+    def test_prefixe_non_double(self):
+        """Un titre qui commence par « Quiz » ne donne pas « quiz-quiz-… »."""
+        self.assertEqual(
+            nom_fichier({"titre": "Quiz — Les volcans"}), "quiz-les-volcans.pdf"
+        )
+
     def test_titre_sans_caractere_utilisable(self):
         """Un titre fait seulement de symboles donne quand même un nom."""
         self.assertEqual(nom_fichier({"titre": "???"}), "quiz-eleve.pdf")
@@ -109,3 +121,112 @@ class PdfEleveTests(SimpleTestCase):
         # Le texte est écrit tel quel, balise comprise (aucun passage en gras)
         self.assertIn("(/b)", texte)
         self.assertIn("(gras)", texte)
+
+
+class ExportVueTests(TestCase):
+    """Téléchargement : quiz validé seulement, propriétaire, GET, panne MongoDB."""
+
+    def setUp(self):
+        """Anne a un quiz validé et un brouillon ; Paul a un quiz validé."""
+        self.anne = creer_enseignant()
+        self.paul = creer_enseignant("paul.martin@eduquizai.local", prenom="Paul")
+        self.repository = QuizRepository()
+        self.addCleanup(self.repository.collection.delete_many, {})
+        lecon = creer_lecon(self.anne, titre="La Révolution française")
+        self.id_valide = creer_quiz(
+            self.repository,
+            id_utilisateur=self.anne.pk,
+            id_lecon=lecon.pk,
+            titre="La Révolution française",
+        )
+        self.repository.valider(self.id_valide, self.anne.pk)
+        self.id_brouillon = creer_quiz(
+            self.repository, id_utilisateur=self.anne.pk, id_lecon=lecon.pk
+        )
+        self.id_paul = creer_quiz(
+            self.repository,
+            id_utilisateur=self.paul.pk,
+            id_lecon=creer_lecon(self.paul).pk,
+        )
+        self.repository.valider(self.id_paul, self.paul.pk)
+        self.client.force_login(self.anne)
+
+    def url(self, id_quiz):
+        """Adresse d'export d'un quiz."""
+        return reverse("quiz:exporter", args=[id_quiz])
+
+    def textes_messages(self, reponse):
+        """Messages affichés à l'enseignant après la requête."""
+        return [str(m) for m in get_messages(reponse.wsgi_request)]
+
+    def test_quiz_valide_telecharge_en_pdf(self):
+        """Un quiz validé est envoyé en pièce jointe PDF, sans cache."""
+        reponse = self.client.get(self.url(self.id_valide))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual(reponse["Content-Type"], "application/pdf")
+        self.assertEqual(
+            reponse["Content-Disposition"],
+            'attachment; filename="quiz-la-revolution-francaise.pdf"',
+        )
+        self.assertIn("no-store", reponse["Cache-Control"])
+        self.assertTrue(reponse.content.startswith(b"%PDF-"))
+
+    def test_brouillon_refuse(self):
+        """Un brouillon n'est jamais exporté, même en tapant l'adresse."""
+        reponse = self.client.get(self.url(self.id_brouillon))
+        self.assertRedirects(
+            reponse,
+            reverse("quiz:detail", args=[self.id_brouillon]),
+            fetch_redirect_response=False,
+        )
+        self.assertIn("Validez le quiz", self.textes_messages(reponse)[0])
+
+    def test_quiz_d_un_autre_enseignant(self):
+        """Le quiz d'un autre enseignant donne une 404 (IDOR)."""
+        self.assertEqual(self.client.get(self.url(self.id_paul)).status_code, 404)
+
+    def test_identifiant_invalide(self):
+        """Un identifiant mal formé donne la même 404."""
+        self.assertEqual(self.client.get(self.url("pas-un-id")).status_code, 404)
+
+    def test_connexion_obligatoire(self):
+        """Sans connexion, retour à la page de connexion."""
+        self.client.logout()
+        url = self.url(self.id_valide)
+        self.assertRedirects(
+            self.client.get(url),
+            f"{reverse('comptes:connexion')}?next={url}",
+            fetch_redirect_response=False,
+        )
+
+    def test_post_refuse(self):
+        """Seul le GET est accepté (l'export ne modifie rien)."""
+        self.assertEqual(self.client.post(self.url(self.id_valide)).status_code, 405)
+
+    def test_mongodb_indisponible(self):
+        """Sans MongoDB, retour au détail avec un message, pas d'erreur 500."""
+        with (
+            mock.patch.object(
+                QuizRepository, "obtenir", side_effect=PyMongoError("hors service")
+            ),
+            self.assertLogs("quiz.views", level="ERROR"),
+        ):
+            reponse = self.client.get(self.url(self.id_valide))
+        self.assertRedirects(
+            reponse,
+            reverse("quiz:detail", args=[self.id_valide]),
+            fetch_redirect_response=False,
+        )
+        self.assertIn("n'a pas pu être exporté", self.textes_messages(reponse)[0])
+
+    def test_bouton_actif_pour_un_quiz_valide(self):
+        """Le détail d'un quiz validé propose le lien de téléchargement."""
+        reponse = self.client.get(reverse("quiz:detail", args=[self.id_valide]))
+        self.assertContains(reponse, f'href="{self.url(self.id_valide)}" download')
+
+    def test_bouton_desactive_pour_un_brouillon(self):
+        """Pour un brouillon, le bouton est grisé et son motif est expliqué."""
+        reponse = self.client.get(reverse("quiz:detail", args=[self.id_brouillon]))
+        self.assertNotContains(reponse, self.url(self.id_brouillon))
+        self.assertContains(reponse, 'disabled aria-describedby="aide-export"')
+        self.assertContains(reponse, 'id="aide-export"')

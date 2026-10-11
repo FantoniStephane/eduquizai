@@ -8,13 +8,14 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import FormView, ListView, TemplateView
 from pymongo.errors import PyMongoError
 
 from lecons.models import Lecon
 
 from .client_ia import GenerationIAError, generer_questions
+from .export import generer_pdf_eleve, nom_fichier
 from .forms import (
     DIFFICULTES,
     TYPES_QUESTION,
@@ -308,6 +309,47 @@ def valider_un_quiz(request, id_quiz):
             request, "Le quiz n'a pas pu être validé. Réessayez dans quelques instants."
         )
     return redirect("quiz:detail", id_quiz=id_quiz)
+
+
+@require_GET
+def exporter_un_quiz(request, id_quiz):
+    """Télécharge le quiz en PDF, version élève (tâche 40).
+
+    Seul un quiz validé par l'enseignant peut être exporté : un quiz généré par
+    l'IA et non relu ne doit pas être distribué aux élèves. Le fichier ne
+    contient jamais les réponses ; le corrigé reste dans l'espace de
+    l'enseignant. Le refus est vérifié ici, pas seulement par le bouton grisé.
+    Le quiz est cherché parmi ceux de l'enseignant connecté (404 sinon, IDOR).
+    """
+    try:
+        quiz = QuizRepository().obtenir(id_quiz, request.user.pk)
+    except PyMongoError:
+        logger.exception("MongoDB indisponible : export d'un quiz")
+        messages.error(
+            request,
+            "Le quiz n'a pas pu être exporté. Réessayez dans quelques instants.",
+        )
+        return redirect("quiz:detail", id_quiz=id_quiz)
+    if quiz is None:
+        raise Http404("Quiz introuvable")
+    if quiz["statut"] != "valide":
+        messages.error(
+            request,
+            "Validez le quiz avant de l'exporter : seul un quiz relu peut être "
+            "distribué aux élèves.",
+        )
+        return redirect("quiz:detail", id_quiz=id_quiz)
+    lecon = Lecon.objects.filter(utilisateur=request.user, pk=quiz["id_lecon"]).first()
+    contenu = generer_pdf_eleve(
+        quiz,
+        matiere=lecon.get_matiere_display() if lecon else "",
+        niveau=lecon.get_niveau_scolaire_display() if lecon else "",
+    )
+    reponse = HttpResponse(contenu, content_type="application/pdf")
+    reponse["Content-Disposition"] = f'attachment; filename="{nom_fichier(quiz)}"'
+    # Document personnel : ne pas le garder dans un cache (navigateur, proxy)
+    reponse["Cache-Control"] = "private, no-store"
+    return reponse
 
 
 class QuizModificationView(TemplateView):

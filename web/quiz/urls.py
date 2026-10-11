@@ -9,6 +9,7 @@ from .views import (
     QuizModificationView,
     QuizSuppressionView,
     annuler_generation,
+    exporter_un_quiz,
     valider_un_quiz,
 )
 
@@ -22,4 +23,5 @@ urlpatterns = [
     path("<str:id_quiz>/valider/", valider_un_quiz, name="valider"),
     path("<str:id_quiz>/modifier/", QuizModificationView.as_view(), name="modifier"),
     path("<str:id_quiz>/supprimer/", QuizSuppressionView.as_view(), name="supprimer"),
+    path("<str:id_quiz>/exporter/", exporter_un_quiz, name="exporter"),
 ]

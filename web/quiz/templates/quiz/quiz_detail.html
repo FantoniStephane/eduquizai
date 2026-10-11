@@ -1,8 +1,9 @@
 {% extends "base_connecte.html" %}
 {% comment %}
   Maquette 8 (détail d'un quiz). Les textes viennent de l'IA : Django les échappe,
-  aucun n'est marqué comme sûr. Exporter est désactivé jusqu'à sa tâche ;
-  Modifier et Supprimer (31.1, 31.2) sont des liens. Valider (tâche 31) : formulaire
+  aucun n'est marqué comme sûr. Exporter (tâche 40) : lien vers le PDF élève
+  pour un quiz validé, bouton désactivé (expliqué par l'encart « À relire ») pour
+  un brouillon. Modifier et Supprimer (31.1, 31.2) sont des liens. Valider (tâche 31) : formulaire
   POST + CSRF ; avec JavaScript, une fenêtre de confirmation demande d'abord à
   l'enseignant s'il a relu le quiz (sans JavaScript, la validation est directe).
 {% endcomment %}
@@ -42,7 +43,11 @@
       <div class="boutons">
         <a class="btn btn-modifier" href="{% url 'quiz:modifier' quiz.id %}">Modifier</a>
         <a class="btn btn-danger" href="{% url 'quiz:supprimer' quiz.id %}">Supprimer</a>
-        <button class="btn btn-secondaire" type="button" disabled title="Disponible prochainement">⭳ Exporter</button>
+        {% if quiz.statut == "valide" %}
+          <a class="btn btn-secondaire" href="{% url 'quiz:exporter' quiz.id %}" download aria-label="Exporter en PDF, version élève">⭳ Exporter</a>
+        {% else %}
+          <button class="btn btn-secondaire" type="button" disabled aria-describedby="aide-export" aria-label="Exporter en PDF, version élève">⭳ Exporter</button>
+        {% endif %}
         {% if quiz.statut == "brouillon" %}
           <form id="form-validation" method="post" action="{% url 'quiz:valider' quiz.id %}">
             {% csrf_token %}
@@ -93,7 +98,7 @@
           <dt>Questions ouvertes</dt><dd>{{ recap.ouverte }}</dd>
         </dl>
         {% if quiz.statut != "valide" %}
-          <p class="alerte-info" role="note"><strong>À relire avant validation.</strong> Ce quiz a été généré par une IA : vérifiez l'exactitude des questions et des réponses. Une fois validé, il pourra être utilisé avec vos élèves.</p>
+          <p class="alerte-info" role="note" id="aide-export"><strong>À relire avant validation.</strong> Ce quiz a été généré par une IA : vérifiez l'exactitude des questions et des réponses. Une fois validé, il pourra être utilisé avec vos élèves et exporté en PDF.</p>
         {% endif %}
       </aside>
     </div>
