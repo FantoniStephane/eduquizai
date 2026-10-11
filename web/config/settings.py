@@ -92,13 +92,17 @@ DATABASES = {
 }
 
 
-# MongoDB : base des quiz, utilisée par le repository PyMongo de l'application quiz
+# MongoDB : base des quiz, utilisée par le repository PyMongo de l'application quiz.
+# Compte applicatif aux droits limités à cette base (jamais le compte root,
+# réservé à l'administration) : voir docker/mongo/initdb/01_utilisateur_app.js
 MONGO = {
     "HOST": config("MONGO_HOST", default="127.0.0.1"),
     "PORT": config("MONGO_PORT", default=27017, cast=int),
-    "USER": config("MONGO_INITDB_ROOT_USERNAME"),
-    "PASSWORD": config("MONGO_INITDB_ROOT_PASSWORD"),
+    "USER": config("MONGO_APP_USER"),
+    "PASSWORD": config("MONGO_APP_PASSWORD"),
     "NAME": config("MONGO_DB"),
+    # Base où le compte est déclaré (fixe, même pendant les tests)
+    "AUTH_DB": config("MONGO_DB"),
 }
 
 # Microservice IA : adresse sur le réseau interne de Docker et secret partagé

@@ -22,7 +22,7 @@ def get_client():
         port=reglages["PORT"],
         username=reglages["USER"],
         password=reglages["PASSWORD"],
-        authSource="admin",
+        authSource=reglages["AUTH_DB"],
         serverSelectionTimeoutMS=DELAI_CONNEXION_MS,
         tz_aware=True,
     )

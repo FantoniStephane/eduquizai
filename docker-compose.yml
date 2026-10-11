@@ -46,6 +46,8 @@ services:
     env_file: .env
     volumes:
       - mongo_data:/data/db
+      # Création du compte applicatif au premier démarrage (lecture seule)
+      - ./docker/mongo/initdb:/docker-entrypoint-initdb.d:ro
     ports:
       - "127.0.0.1:27017:27017"
     healthcheck:
