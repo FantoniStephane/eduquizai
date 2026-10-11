@@ -1,0 +1,82 @@
+# Intégration continue d'EduQuizAI (tâche 41).
+#
+# À chaque push sur develop ou main, et à chaque pull request vers main,
+# GitHub Actions vérifie le projet sur une machine neuve. Les jobs
+# s'enchaînent avec « needs » : si une étape échoue, les suivantes ne sont
+# pas lancées (plus tard, aucun déploiement d'un code qui ne passe pas).
+#
+# Aucun vrai secret ici : les variables obligatoires reçoivent des valeurs de
+# test, qui ne servent que sur la machine temporaire de GitHub.
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [main]
+
+# Le pipeline ne fait que lire le dépôt (moindre privilège)
+permissions:
+  contents: read
+
+# Un nouveau push annule la vérification encore en cours sur la même branche
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  # Valeurs de test pour les variables obligatoires des settings
+  DJANGO_SECRET_KEY: cle-de-test-ci-sans-valeur-reelle
+  IA_SECRET_KEY: cle-ia-de-test-ci-sans-valeur-reelle
+  IA_JWT_SECRET: secret-jwt-de-test-ci-sans-valeur-reelle
+  POSTGRES_DB: eduquizai
+  POSTGRES_USER: eduquizai
+  POSTGRES_PASSWORD: mot-de-passe-de-test
+  MONGO_DB: eduquizai
+  MONGO_APP_USER: eduquizai_app
+  MONGO_APP_PASSWORD: mot-de-passe-de-test
+
+jobs:
+  qualite:
+    name: Qualité (dépendances, Ruff, configuration Django)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            web/requirements.txt
+            ia/requirements.txt
+
+      - name: Installer les dépendances et les outils
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r web/requirements.txt -r ia/requirements.txt
+          pip install pip-audit ruff==0.16.9
+
+      # Une dépendance avec une faille connue bloque le pipeline
+      - name: Audit des dépendances (pip-audit)
+        run: pip-audit -r web/requirements.txt -r ia/requirements.txt
+
+      # Mêmes règles que le pre-commit (pyproject.toml)
+      - name: Ruff (erreurs et style)
+        run: ruff check .
+
+      - name: Ruff (mise en forme)
+        run: ruff format --check .
+
+      # Cohérence de la configuration Django des deux projets
+      - name: Configuration Django (web)
+        working-directory: web
+        run: python manage.py check
+
+      - name: Configuration Django (ia)
+        working-directory: ia
+        run: python manage.py check
