@@ -99,6 +99,18 @@ Après l'ajout ou le changement du secret : `docker compose up -d --force-recrea
 - Le paquet `requests` est installé dans l'image `web` : après changement de `requirements.txt`, `docker compose up -d --build web`.
 - Annulation : retenue dans le cache en mémoire de Django (un seul processus en développement).
 
+## Génération de chauffe et plan B (avant une démo)
+
+- Après un démarrage de Docker ou une longue inactivité, le modèle local n'est plus en mémoire (`docker compose exec ollama ollama ps` vide) : la première génération doit d'abord charger le modèle (2,3 Go) dans la carte graphique et peut dépasser le délai de 60 s (« L'IA n'a pas répondu à temps… »).
+- Avant une démo : lancer une génération de 3 questions (« chauffe »), puis vérifier `ollama ps` : `llama3.2:3b … 100% GPU`. À chaud : environ 9 s pour 5 questions (mesure du 11/10).
+- Plan B (machine sans carte graphique compatible) : `IA_FOURNISSEUR=mistral` dans `.env`, puis `docker compose up -d --force-recreate web ia`. Retour au modèle local : `IA_FOURNISSEUR=ollama`, même commande.
+
+## Export d'un quiz en PDF (tâche 40)
+
+- Adresse : `/quiz/<id>/exporter/` (bouton « Exporter » du détail d'un quiz validé). Version élève uniquement, sans les réponses.
+- Bibliothèque `reportlab` (installe aussi `pillow`) : après changement de `requirements.txt`, `pip install -r web/requirements.txt` (venv) et `docker compose up -d --build web`.
+- Tests : `docker compose exec web python manage.py test quiz.tests_export`.
+
 ## Sécurité de l'environnement (tâche 33)
 
 ### Compte MongoDB de l'application

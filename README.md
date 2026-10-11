@@ -10,7 +10,7 @@ Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications
 - Rédaction de leçons dans un éditeur mis en forme, ou import d'un fichier (.docx, .txt)
 - Génération automatique de quiz par IA : QCM, vrai/faux, questions ouvertes
 - Relecture, modification et validation manuelle des quiz
-- Export des quiz en PDF, CSV ou JSON (version élève ou corrigée)
+- Export d'un quiz validé en PDF, version élève (sans les réponses)
 
 ## Stack technique
 
