@@ -133,3 +133,32 @@ docker compose exec web env | Select-String "ROOT|MISTRAL"           # rien ne d
 ### Limitation des essais de connexion
 
 Après 5 échecs (même adresse et même IP) ou 20 échecs (même IP), la connexion est bloquée 15 minutes. En développement, pour débloquer tout de suite : `docker compose restart web` (le cache est en mémoire).
+
+## Données de test, démonstration, sauvegarde (tâche 35)
+
+### Bases de test
+
+Les tests ne touchent jamais aux données de développement : Django crée une base PostgreSQL `test_eduquizai` et le lanceur `config/test_runner.py` une base MongoDB `test_eduquizai`, toutes deux supprimées à la fin.
+
+### Données de démonstration
+
+```powershell
+# Première fois (le compte n'existe pas) : le mot de passe est contrôlé par les validateurs
+docker compose exec web python manage.py donnees_demo --mot-de-passe "<mot de passe>"
+# Remettre la démo à neuf (supprime les leçons et quiz de l'enseignante de démo uniquement)
+docker compose exec web python manage.py donnees_demo --reinitialiser
+```
+
+Contenu : l'enseignante anne.durand@eduquizai.local, 4 leçons (histoire, SVT, mathématiques, anglais) et 3 quiz (1 validé, 2 brouillons). La leçon d'anglais n'a pas de quiz (génération et suppression de leçon) ; la Révolution française en a un (suppression bloquée). La commande refuse d'écraser des données sans `--reinitialiser`.
+
+### Sauvegarde et restauration
+
+```powershell
+.\scripts\sauvegarde.ps1                                    # crée sauvegardes\<date_heure>\
+.\scripts\restauration.ps1 sauvegardes\2026-10-11_13-36-47   # demande de taper OUI
+```
+
+- Sauvegarde : `pg_dump -Fc` (→ `postgres.dump`) et `mongodump --gzip` avec le compte applicatif (→ `mongo.archive.gz`), faits dans les conteneurs puis copiés par `docker compose cp`.
+- Restauration : arrêt de `web`, `pg_restore --clean --single-transaction`, `mongorestore --drop` limité à la base de l'application, redémarrage de `web` (même en cas d'erreur).
+- `sauvegardes/` est ignoré par Git : il contient des données personnelles. Copier les sauvegardes hors du poste (clé USB, OneDrive) pour qu'elles survivent à une panne du disque.
+- Essai du 11/10/2026 : sauvegarde, suppression d'une leçon et d'un quiz, restauration → tout est revenu.

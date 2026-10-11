@@ -30,6 +30,8 @@ staticfiles/
 # ===== Docker / données locales =====
 data/
 *.dump
+# Sauvegardes des bases (données personnelles) : jamais publiées
+sauvegardes/
 
 # ===== Éditeurs et système =====
 .vscode/*
