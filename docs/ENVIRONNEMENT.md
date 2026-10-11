@@ -162,3 +162,16 @@ Contenu : l'enseignante anne.durand@eduquizai.local, 4 leçons (histoire, SVT, m
 - Restauration : arrêt de `web`, `pg_restore --clean --single-transaction`, `mongorestore --drop` limité à la base de l'application, redémarrage de `web` (même en cas d'erreur).
 - `sauvegardes/` est ignoré par Git : il contient des données personnelles. Copier les sauvegardes hors du poste (clé USB, OneDrive) pour qu'elles survivent à une panne du disque.
 - Essai du 11/10/2026 : sauvegarde, suppression d'une leçon et d'un quiz, restauration → tout est revenu.
+
+## Éco-conception : police allégée (tâche 37)
+
+`web/static/fonts/InterVariable.woff2` est une version réduite de la police Inter (licence SIL OFL 1.1, qui autorise cette modification ; voir `LICENSE_Inter.txt`) : seuls les caractères latins, les accents français, la ponctuation et quelques symboles sont conservés, avec les deux axes variables (graisse `wght`, taille optique `opsz`). Poids : 352 Ko → 102 Ko.
+
+Pour la refaire à partir du fichier d'origine (`InterVariable.woff2` de la distribution officielle d'Inter) :
+
+```powershell
+pip install fonttools brotli
+pyftsubset InterVariable.woff2 --unicodes="U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+2261,U+2713-2714" --layout-features="*" --flavor=woff2 --output-file=web/static/fonts/InterVariable.woff2
+```
+
+Un caractère absent de la police réduite (alphabet non latin, par exemple) s'affiche quand même, avec la police de secours du système.
