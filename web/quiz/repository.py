@@ -147,6 +147,32 @@ class QuizRepository:
             {"id_lecon": int(id_lecon), "id_utilisateur": int(id_utilisateur)}
         )
 
+    def compter_par_lecons(self, ids_lecons, id_utilisateur):
+        """Nombre de quiz de plusieurs leçons de l'enseignant, en une seule requête.
+
+        Sert à la liste des leçons : une agrégation pour toute la page, plutôt
+        qu'un comptage par leçon.
+
+        Returns:
+            Dictionnaire {id_lecon: nombre de quiz} ; une leçon sans quiz n'y
+            figure pas.
+        """
+        identifiants = [int(identifiant) for identifiant in ids_lecons]
+        if not identifiants:
+            return {}
+        resultats = self.collection.aggregate(
+            [
+                {
+                    "$match": {
+                        "id_utilisateur": int(id_utilisateur),
+                        "id_lecon": {"$in": identifiants},
+                    }
+                },
+                {"$group": {"_id": "$id_lecon", "nombre": {"$sum": 1}}},
+            ]
+        )
+        return {resultat["_id"]: resultat["nombre"] for resultat in resultats}
+
     def modifier(
         self,
         id_quiz,

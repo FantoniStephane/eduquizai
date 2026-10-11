@@ -389,6 +389,34 @@ class LeconVuesTests(TestCase):
         self.assertNotContains(reponse, "Quiz de Paul")
         self.assertNotContains(reponse, "Aucun quiz n")
 
+    def test_liste_nombre_de_quiz_et_actions(self):
+        """Colonne Quiz (sans les quiz d'autrui) et liens voir, modifier, supprimer."""
+        repository = QuizRepository()
+        self.addCleanup(repository.collection.delete_many, {})
+        for _ in range(2):
+            creer_quiz(repository, id_utilisateur=self.anne.pk, id_lecon=self.lecon.pk)
+        creer_quiz(repository, id_utilisateur=self.paul.pk, id_lecon=self.lecon.pk)
+        sans_quiz = creer_lecon(self.anne, titre="Les fractions")
+        reponse = self.client.get(reverse("lecons:liste"))
+        nombres = {lecon.pk: lecon.nb_quiz for lecon in reponse.context["lecons"]}
+        self.assertEqual(nombres, {self.lecon.pk: 2, sans_quiz.pk: 0})
+        for nom in ("detail", "modifier", "supprimer"):
+            with self.subTest(action=nom):
+                self.assertContains(
+                    reponse, reverse(f"lecons:{nom}", args=[self.lecon.pk])
+                )
+        self.assertContains(reponse, "Supprimer la leçon La Révolution française")
+
+    def test_liste_si_mongodb_ne_repond_pas(self):
+        """Panne MongoDB : la liste s'affiche, la colonne Quiz indique « — »."""
+        with mock.patch.object(
+            QuizRepository, "compter_par_lecons", side_effect=PyMongoError
+        ):
+            reponse = self.client.get(reverse("lecons:liste"))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertIsNone(reponse.context["lecons"][0].nb_quiz)
+        self.assertContains(reponse, '<td data-l="Quiz">—</td>', html=True)
+
     def test_detail_sans_quiz(self):
         """Une leçon sans quiz affiche le message habituel."""
         reponse = self.client.get(reverse("lecons:detail", args=[self.lecon.pk]))

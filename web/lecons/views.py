@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 class LeconListView(ListView):
     """Leçons de l'enseignant connecté (maquette 03).
 
-    Recherche par titre, filtres matière et niveau, pagination par 6. La colonne
-    Quiz et les actions (voir, modifier, supprimer) viendront avec leurs pages.
+    Recherche par titre, filtres matière et niveau, pagination par 6, nombre de
+    quiz de chaque leçon et actions (voir, modifier, supprimer).
     """
 
     template_name = "lecons/lecon_liste.html"
@@ -62,7 +62,20 @@ class LeconListView(ListView):
         contexte["filtre_actif"] = any(
             self.request.GET.get(nom) for nom in ("q", "matiere", "niveau")
         )
+        self._ajouter_nombre_de_quiz(contexte["lecons"])
         return contexte
+
+    def _ajouter_nombre_de_quiz(self, lecons):
+        """Nombre de quiz de chaque leçon de la page (None si MongoDB est en panne)."""
+        try:
+            nombres = QuizRepository().compter_par_lecons(
+                [lecon.pk for lecon in lecons], self.request.user.pk
+            )
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : nombre de quiz des leçons")
+            nombres = None
+        for lecon in lecons:
+            lecon.nb_quiz = None if nombres is None else nombres.get(lecon.pk, 0)
 
 
 class LeconCreateView(SuccessMessageMixin, CreateView):
