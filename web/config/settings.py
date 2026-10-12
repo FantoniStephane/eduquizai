@@ -192,3 +192,6 @@ LOGOUT_REDIRECT_URL = "comptes:connexion"
 
 # Session : l'enseignant reste connecté 8 heures au plus
 SESSION_COOKIE_AGE = 60 * 60 * 8
+# Cookie CSRF illisible par JavaScript : les scripts de l'application lisent le
+# jeton dans le champ caché du formulaire, jamais dans le cookie
+CSRF_COOKIE_HTTPONLY = True

@@ -16,11 +16,21 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.contrib.auth.decorators import login_not_required
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from .views import DonneesPersonnellesView, TableauDeBordView
 
 urlpatterns = [
+    # Une seule page de connexion : celle de l'administration renvoie vers la
+    # page de l'application (limitation des essais pour tous les comptes)
+    path(
+        "admin/login/",
+        login_not_required(
+            RedirectView.as_view(pattern_name="comptes:connexion", query_string=True)
+        ),
+    ),
     path("admin/", admin.site.urls),
     path("comptes/", include("comptes.urls")),
     path("lecons/", include("lecons.urls")),

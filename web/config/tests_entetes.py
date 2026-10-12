@@ -41,3 +41,19 @@ class EntetesSecuriteTests(TestCase):
         self.assertEqual(reponse.headers["X-Frame-Options"], "DENY")
         self.assertEqual(reponse.headers["X-Content-Type-Options"], "nosniff")
         self.assertEqual(reponse.headers["Referrer-Policy"], "same-origin")
+
+    def test_entetes_ajoutes_apres_le_scan_zap(self):
+        """Fonctions du navigateur interdites, ressources réservées au site."""
+        reponse = self.client.get(reverse("comptes:connexion"))
+        politique = reponse.headers["Permissions-Policy"]
+        for fonction in ("camera", "microphone", "geolocation"):
+            with self.subTest(fonction=fonction):
+                self.assertIn(f"{fonction}=()", politique)
+        entetes = reponse.headers
+        self.assertEqual(entetes["Cross-Origin-Resource-Policy"], "same-origin")
+        self.assertEqual(entetes["Cross-Origin-Embedder-Policy"], "require-corp")
+
+    def test_cookie_csrf_illisible_par_javascript(self):
+        """Le cookie CSRF porte l'attribut HttpOnly."""
+        reponse = self.client.get(reverse("comptes:connexion"))
+        self.assertTrue(reponse.cookies["csrftoken"]["httponly"])

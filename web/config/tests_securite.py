@@ -4,6 +4,10 @@ Ils complètent les tests de chaque fonctionnalité (IDOR, CSRF, injections,
 fichiers importés, JWT…) avec les attaques qui touchent toute l'application :
 redirection ouverte, fixation de session, mot de passe faible, accès à
 l'administration et XSS stocké vu à travers les pages.
+
+La page de connexion de l'administration est aussi vérifiée : elle renvoie vers
+celle de l'application, seule porte d'entrée (point relevé lors du scan OWASP
+ZAP, tâche 45).
 """
 
 from django.contrib import admin
@@ -126,6 +130,22 @@ class AdministrationSecuriteTests(TestCase):
                 reponse = self.client.get(url)
                 self.assertEqual(reponse.status_code, 302)
                 self.assertIn(reverse("admin:login"), reponse["Location"])
+
+    def test_connexion_de_l_admin_renvoyee_vers_l_application(self):
+        """/admin/login/ n'affiche rien : il renvoie à la page de connexion."""
+        reponse = self.client.get(reverse("admin:login") + "?next=/admin/")
+        self.assertRedirects(
+            reponse,
+            reverse("comptes:connexion") + "?next=/admin/",
+            fetch_redirect_response=False,
+        )
+
+    def test_enseignant_sur_l_admin_retrouve_son_tableau_de_bord(self):
+        """Pas de boucle de redirections : l'enseignant revient chez lui."""
+        self.client.force_login(creer_enseignant())
+        reponse = self.client.get(reverse("admin:index"), follow=True)
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual(reponse.redirect_chain[-1][0], reverse("tableau_de_bord"))
 
     def test_ni_lecons_ni_quiz_dans_l_administration(self):
         """L'administrateur ne peut pas lire le contenu des enseignants."""

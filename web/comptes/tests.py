@@ -32,6 +32,15 @@ class ConnexionTests(TestCase):
         self.assertRedirects(reponse, reverse("tableau_de_bord"))
         self.assertContains(self.client.get(reverse("tableau_de_bord")), "Bonjour Anne")
 
+    def test_administrateur_arrive_dans_l_administration(self):
+        """Même page de connexion, mais l'administrateur arrive dans l'admin."""
+        Utilisateur.objects.create_superuser("admin@eduquizai.local", MOT_DE_PASSE)
+        reponse = self.client.post(
+            reverse("comptes:connexion"),
+            {"username": "admin@eduquizai.local", "password": MOT_DE_PASSE},
+        )
+        self.assertRedirects(reponse, reverse("admin:index"))
+
     def test_connexion_refusee_avec_un_mauvais_mot_de_passe(self):
         """Un mauvais mot de passe affiche un message général."""
         reponse = self.client.post(

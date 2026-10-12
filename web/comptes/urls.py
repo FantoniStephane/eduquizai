@@ -1,21 +1,13 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from .forms import ConnexionForm
+from .views import ConnexionView
 
 app_name = "comptes"
 
 urlpatterns = [
     # Connexion et déconnexion
-    path(
-        "connexion/",
-        auth_views.LoginView.as_view(
-            template_name="comptes/connexion.html",
-            authentication_form=ConnexionForm,
-            redirect_authenticated_user=True,
-        ),
-        name="connexion",
-    ),
+    path("connexion/", ConnexionView.as_view(), name="connexion"),
     path("deconnexion/", auth_views.LogoutView.as_view(), name="deconnexion"),
     # Mot de passe oublié : demande du lien, puis confirmation d'envoi
     path(

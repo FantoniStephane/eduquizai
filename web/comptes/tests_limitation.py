@@ -42,6 +42,15 @@ class LimitationConnexionTests(TestCase):
         self.assertContains(reponse, MESSAGE_BLOCAGE)
         self.assertNotIn("_auth_user_id", self.client.session)
 
+    def test_compte_administrateur_protege_lui_aussi(self):
+        """L'administrateur se connecte par la même page : même limitation."""
+        admin = "admin@eduquizai.local"
+        Utilisateur.objects.create_superuser(admin, MOT_DE_PASSE)
+        self._echouer(MAX_ECHECS_COMPTE, adresse=admin)
+        reponse = self._connexion(adresse=admin, mot_de_passe=MOT_DE_PASSE)
+        self.assertContains(reponse, MESSAGE_BLOCAGE)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
     def test_sous_la_limite_la_connexion_reste_possible(self):
         """4 échecs puis le bon mot de passe : connexion acceptée."""
         self._echouer(MAX_ECHECS_COMPTE - 1)
