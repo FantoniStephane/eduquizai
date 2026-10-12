@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml)
 
-Générateur de quiz pédagogiques pour enseignants, piloté par une intelligence artificielle **locale**.
+Générateur de quiz pédagogiques pour enseignants, piloté par une intelligence artificielle (API Mistral, ou modèle local avec Ollama).
+
+**En ligne : https://eduquizai.duckdns.org** — déploiement automatique depuis `main` (voir `docs/DEPLOIEMENT.md`).
 
 Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications (CDA)** — Metz Numeric School, session 2026.
 
@@ -32,7 +34,7 @@ Voir `docs/conception/diagrammes/architecture.png`.
 ## Structure du dépôt
 
 ```
-docs/                    Documentation technique (environnement, plan de tests)
+docs/                    Documentation technique (environnement, plan de tests, déploiement)
 docs/conception/         Diagrammes (UML, MCD, architecture), charte graphique, maquettes
 ```
 
