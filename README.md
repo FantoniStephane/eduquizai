@@ -32,7 +32,7 @@ Voir `docs/conception/diagrammes/architecture.png`.
 ## Structure du dépôt
 
 ```
-docs/                    Documentation technique (environnement)
+docs/                    Documentation technique (environnement, plan de tests)
 docs/conception/         Diagrammes (UML, MCD, architecture), charte graphique, maquettes
 ```
 
