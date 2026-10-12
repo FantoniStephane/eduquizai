@@ -17,4 +17,5 @@ RUN useradd --create-home appuser
 USER appuser
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Gunicorn en production, serveur de développement sinon (voir lancement.sh)
+CMD ["sh", "lancement.sh"]

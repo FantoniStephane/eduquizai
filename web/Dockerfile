@@ -12,9 +12,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Sécurité : l'application ne tourne pas en root
-RUN useradd --create-home appuser
+# Sécurité : l'application ne tourne pas en root. Elle n'a le droit d'écrire
+# que dans le dossier des fichiers statiques (collectstatic en production)
+RUN useradd --create-home appuser \
+    && mkdir -p /app/staticfiles \
+    && chown appuser /app/staticfiles
 USER appuser
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Gunicorn en production, serveur de développement sinon (voir lancement.sh)
+CMD ["sh", "lancement.sh"]
