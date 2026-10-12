@@ -20,7 +20,7 @@ Le plan suit les quatre niveaux de test classiques :
 | Niveau | Ce qui est vérifié | Comment | Volume |
 |---|---|---|---|
 | Tests unitaires | Une fonction isolée, sans base de données ni réseau : conversion HTML ↔ Markdown, lecture d'un fichier importé, contrôle d'un quiz, construction du prompt, jeton JWT, PDF élève | `SimpleTestCase` de Django, doublures (`unittest.mock`) pour Ollama et Mistral | 65 tests (40 web, 25 microservice IA) |
-| Tests d'intégration | Une page ou une API de bout en bout côté serveur : URL, vue, formulaire, gabarit, bases PostgreSQL et MongoDB de test, appel au microservice simulé | `TestCase` et client de test de Django, client de test de DRF pour l'API | 207 tests (201 web, 6 microservice IA) |
+| Tests d'intégration | Une page ou une API de bout en bout côté serveur : URL, vue, formulaire, gabarit, bases PostgreSQL et MongoDB de test, appel au microservice simulé | `TestCase` et client de test de Django, client de test de DRF pour l'API | 213 tests (207 web, 6 microservice IA) |
 | Tests système | L'application complète dans ses conteneurs, avec le vrai modèle d'IA | Parcours manuel dans Chrome (ordinateur et mobile), console sans erreur CSP, Lighthouse, génération réelle (`essai_generation`, `mesure_generation`), essai d'injection de prompt, construction et démarrage des images Docker en CI | À chaque fonctionnalité terminée |
 | Tests d'acceptation | Chaque user story, du point de vue de l'enseignant | Recette : critère d'acceptation vérifié à la main et couvert par des tests automatiques (tableau « Recette des user stories ») | 12 user stories |
 
@@ -35,7 +35,7 @@ Le plan suit les quatre niveaux de test classiques :
 | Ruff et `pip-audit` | Analyse statique du code et des dépendances avant les tests |
 | Chrome (outils de développement), Lighthouse, script d'audit d'accessibilité | Rendu comparé aux maquettes, console (CSP), accessibilité |
 | Commandes `essai_generation` et `mesure_generation` | Génération avec le vrai modèle, mesure du temps et de la validité des réponses |
-| OWASP ZAP | Scan dynamique de l'application en fonctionnement (attaques automatiques sur les pages) |
+| OWASP ZAP | Scan de l'application en fonctionnement, vue de l'extérieur comme par un attaquant (en-têtes, cookies, bibliothèques vulnérables, fuites d'informations) |
 
 ## Environnement de test
 
@@ -55,7 +55,7 @@ La commande `python manage.py donnees_demo` charge un jeu de données cohérent 
 |---|---|---|
 | Qualité | `pip-audit` (aucune dépendance avec une faille connue), Ruff (erreurs, style, mise en forme), `manage.py check` sur les deux projets Django | ~30 s |
 | Tests du microservice IA | 31 tests, Ollama et Mistral remplacés par des doublures ; couverture | ~20 s |
-| Tests de l'application web | 241 tests sur de vraies bases PostgreSQL 17 et MongoDB 8 (services GitHub) ; couverture | ~1 min |
+| Tests de l'application web | 247 tests sur de vraies bases PostgreSQL 17 et MongoDB 8 (services GitHub) ; couverture | ~1 min |
 | Images Docker | Construction des images `web` et `ia` avec les Dockerfiles du projet, puis démarrage de l'application dans chaque image (`manage.py check`) ; taille des images dans le résumé du run (web : 220 Mo, ia : 157 Mo, sur une base `python:3.12-slim`). Lancé seulement si tous les tests passent | ~1 min |
 
 - **Mêmes bases qu'en développement** : le compte MongoDB applicatif est créé par le script utilisé en local (`docker/mongo/initdb/01_utilisateur_app.js`), qui est ainsi vérifié lui aussi.
@@ -65,12 +65,12 @@ La commande `python manage.py donnees_demo` charge un jeu de données cohérent 
 
 ## Tests par fonctionnalité
 
-Au total, **272 tests automatiques** : 241 pour l'application web, 31 pour le microservice IA. Ils passent en 5 secondes en local et environ 2 minutes en CI (installation comprise).
+Au total, **278 tests automatiques** : 247 pour l'application web, 31 pour le microservice IA. Ils passent en 5 secondes en local et environ 2 minutes en CI (installation comprise).
 
 | Fonctionnalité | Fichier de tests | Nb | Exemples de cas vérifiés |
 |---|---|---|---|
-| Comptes, invitation, connexion | `comptes/tests.py` | 9 | Compte créé sans mot de passe, lien d'invitation à usage unique, compte désactivé refusé, déconnexion en POST seulement, message neutre « mot de passe oublié » |
-| Limitation des essais de connexion | `comptes/tests_limitation.py` | 7 | Blocage au 6ᵉ échec même avec le bon mot de passe, blocage d'une IP qui essaie de nombreux comptes, autre IP non bloquée, même message pour un compte inexistant, aucune adresse en clair dans le cache |
+| Comptes, invitation, connexion | `comptes/tests.py` | 10 | Compte créé sans mot de passe, administrateur envoyé dans l'administration, lien d'invitation à usage unique, compte désactivé refusé, déconnexion en POST seulement, message neutre « mot de passe oublié » |
+| Limitation des essais de connexion | `comptes/tests_limitation.py` | 8 | Blocage au 6ᵉ échec même avec le bon mot de passe (compte administrateur compris), blocage d'une IP qui essaie de nombreux comptes, autre IP non bloquée, même message pour un compte inexistant, aucune adresse en clair dans le cache |
 | Leçons (modèle, éditeur, formulaire, pages) | `lecons/tests.py` | 45 | Conversion HTML → Markdown sans perte, script et image piégée supprimés, 20 000 caractères maximum, liste limitée à mes leçons, recherche et filtres, pagination, suppression bloquée si la leçon a des quiz, MongoDB en panne |
 | Import d'un fichier texte | `lecons/tests_importation.py` | 20 | .txt (UTF-8 et Windows) et .docx, faux .docx, bombe ZIP, fichier trop gros, texte trop long refusé sans coupure |
 | Accès aux quiz (MongoDB) | `quiz/tests.py` | 20 | Contrôle d'un quiz, quiz d'un collègue introuvable, identifiants invalides, règle de validation de la collection, suppression d'un compte → ses quiz supprimés, jeton JWT |
@@ -82,7 +82,7 @@ Au total, **272 tests automatiques** : 241 pour l'application web, 31 pour le mi
 | Liste des quiz | `quiz/tests_vues.py` | 13 | Liste limitée à mes quiz, filtre par leçon limité à mes leçons, colonnes lues dans MongoDB |
 | Export PDF élève | `quiz/tests_export.py` | 20 | Aucune réponse ni explication dans la version élève, quiz brouillon refusé, quiz d'autrui introuvable, en-têtes de téléchargement, nom du fichier, textes échappés |
 | Tableau de bord | `config/tests_tableau_de_bord.py` | 9 | Trois chiffres, derniers brouillons et dernières leçons de l'enseignant seulement, MongoDB en panne |
-| Sécurité transverse | `config/tests_securite.py`, `config/tests_entetes.py` | 12 | Redirection ouverte, fixation de session, mots de passe faibles, administration, XSS stocké sur 5 pages, CSP et en-têtes sur toutes les pages |
+| Sécurité transverse | `config/tests_securite.py`, `config/tests_entetes.py` | 16 | Redirection ouverte, fixation de session, mots de passe faibles, administration (page de connexion unique, pas de boucle pour un enseignant), XSS stocké sur 5 pages, CSP et en-têtes ajoutés après le scan ZAP sur toutes les pages, cookie CSRF `HttpOnly` |
 | Pages d'erreur, gabarits, données personnelles | `config/tests_erreurs.py`, `config/tests.py`, `config/tests_donnees_personnelles.py` | 9 | 404, 403, formulaire expiré et 500 sans détail technique ; page RGPD accessible sans connexion |
 | Données de démonstration | `quiz/tests_donnees_demo.py` | 5 | Refus d'écraser des données, réinitialisation limitée à l'enseignante de démonstration |
 | Microservice IA : génération | `ia/generation/tests.py` | 25 | Leçon encadrée dans le prompt, fausse balise neutralisée, schéma JSON par type, nouvelle tentative indiquant au modèle la règle non respectée puis abandon, refus journalisé sans le texte de la leçon, Ollama arrêté, délai dépassé, Mistral choisi par réglage, aucun appel sans clé |
