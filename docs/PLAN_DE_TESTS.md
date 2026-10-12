@@ -19,7 +19,7 @@ Le plan suit les quatre niveaux de test classiques :
 
 | Niveau | Ce qui est vérifié | Comment | Volume |
 |---|---|---|---|
-| Tests unitaires | Une fonction isolée, sans base de données ni réseau : conversion HTML ↔ Markdown, lecture d'un fichier importé, contrôle d'un quiz, construction du prompt, jeton JWT, PDF élève | `SimpleTestCase` de Django, doublures (`unittest.mock`) pour Ollama et Mistral | 63 tests (40 web, 23 microservice IA) |
+| Tests unitaires | Une fonction isolée, sans base de données ni réseau : conversion HTML ↔ Markdown, lecture d'un fichier importé, contrôle d'un quiz, construction du prompt, jeton JWT, PDF élève | `SimpleTestCase` de Django, doublures (`unittest.mock`) pour Ollama et Mistral | 65 tests (40 web, 25 microservice IA) |
 | Tests d'intégration | Une page ou une API de bout en bout côté serveur : URL, vue, formulaire, gabarit, bases PostgreSQL et MongoDB de test, appel au microservice simulé | `TestCase` et client de test de Django, client de test de DRF pour l'API | 207 tests (201 web, 6 microservice IA) |
 | Tests système | L'application complète dans ses conteneurs, avec le vrai modèle d'IA | Parcours manuel dans Chrome (ordinateur et mobile), console sans erreur CSP, Lighthouse, génération réelle (`essai_generation`, `mesure_generation`), essai d'injection de prompt, construction et démarrage des images Docker en CI | À chaque fonctionnalité terminée |
 | Tests d'acceptation | Chaque user story, du point de vue de l'enseignant | Recette : critère d'acceptation vérifié à la main et couvert par des tests automatiques (tableau « Recette des user stories ») | 12 user stories |
@@ -54,7 +54,7 @@ La commande `python manage.py donnees_demo` charge un jeu de données cohérent 
 | Job | Contrôles | Durée |
 |---|---|---|
 | Qualité | `pip-audit` (aucune dépendance avec une faille connue), Ruff (erreurs, style, mise en forme), `manage.py check` sur les deux projets Django | ~30 s |
-| Tests du microservice IA | 29 tests, Ollama et Mistral remplacés par des doublures ; couverture | ~20 s |
+| Tests du microservice IA | 31 tests, Ollama et Mistral remplacés par des doublures ; couverture | ~20 s |
 | Tests de l'application web | 241 tests sur de vraies bases PostgreSQL 17 et MongoDB 8 (services GitHub) ; couverture | ~1 min |
 | Images Docker | Construction des images `web` et `ia` avec les Dockerfiles du projet, puis démarrage de l'application dans chaque image (`manage.py check`) ; taille des images dans le résumé du run (web : 220 Mo, ia : 157 Mo, sur une base `python:3.12-slim`). Lancé seulement si tous les tests passent | ~1 min |
 
@@ -65,7 +65,7 @@ La commande `python manage.py donnees_demo` charge un jeu de données cohérent 
 
 ## Tests par fonctionnalité
 
-Au total, **270 tests automatiques** : 241 pour l'application web, 29 pour le microservice IA. Ils passent en 5 secondes en local et environ 2 minutes en CI (installation comprise).
+Au total, **272 tests automatiques** : 241 pour l'application web, 31 pour le microservice IA. Ils passent en 5 secondes en local et environ 2 minutes en CI (installation comprise).
 
 | Fonctionnalité | Fichier de tests | Nb | Exemples de cas vérifiés |
 |---|---|---|---|
@@ -85,7 +85,7 @@ Au total, **270 tests automatiques** : 241 pour l'application web, 29 pour le mi
 | Sécurité transverse | `config/tests_securite.py`, `config/tests_entetes.py` | 12 | Redirection ouverte, fixation de session, mots de passe faibles, administration, XSS stocké sur 5 pages, CSP et en-têtes sur toutes les pages |
 | Pages d'erreur, gabarits, données personnelles | `config/tests_erreurs.py`, `config/tests.py`, `config/tests_donnees_personnelles.py` | 9 | 404, 403, formulaire expiré et 500 sans détail technique ; page RGPD accessible sans connexion |
 | Données de démonstration | `quiz/tests_donnees_demo.py` | 5 | Refus d'écraser des données, réinitialisation limitée à l'enseignante de démonstration |
-| Microservice IA : génération | `ia/generation/tests.py` | 23 | Leçon encadrée dans le prompt, fausse balise neutralisée, schéma JSON par type, nouvelle tentative puis abandon si réponse invalide, Ollama arrêté, délai dépassé, Mistral choisi par réglage, aucun appel sans clé |
+| Microservice IA : génération | `ia/generation/tests.py` | 25 | Leçon encadrée dans le prompt, fausse balise neutralisée, schéma JSON par type, nouvelle tentative indiquant au modèle la règle non respectée puis abandon, refus journalisé sans le texte de la leçon, Ollama arrêté, délai dépassé, Mistral choisi par réglage, aucun appel sans clé |
 | Microservice IA : API | `ia/generation/tests_api.py` | 6 | Jetons invalides et `alg: none` refusés (401), GET refusé (405), paramètres invalides, erreurs de l'IA transmises proprement |
 
 ## Recette des user stories

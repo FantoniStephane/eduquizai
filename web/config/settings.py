@@ -117,9 +117,9 @@ IA = {
     # Attente maximale d'une génération, en secondes : plus que le délai du
     # modèle (60 s) pour laisser place à la nouvelle tentative du microservice
     "DELAI": config("IA_DELAI", default=130, cast=int),
-    # « ollama » (modèle local) ou « mistral » (API externe) : choisi pour le
-    # microservice, repris ici pour informer l'enseignant
-    "FOURNISSEUR": config("IA_FOURNISSEUR", default="ollama"),
+    # « mistral » (API externe, par défaut) ou « ollama » (modèle local) :
+    # choisi pour le microservice, repris ici pour informer l'enseignant
+    "FOURNISSEUR": config("IA_FOURNISSEUR", default="mistral"),
 }
 
 # Tests : bases de test PostgreSQL (Django) et MongoDB (même principe)

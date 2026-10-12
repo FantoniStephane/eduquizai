@@ -43,10 +43,11 @@ TIME_ZONE = "Europe/Paris"
 USE_I18N = True
 USE_TZ = True
 
-# Fournisseur d'IA : « ollama » (modèle local, par défaut : les leçons ne
-# quittent pas l'infrastructure) ou « mistral » (API externe, plus rapide)
+# Fournisseur d'IA : « mistral » (API externe, par défaut : rapide et fiable,
+# serveur de production sans carte graphique) ou « ollama » (modèle local :
+# développement, fonctionnement hors ligne, leçons gardées sur la machine)
 IA_FOURNISSEUR = config(
-    "IA_FOURNISSEUR", default="ollama", cast=Choices(["ollama", "mistral"])
+    "IA_FOURNISSEUR", default="mistral", cast=Choices(["ollama", "mistral"])
 )
 
 # Modèle de langage local (conteneur « ollama »)

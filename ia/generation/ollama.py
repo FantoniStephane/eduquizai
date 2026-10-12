@@ -1,6 +1,7 @@
 """Fournisseur « ollama » : modèle de langage local (API HTTP d'Ollama).
 
-Choix par défaut : les leçons ne quittent pas l'infrastructure.
+Fournisseur local, au choix par réglage : développement, fonctionnement hors
+ligne, leçons gardées sur la machine (le fournisseur par défaut est Mistral).
 """
 
 import requests

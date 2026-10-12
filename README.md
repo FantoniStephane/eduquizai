@@ -19,7 +19,7 @@ Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications
 | Couche | Technologie |
 |---|---|
 | Application | Python · Django (templates) |
-| Microservice IA | Django REST Framework · JWT · Ollama (modèle local) |
+| Microservice IA | Django REST Framework · JWT · API Mistral (par défaut) ou Ollama (modèle local) |
 | Bases de données | PostgreSQL (utilisateurs, leçons) · MongoDB (quiz) |
 | DevOps | Docker · Docker Compose · GitHub Actions |
 | Qualité | Ruff · pre-commit · tests Django · coverage |

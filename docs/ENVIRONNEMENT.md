@@ -48,7 +48,7 @@ docker exec ollama-test ollama ps
 
 ## Modèles d'IA et fournisseur (sprint 2)
 
-Le microservice `ia` utilise par défaut le modèle local d'Ollama. Modèles comparés :
+Le microservice `ia` utilise **par défaut l'API Mistral** (`IA_FOURNISSEUR=mistral`) : sur une vraie leçon, le modèle local de 3 milliards de paramètres produisait des QCM refusés par le contrôle (choix en double), alors que Mistral génère un quiz valide en 3,5 s (jeu d'essai du 12/10/2026). Le modèle local d'Ollama reste disponible par réglage, pour le développement et le fonctionnement hors ligne. Modèles locaux comparés :
 
 ```
 docker compose exec ollama ollama pull qwen2.5:3b
@@ -59,14 +59,16 @@ docker compose exec ollama ollama ps
 
 `ollama ps` doit afficher `100% GPU` dans la colonne PROCESSOR : le contexte est limité à 2 048 jetons pour que le modèle tienne entièrement dans les 4 Go de la carte graphique.
 
-**Alternative : API Mistral.** Créer une clé sur la console de Mistral AI, puis la renseigner dans `.env` (jamais dans le code ni dans Git) :
+**Fournisseur par défaut : API Mistral.** Créer une clé sur la console de Mistral AI, puis la renseigner dans `.env` (jamais dans le code ni dans Git) :
 
 ```
 IA_FOURNISSEUR=mistral
 MISTRAL_API_KEY=<clé personnelle>
 ```
 
-puis `docker compose up -d --force-recreate ia`. Mesure : `docker compose exec ia python manage.py mesure_generation --fournisseur mistral ministral-3b-2512`.
+puis `docker compose up -d --force-recreate web ia`. Pour travailler avec le modèle local : `IA_FOURNISSEUR=ollama`, même commande.
+
+**Confidentialité** : avec l'offre gratuite de Mistral, les requêtes peuvent servir à entraîner leurs modèles ; on n'y envoie que des leçons d'exemple. Une mise en production avec de vraies leçons demande une offre qui exclut les données de l'entraînement (à vérifier dans les conditions de Mistral AI). Mesure : `docker compose exec ia python manage.py mesure_generation --fournisseur mistral ministral-3b-2512`.
 
 ## Extensions VS Code
 
@@ -99,11 +101,10 @@ Après l'ajout ou le changement du secret : `docker compose up -d --force-recrea
 - Le paquet `requests` est installé dans l'image `web` : après changement de `requirements.txt`, `docker compose up -d --build web`.
 - Annulation : retenue dans le cache en mémoire de Django (un seul processus en développement).
 
-## Génération de chauffe et plan B (avant une démo)
+## Avant une démo
 
-- Après un démarrage de Docker ou une longue inactivité, le modèle local n'est plus en mémoire (`docker compose exec ollama ollama ps` vide) : la première génération doit d'abord charger le modèle (2,3 Go) dans la carte graphique et peut dépasser le délai de 60 s (« L'IA n'a pas répondu à temps… »).
-- Avant une démo : lancer une génération de 3 questions (« chauffe »), puis vérifier `ollama ps` : `llama3.2:3b … 100% GPU`. À chaud : environ 9 s pour 5 questions (mesure du 11/10).
-- Plan B (machine sans carte graphique compatible) : `IA_FOURNISSEUR=mistral` dans `.env`, puis `docker compose up -d --force-recreate web ia`. Retour au modèle local : `IA_FOURNISSEUR=ollama`, même commande.
+- Démo avec le fournisseur par défaut (Mistral) : vérifier `IA_FOURNISSEUR=mistral` et `MISTRAL_API_KEY` dans `.env`, puis une génération d'essai : `docker compose exec ia python manage.py essai_generation --nombre 3` (environ 3 s). Connexion Internet indispensable.
+- Avec le modèle local (`IA_FOURNISSEUR=ollama`) : après un démarrage de Docker ou une longue inactivité, le modèle n'est plus en mémoire (`docker compose exec ollama ollama ps` vide) et la première génération peut dépasser le délai de 60 s ; lancer d'abord une génération de 3 questions (« chauffe »), puis vérifier `ollama ps` : `llama3.2:3b … 100% GPU`. Le petit modèle échoue sur certaines leçons (QCM aux choix en double, refusés par le contrôle) : il n'est pas utilisé pour la démo.
 
 ## Export d'un quiz en PDF (tâche 40)
 
