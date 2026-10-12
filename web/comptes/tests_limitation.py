@@ -1,10 +1,16 @@
 """Tests de la limitation des essais de connexion (force brute)."""
 
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from .limitation import MAX_ECHECS_COMPTE, MAX_ECHECS_IP, MESSAGE_BLOCAGE, _cles
+from .limitation import (
+    MAX_ECHECS_COMPTE,
+    MAX_ECHECS_IP,
+    MESSAGE_BLOCAGE,
+    _cles,
+    adresse_ip,
+)
 from .models import Utilisateur
 
 ADRESSE = "anne.durand@eduquizai.local"
@@ -92,3 +98,44 @@ class LimitationConnexionTests(TestCase):
         for cle in _cles(ADRESSE, "10.0.0.1"):
             self.assertNotIn("anne", cle)
             self.assertNotIn("10.0.0.1", cle)
+
+
+class AdresseIpTests(TestCase):
+    """Adresse IP du visiteur, en direct ou derrière le proxy de production."""
+
+    def _requete(self, transmises=None):
+        """Requête arrivée par le proxy 172.18.0.2, avec X-Forwarded-For."""
+        entetes = {"REMOTE_ADDR": "172.18.0.2"}
+        if transmises is not None:
+            entetes["HTTP_X_FORWARDED_FOR"] = transmises
+        return RequestFactory().get("/", **entetes)
+
+    def test_sans_proxy_l_en_tete_est_ignore(self):
+        """En développement, X-Forwarded-For (falsifiable) n'est pas lu."""
+        self.assertEqual(adresse_ip(self._requete("6.6.6.6")), "172.18.0.2")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_derriere_le_proxy_adresse_ajoutee_par_le_proxy(self):
+        """Une IP inventée par le visiteur ne remplace pas la vraie."""
+        requete = self._requete("6.6.6.6, 203.0.113.7")
+        self.assertEqual(adresse_ip(requete), "203.0.113.7")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_derriere_le_proxy_sans_en_tete(self):
+        """En-tête absent : l'adresse de connexion sert par défaut."""
+        self.assertEqual(adresse_ip(self._requete()), "172.18.0.2")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_changer_d_ip_inventee_ne_debloque_pas(self):
+        """L'attaquant qui change d'IP inventée à chaque essai reste bloqué."""
+        cache.clear()
+        self.addCleanup(cache.clear)
+        Utilisateur.objects.create_user(ADRESSE, MOT_DE_PASSE)
+        for numero in range(MAX_ECHECS_COMPTE + 1):
+            reponse = self.client.post(
+                reverse("comptes:connexion"),
+                {"username": ADRESSE, "password": "faux"},
+                REMOTE_ADDR="172.18.0.2",
+                HTTP_X_FORWARDED_FOR=f"6.6.6.{numero}, 203.0.113.7",
+            )
+        self.assertContains(reponse, MESSAGE_BLOCAGE)

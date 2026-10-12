@@ -53,6 +53,14 @@ class EntetesSecuriteTests(TestCase):
         self.assertEqual(entetes["Cross-Origin-Resource-Policy"], "same-origin")
         self.assertEqual(entetes["Cross-Origin-Embedder-Policy"], "require-corp")
 
+    def test_fichiers_statiques_avec_les_en_tetes(self):
+        """Les fichiers servis par WhiteNoise portent aussi les en-têtes."""
+        reponse = self.client.get("/static/css/style.css")
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual(reponse.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(reponse.headers["Cross-Origin-Resource-Policy"], "same-origin")
+        self.assertIn("camera=()", reponse.headers["Permissions-Policy"])
+
     def test_cookie_csrf_illisible_par_javascript(self):
         """Le cookie CSRF porte l'attribut HttpOnly."""
         reponse = self.client.get(reverse("comptes:connexion"))

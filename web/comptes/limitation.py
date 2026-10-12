@@ -12,13 +12,14 @@ un attaquant qui possède un compte ne peut pas effacer ses autres échecs.
 Les clés du cache sont des empreintes SHA-256 : aucune adresse e-mail ni IP
 n'y est stockée en clair.
 
-Limites (déploiement) : le cache doit être partagé entre les processus du
-serveur (Redis ou cache en base) et, derrière un proxy inverse, l'adresse IP
-réelle doit être lue de façon sûre.
+En production, le cache est partagé entre les processus du serveur (table
+PostgreSQL, voir ``settings.CACHES``) et l'adresse IP réelle est lue derrière
+le proxy inverse (voir ``adresse_ip``).
 """
 
 import hashlib
 
+from django.conf import settings
 from django.core.cache import cache
 
 MAX_ECHECS_COMPTE = 5
@@ -28,9 +29,26 @@ MESSAGE_BLOCAGE = "Trop de tentatives de connexion. Réessayez dans 15 minutes."
 
 
 def adresse_ip(request):
-    """Adresse IP du visiteur (vide si la requête est inconnue)."""
+    """Adresse IP du visiteur (vide si la requête est inconnue).
+
+    Derrière un proxy (Traefik en production), REMOTE_ADDR est l'adresse du
+    proxy : l'IP du visiteur est dans l'en-tête X-Forwarded-For. Le visiteur
+    peut y écrire ce qu'il veut, mais chaque proxy ajoute l'adresse qu'il voit
+    à la fin : on lit donc l'adresse ajoutée par notre proxy (la dernière),
+    jamais la première, qu'un attaquant pourrait inventer pour échapper au
+    blocage.
+    """
     if request is None:
         return ""
+    proxys = settings.PROXYS_DE_CONFIANCE
+    if proxys:
+        transmises = [
+            ip.strip()
+            for ip in request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")
+            if ip.strip()
+        ]
+        if len(transmises) >= proxys:
+            return transmises[-proxys]
     return request.META.get("REMOTE_ADDR", "")
 
 

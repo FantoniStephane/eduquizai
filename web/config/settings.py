@@ -30,6 +30,15 @@ ALLOWED_HOSTS = config(
     "DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv()
 )
 
+# Production : un seul interrupteur, défini uniquement sur le serveur. Il active
+# HTTPS, le cache partagé et la lecture de l'IP réelle derrière Traefik (voir la
+# fin du fichier). Il est distinct de DEBUG : les tests (CI comprise) tournent
+# sans DEBUG, mais pas derrière HTTPS.
+PRODUCTION = config("DJANGO_PRODUCTION", default=False, cast=bool)
+
+# Origines autorisées pour les formulaires en HTTPS (ex. https://eduquizai.fr)
+CSRF_TRUSTED_ORIGINS = config("DJANGO_CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+
 
 # Application definition
 
@@ -39,6 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    # Fichiers statiques servis par WhiteNoise, aussi avec « runserver »
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "comptes",
     "lecons",
@@ -49,6 +60,9 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     # En-tête Content-Security-Policy : seuls nos propres scripts s'exécutent
     "config.middleware.PolitiqueSecuriteContenuMiddleware",
+    # Fichiers statiques : placé après la CSP pour qu'ils reçoivent aussi tous
+    # les en-têtes de sécurité (relevé par le scan OWASP ZAP)
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -165,9 +179,27 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = (
-    BASE_DIR / "staticfiles"
-)  # fichiers rassemblés par collectstatic (déploiement)
+# Fichiers rassemblés par collectstatic, seulement en production (ailleurs,
+# WhiteNoise lit directement les fichiers sources)
+STATIC_ROOT = BASE_DIR / "staticfiles" if PRODUCTION else None
+
+# En production, fichiers compressés (gzip, Brotli) et versionnés (empreinte
+# dans le nom : mise en cache longue durée sans risque de version périmée)
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if PRODUCTION
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        )
+    },
+}
+# Hors production, WhiteNoise lit les fichiers sources (pas de collectstatic) et
+# les cherche à chaque demande, au lieu de tout parcourir au démarrage (chaque
+# test démarre l'application : sans ce réglage, les tests sont deux fois plus lents)
+WHITENOISE_USE_FINDERS = not PRODUCTION
+WHITENOISE_AUTOREFRESH = not PRODUCTION
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -195,3 +227,44 @@ SESSION_COOKIE_AGE = 60 * 60 * 8
 # Cookie CSRF illisible par JavaScript : les scripts de l'application lisent le
 # jeton dans le champ caché du formulaire, jamais dans le cookie
 CSRF_COOKIE_HTTPONLY = True
+
+# Cache : en mémoire en développement ; en production, partagé entre les
+# processus de Gunicorn grâce à une table PostgreSQL (limitation des essais de
+# connexion, annulation des générations). Table créée au démarrage du
+# conteneur par « createcachetable ».
+CACHES = {
+    "default": (
+        {
+            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+            "LOCATION": "cache_eduquizai",
+        }
+        if PRODUCTION
+        else {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+    )
+}
+
+# Nombre de proxys de confiance devant l'application (Traefik en production) :
+# l'IP réelle du visiteur est lue dans l'en-tête X-Forwarded-For
+PROXYS_DE_CONFIANCE = 1 if PRODUCTION else 0
+
+if PRODUCTION:
+    # Traefik reçoit le HTTPS et transmet en HTTP : il l'indique par cet en-tête
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # HSTS : le navigateur n'utilisera plus que HTTPS pendant un an
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # Liste de préchargement HSTS des navigateurs : réservée au propriétaire du
+    # domaine principal (ici duckdns.org, qui n'est pas le nôtre). Avertissement
+    # de « check --deploy » volontairement désactivé, pour cette raison.
+    SILENCED_SYSTEM_CHECKS = ["security.W021"]
+    # Sans DEBUG, Django n'affiche plus les erreurs : on les envoie dans les
+    # journaux du conteneur (lus avec « docker logs » ou dans Coolify)
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {"console": {"class": "logging.StreamHandler"}},
+        "root": {"handlers": ["console"], "level": "WARNING"},
+    }
