@@ -27,18 +27,20 @@ class ConnexionView(LoginView):
         return super().get_default_redirect_url()
 
     def get_redirect_url(self):
-        """Page demandée (« next »), sauf l'administration pour un enseignant.
+        """Page demandée (« next »), si elle correspond au côté de l'utilisateur.
 
-        Un enseignant connecté qui ouvre /admin/ est renvoyé ici par Django ;
-        sans ce filtre, il serait aussitôt redirigé vers /admin/, puis ici, et
-        ainsi de suite. Il retrouve simplement son tableau de bord.
+        - Un enseignant connecté qui ouvre /admin/ est renvoyé ici par Django ;
+          sans ce filtre, il serait aussitôt redirigé vers /admin/, puis ici, et
+          ainsi de suite. Il retrouve simplement son tableau de bord.
+        - L'administrateur n'a rien à faire côté enseignant : une page demandée
+          hors de l'administration (souvent « / », la page d'accueil) est
+          ignorée, il arrive dans l'administration.
         """
         url = super().get_redirect_url()
         utilisateur = self.request.user
-        if (
-            url.startswith(reverse("admin:index"))
-            and utilisateur.is_authenticated
-            and not utilisateur.is_staff
-        ):
+        if not utilisateur.is_authenticated:
+            return url
+        vers_admin = url.startswith(reverse("admin:index"))
+        if vers_admin != utilisateur.is_staff:
             return ""
         return url

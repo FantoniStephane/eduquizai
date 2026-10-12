@@ -41,6 +41,15 @@ class ConnexionTests(TestCase):
         )
         self.assertRedirects(reponse, reverse("admin:index"))
 
+    def test_administrateur_dans_l_administration_meme_depuis_l_accueil(self):
+        """Arrivé par la page d'accueil (« next=/ »), l'admin va dans l'admin."""
+        Utilisateur.objects.create_superuser("admin@eduquizai.local", MOT_DE_PASSE)
+        reponse = self.client.post(
+            reverse("comptes:connexion") + "?next=/",
+            {"username": "admin@eduquizai.local", "password": MOT_DE_PASSE},
+        )
+        self.assertRedirects(reponse, reverse("admin:index"))
+
     def test_connexion_refusee_avec_un_mauvais_mot_de_passe(self):
         """Un mauvais mot de passe affiche un message général."""
         reponse = self.client.post(
