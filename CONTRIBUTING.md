@@ -3,15 +3,13 @@
 ## Branches
 
 ```
-main                 version stable, toujours fonctionnelle
- └── develop         version en cours de développement
-      ├── feature/<nom>   une branche par fonctionnalité (ex. feature/lecon-crud)
-      └── fix/<nom>       une branche par correction (ex. fix/titre-vide)
+main        version stable, déployée en production
+ └── develop    version en cours de développement
 ```
 
-- On ne travaille jamais directement sur `main`.
-- Une fonctionnalité terminée et testée est fusionnée dans `develop`.
-- En fin de sprint, `develop` est fusionnée dans `main`.
+- On ne travaille jamais directement sur `main` : le développement se fait sur `develop`.
+- Quand une partie est terminée et testée (tests et CI verts), `develop` est fusionnée dans `main` par une demande de fusion (pull request) : c'est ce qui déclenche le déploiement.
+- Le projet est développé par une seule personne, donc pas de branche par fonctionnalité. Dans une équipe, on ajouterait des branches `feature/<nom>` et `fix/<nom>` créées depuis `develop`.
 
 ## Messages de commit
 
