@@ -286,8 +286,9 @@ jobs:
           COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
+          # POST : Coolify 4.4 n'accepte plus la méthode GET sur cette route
           code=$(curl --silent --show-error --output reponse.json \
-            --write-out "%{http_code}" \
+            --request POST --write-out "%{http_code}" \
             --header "Authorization: Bearer $COOLIFY_TOKEN" \
             "$COOLIFY_WEBHOOK")
           echo "Réponse de Coolify : HTTP $code"
