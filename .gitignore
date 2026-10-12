@@ -43,3 +43,7 @@ sauvegardes/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Scripts personnels de démarrage et d'arrêt du poste (non publiés)
+arret.py
+demarrage.py
