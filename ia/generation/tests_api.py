@@ -6,7 +6,7 @@ from unittest import mock
 
 import jwt
 from django.conf import settings
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APIClient
 
 from .erreurs import DelaiDepasseError, IAIndisponibleError
@@ -81,6 +81,8 @@ class AuthentificationTests(SimpleTestCase):
         self.assertEqual(client.get(URL).status_code, 405)
 
 
+# Tests écrits pour Ollama : indépendants du fournisseur choisi dans .env
+@override_settings(IA_FOURNISSEUR="ollama")
 @mock.patch("generation.ollama.requests.post")
 class GenererQuizApiTests(SimpleTestCase):
     """Appels authentifiés de l'API de génération."""

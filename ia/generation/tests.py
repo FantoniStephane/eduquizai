@@ -141,6 +141,8 @@ class ParametresTests(SimpleTestCase):
                 post.assert_not_called()
 
 
+# Tests écrits pour Ollama : indépendants du fournisseur choisi dans .env
+@override_settings(IA_FOURNISSEUR="ollama")
 @mock.patch("generation.ollama.requests.post")
 class GenerationTests(SimpleTestCase):
     """Génération avec un faux Ollama (aucun modèle réel n'est appelé)."""
@@ -199,6 +201,39 @@ class GenerationTests(SimpleTestCase):
         ]
         self.assertEqual(len(self.generer()), 3)
         self.assertEqual(post.call_count, 2)
+
+    def test_nouvelle_tentative_avec_la_raison_du_refus(self, post):
+        """La 2e tentative indique au modèle la règle non respectée."""
+        doublon = qcm()
+        doublon["choix"] = ["Lave et cendres", "Cendres et lave", "Gaz", "Eau"]
+        post.side_effect = [
+            reponse_ollama([doublon, vrai_faux(), ouverte()]),
+            reponse_ollama([qcm(), vrai_faux(), ouverte()]),
+        ]
+        self.generer()
+        premier, second = (
+            appel.kwargs["json"]["messages"] for appel in post.call_args_list
+        )
+        self.assertNotIn("refusée", premier[-1]["content"])
+        self.assertIn("Question 1 : choix en double.", second[-1]["content"])
+        self.assertEqual(premier[0], second[0])  # consignes inchangées
+
+    def test_refus_journalise_sans_la_lecon(self, post):
+        """Le journal donne la raison du refus, jamais le contenu de la leçon."""
+        post.side_effect = [
+            reponse_ollama([qcm()]),
+            reponse_ollama([qcm(), vrai_faux(), ouverte()]),
+        ]
+        with self.assertLogs("generation.service", level="WARNING") as journal:
+            self.generer()
+        self.assertEqual(
+            journal.output,
+            [
+                "WARNING:generation.service:Tentative 1 refusée : "
+                "1 questions reçues au lieu de 3."
+            ],
+        )
+        self.assertNotIn("croûte", "".join(journal.output))
 
     def test_abandon_apres_deux_reponses_invalides(self, post):
         """Après deux réponses invalides, la génération échoue."""
@@ -274,6 +309,8 @@ class GenerationTests(SimpleTestCase):
             appeler_ollama([], {})
 
 
+# Tests écrits pour Ollama : indépendants du fournisseur choisi dans .env
+@override_settings(IA_FOURNISSEUR="ollama")
 @mock.patch("generation.ollama.requests.post")
 class EssaiGenerationTests(SimpleTestCase):
     """Commande essai_generation (avec un faux Ollama)."""
@@ -374,6 +411,8 @@ class SchemaTests(SimpleTestCase):
             self.assertFalse(question["additionalProperties"])
 
 
+# Tests écrits pour Ollama : indépendants du fournisseur choisi dans .env
+@override_settings(IA_FOURNISSEUR="ollama")
 @mock.patch("generation.ollama.requests.post")
 class MesureGenerationTests(SimpleTestCase):
     """Commande mesure_generation (avec un faux Ollama)."""

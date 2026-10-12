@@ -3,15 +3,20 @@
 Enchaîne les étapes : contrôle de la demande, construction du prompt, appel
 du fournisseur d'IA choisi dans les réglages (modèle local Ollama ou API
 Mistral) et vérification de sa réponse. Si la réponse est invalide, une
-seule nouvelle tentative est faite avant d'abandonner.
+seule nouvelle tentative est faite, en indiquant au modèle la raison du
+refus, avant d'abandonner.
 """
+
+import logging
 
 from django.conf import settings
 
 from .mistral import appeler_mistral
 from .ollama import appeler_ollama
-from .prompt import construire_messages, schema_reponse
+from .prompt import ajouter_correction, construire_messages, schema_reponse
 from .validation import ReponseInvalideError, valider_reponse, verifier_parametres
+
+logger = logging.getLogger(__name__)
 
 TENTATIVES = 2
 
@@ -50,6 +55,9 @@ def generer_quiz(contenu, *, difficulte, types, nombre, fournisseur=None, modele
         brut = appeler(messages, schema, modele)
         try:
             return valider_reponse(brut, types, nombre)
-        except ReponseInvalideError:
+        except ReponseInvalideError as erreur:
             if tentative == TENTATIVES:
                 raise
+            # Seule la règle non respectée est journalisée (pas la leçon)
+            logger.warning("Tentative %d refusée : %s", tentative, erreur)
+            messages = ajouter_correction(messages, erreur)

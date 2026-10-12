@@ -29,6 +29,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
+# Lanceur de tests : journaux masqués pendant les tests
+TEST_RUNNER = "config.test_runner.IaTestRunner"
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Pas de base de données : le jeton JWT suffit à identifier l'appelant

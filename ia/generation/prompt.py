@@ -79,6 +79,28 @@ def construire_messages(contenu, difficulte, types, nombre):
     ]
 
 
+def ajouter_correction(messages, erreur):
+    """Retourne les messages d'une nouvelle tentative, avec la raison du refus.
+
+    Le modèle ne repart pas de zéro : il sait quelle règle sa réponse
+    précédente n'a pas respectée. Seule la raison du refus est ajoutée
+    (message du contrôle, qui ne contient jamais le texte du modèle ni celui
+    de la leçon) : le contexte du modèle local reste petit.
+
+    Args:
+        messages: messages de la première tentative (non modifiés).
+        erreur: raison du refus (ex. « Question 3 : choix en double. »).
+    """
+    correction = (
+        "\n\nAttention : une réponse précédente à cette demande a été refusée "
+        f"pour cette raison : {erreur} Corrige ce point et respecte toutes les "
+        f"règles ; en particulier, chaque QCM a {CHOIX_QCM} choix vraiment "
+        "différents (jamais les mêmes mots dans un autre ordre)."
+    )
+    *debut, demande = messages
+    return [*debut, {**demande, "content": demande["content"] + correction}]
+
+
 _TEXTE = {"type": "string", "minLength": 1}
 
 
