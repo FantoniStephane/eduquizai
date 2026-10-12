@@ -279,13 +279,18 @@ jobs:
     steps:
       # Secrets enregistrés dans GitHub (jamais dans le dépôt) : l'URL du
       # webhook de la ressource Coolify et un jeton d'API Coolify.
-      # « --fail » : le job échoue si Coolify refuse l'ordre.
+      # Le job échoue si Coolify refuse l'ordre ; sa réponse (code HTTP et
+      # message, sans aucun secret) est affichée pour comprendre le refus.
       - name: Déclencher le déploiement
         env:
           COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
-          curl --fail --silent --show-error \
+          code=$(curl --silent --show-error --output reponse.json \
+            --write-out "%{http_code}" \
             --header "Authorization: Bearer $COOLIFY_TOKEN" \
-            "$COOLIFY_WEBHOOK"
+            "$COOLIFY_WEBHOOK")
+          echo "Réponse de Coolify : HTTP $code"
+          head -c 500 reponse.json; echo
+          if [ "$code" != "200" ]; then exit 1; fi
           echo "### Déploiement demandé à Coolify" >> "$GITHUB_STEP_SUMMARY"
