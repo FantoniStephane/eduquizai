@@ -1,9 +1,10 @@
-# Intégration continue d'EduQuizAI (tâches 41 et 42).
+# Intégration continue et déploiement d'EduQuizAI (tâches 41, 42 et 46).
 #
 # À chaque push sur develop ou main, et à chaque pull request vers main,
 # GitHub Actions vérifie le projet sur une machine neuve. Les jobs
 # s'enchaînent avec « needs » : si une étape échoue, les suivantes ne sont
-# pas lancées (plus tard, aucun déploiement d'un code qui ne passe pas).
+# pas lancées : aucun déploiement d'un code qui ne passe pas tous les contrôles.
+# Le déploiement n'a lieu que sur un push vers main (voir le dernier job).
 #
 # Machine fixée (ubuntu-24.04) plutôt que « ubuntu-latest » : l'environnement
 # ne change pas sans qu'on le décide (reproductibilité).
@@ -85,6 +86,11 @@ jobs:
       - name: Configuration Django (ia)
         working-directory: ia
         run: python manage.py check
+
+      # Le compose de production (Coolify) est-il valide ? Les secrets absents
+      # ici sont seulement signalés : ils sont saisis dans Coolify
+      - name: Compose de production (syntaxe)
+        run: docker compose -f docker-compose.prod.yml config --quiet
 
   tests-ia:
     name: Tests du microservice IA (+ couverture)
@@ -258,3 +264,28 @@ jobs:
           echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
           docker image ls --filter "reference=eduquizai-*:ci" \
             --format "| {{.Repository}} | {{.Size}} |" >> "$GITHUB_STEP_SUMMARY"
+
+  # Déploiement sur le serveur (VPS avec Coolify), seulement après un push sur
+  # main et si tout ce qui précède est vert. Coolify reçoit l'ordre par son
+  # webhook, récupère le code de main, reconstruit les images avec
+  # docker-compose.prod.yml et remplace les conteneurs.
+  deploiement:
+    name: Déploiement (Coolify)
+    runs-on: ubuntu-24.04
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Environnement GitHub « production » : historique des déploiements
+    environment: production
+    steps:
+      # Secrets enregistrés dans GitHub (jamais dans le dépôt) : l'URL du
+      # webhook de la ressource Coolify et un jeton d'API Coolify.
+      # « --fail » : le job échoue si Coolify refuse l'ordre.
+      - name: Déclencher le déploiement
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_WEBHOOK"
+          echo "### Déploiement demandé à Coolify" >> "$GITHUB_STEP_SUMMARY"
