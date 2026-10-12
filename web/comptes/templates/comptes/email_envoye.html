@@ -1,0 +1,17 @@
+{% extends "base_connexion.html" %}
+{% comment %}
+  Maquette 13b. Message identique que l'adresse existe ou non :
+  on ne révèle pas quelles adresses possèdent un compte.
+{% endcomment %}
+
+{% block titre %}E-mail envoyé{% endblock %}
+
+{% block contenu %}
+  <div class="carte">
+    <h1>Vérifiez votre messagerie</h1>
+    <p class="muted">Mot de passe oublié</p>
+    <div class="alerte-succes" role="status">Si un compte existe pour cette adresse, un e-mail vient de lui être envoyé.</div>
+    <p class="texte">Il contient un lien personnel, valable 72 heures, pour choisir un nouveau mot de passe. Pensez à vérifier vos courriers indésirables.</p>
+    <a class="btn btn-primaire btn-bloc" href="{% url 'comptes:connexion' %}">Retour à la connexion</a>
+  </div>
+{% endblock %}

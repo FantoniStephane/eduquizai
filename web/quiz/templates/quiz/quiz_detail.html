@@ -1,0 +1,124 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 8 (détail d'un quiz). Les textes viennent de l'IA : Django les échappe,
+  aucun n'est marqué comme sûr. Exporter (tâche 40) : lien vers le PDF élève
+  pour un quiz validé, bouton désactivé (expliqué par l'encart « À relire ») pour
+  un brouillon. Modifier et Supprimer (31.1, 31.2) sont des liens. Valider (tâche 31) : formulaire
+  POST + CSRF ; avec JavaScript, une fenêtre de confirmation demande d'abord à
+  l'enseignant s'il a relu le quiz (sans JavaScript, la validation est directe).
+{% endcomment %}
+
+{% block titre %}{% if quiz %}{{ quiz.titre }}{% else %}Quiz{% endif %}{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  {% if mongo_indisponible %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li aria-current="page">Quiz</li>
+      </ol>
+    </nav>
+    <div class="alerte-erreur" role="alert">Ce quiz est momentanément indisponible. Réessayez dans quelques instants.</div>
+  {% else %}
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="{% url 'quiz:liste' %}">Mes quiz</a></li>
+        <li aria-current="page">{{ quiz.titre }}</li>
+      </ol>
+    </nav>
+    <div class="titre-page">
+      <div>
+        <h1>{{ quiz.titre }}</h1>
+        <div class="meta">
+          {% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}
+          {% if lecon %}
+            <span class="badge badge-type">{{ lecon.get_matiere_display }}</span>
+            <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
+          {% endif %}
+          <span class="badge badge-type">{{ quiz.difficulte|capfirst }}</span>
+          <span class="muted">Généré le {{ quiz.date_creation|date:"d/m/Y" }}{% if quiz.statut == "valide" and quiz.date_validation %}, validé le {{ quiz.date_validation|date:"d/m/Y" }}{% endif %}{% if lecon %} à partir de la leçon <a href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a>{% endif %}</span>
+        </div>
+      </div>
+      <div class="boutons">
+        <a class="btn btn-modifier" href="{% url 'quiz:modifier' quiz.id %}">Modifier</a>
+        <a class="btn btn-danger" href="{% url 'quiz:supprimer' quiz.id %}">Supprimer</a>
+        {% if quiz.statut == "valide" %}
+          <a class="btn btn-secondaire" href="{% url 'quiz:exporter' quiz.id %}" download aria-label="Exporter en PDF, version élève">⭳ Exporter</a>
+        {% else %}
+          <button class="btn btn-secondaire" type="button" disabled aria-describedby="aide-export" aria-label="Exporter en PDF, version élève">⭳ Exporter</button>
+        {% endif %}
+        {% if quiz.statut == "brouillon" %}
+          <form id="form-validation" method="post" action="{% url 'quiz:valider' quiz.id %}">
+            {% csrf_token %}
+            <button class="btn btn-succes" type="submit">✓ Valider le quiz</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grille-detail">
+      <section class="carte carte-questions" aria-labelledby="t-questions">
+        <h2 id="t-questions" class="sr">Questions du quiz</h2>
+        <div class="zone-defilante" tabindex="0" aria-label="Questions du quiz">
+          {% for question in quiz.questions %}
+            <article class="question" aria-labelledby="q{{ forloop.counter }}">
+              <div class="question-tete">
+                <span class="num" aria-hidden="true">{{ forloop.counter }}</span>
+                <span class="badge badge-type">{% if question.type_question == "qcm" %}QCM{% elif question.type_question == "vrai_faux" %}Vrai / Faux{% else %}Question ouverte{% endif %}</span>
+              </div>
+              <h3 id="q{{ forloop.counter }}"><span class="sr">Question {{ forloop.counter }} : </span>{{ question.texte }}</h3>
+              {% if question.type_question == "ouverte" %}
+                <p class="reponse-attendue"><strong>Réponse attendue :</strong> {{ question.reponse_attendue }}</p>
+              {% else %}
+                <ul class="choix">
+                  {% for choix in question.choix %}
+                    {% if choix.est_correct %}
+                      <li class="correct"><span>{{ choix.texte }}</span><span class="etiq">✓ Bonne réponse</span></li>
+                    {% else %}
+                      <li>{{ choix.texte }}</li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              {% if question.explication %}
+                <p class="explication"><strong>Explication :</strong> {{ question.explication }}</p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <aside class="carte recap" aria-labelledby="t-recap">
+        <h2 id="t-recap" class="titre-recap">Récapitulatif</h2>
+        <dl>
+          <dt>Questions</dt><dd>{{ recap.total }}</dd>
+          <dt>QCM</dt><dd>{{ recap.qcm }}</dd>
+          <dt>Vrai / Faux</dt><dd>{{ recap.vrai_faux }}</dd>
+          <dt>Questions ouvertes</dt><dd>{{ recap.ouverte }}</dd>
+        </dl>
+        {% if quiz.statut != "valide" %}
+          <p class="alerte-info" role="note" id="aide-export"><strong>À relire avant validation.</strong> Ce quiz a été généré par une IA : vérifiez l'exactitude des questions et des réponses. Une fois validé, il pourra être utilisé avec vos élèves et exporté en PDF.</p>
+        {% endif %}
+      </aside>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block apres_contenu %}
+  {% if quiz and quiz.statut == "brouillon" %}
+    <div class="voile" id="voile-validation" hidden>
+      <div class="dialogue" role="alertdialog" aria-modal="true" aria-labelledby="t-valid" aria-describedby="d-valid">
+        <div class="ico-succes" aria-hidden="true">✓</div>
+        <h2 id="t-valid">Valider le quiz « {{ quiz.titre }} » ?</h2>
+        <p id="d-valid">Ce quiz a été généré par une IA. Confirmez que vous avez <strong>relu les questions et les réponses</strong> avant de le valider.</p>
+        <div class="boutons">
+          <button class="btn btn-secondaire" type="button" id="valid-annuler">Revoir le quiz</button>
+          <button class="btn btn-succes" type="button" id="valid-confirmer">Oui, je l'ai relu : valider</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}{{ block.super }}{% load static %}<script src="{% static 'js/validation.js' %}" defer></script>{% endblock %}

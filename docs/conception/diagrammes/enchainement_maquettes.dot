@@ -15,6 +15,9 @@ digraph G {
   n09 [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/09.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT COLOR="white"><B>9 · Modification quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Update</FONT></TD></TR></TABLE>>];
   n10 [label=<<TABLE BORDER="1" COLOR="#B91C1C" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/10.png"/></TD></TR><TR><TD BGCOLOR="#B91C1C"><FONT COLOR="white"><B>10 · Suppression</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Delete (leçon ou quiz)</FONT></TD></TR></TABLE>>];
   n11 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/11.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>11 · Export</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">PDF · CSV · JSON</FONT></TD></TR></TABLE>>];
+  n12 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/12.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>12 · Choisir son mot de passe</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">12b lien invalide · 12c mot de passe enregistré</FONT></TD></TR></TABLE>>];
+  n13 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/13.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>13 · Mot de passe oublié</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">13b e-mail envoyé</FONT></TD></TR></TABLE>>];
+  mail [shape=note, style=filled, fillcolor="#FFFBEB", color="#B45309", fontname="Inter", fontsize=11, fontcolor="#78350F", label=<<B>E-mail</B><BR/>lien personnel<BR/>usage unique · 72 h>];
   n01 -> n02 [label="se connecter"];
   n02 -> n03 [label="Leçons"];
   n02 -> n04 [label="+ Nouvelle leçon"];
@@ -35,6 +38,12 @@ digraph G {
   n03 -> n10 [label="Supprimer", color="#B91C1C", fontcolor="#B91C1C"];
   n08 -> n10 [label="Supprimer", color="#B91C1C", fontcolor="#B91C1C"];
   n02 -> n01 [label="Déconnexion", style=dotted, constraint=false];
+  adm [shape=box, style="rounded,filled", fillcolor="white", color="#1E3A8A", fontname="Inter", fontsize=11, fontcolor="#1E3A8A", label=<<B>Administrateur</B><BR/>crée le compte (admin Django)>];
+  adm -> mail [label="invitation"];
+  n01 -> n13 [label="Mot de passe oublié ?"];
+  n13 -> mail [label="Recevoir un lien"];
+  mail -> n12 [label="ouvrir le lien"];
+  n12 -> n01 [label="mot de passe enregistré", style=dashed, constraint=false];
   {rank=same; n03; n06}
   {rank=same; n04; n05; n07}
 }

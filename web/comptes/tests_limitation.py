@@ -1,0 +1,141 @@
+"""Tests de la limitation des essais de connexion (force brute)."""
+
+from django.core.cache import cache
+from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse
+
+from .limitation import (
+    MAX_ECHECS_COMPTE,
+    MAX_ECHECS_IP,
+    MESSAGE_BLOCAGE,
+    _cles,
+    adresse_ip,
+)
+from .models import Utilisateur
+
+ADRESSE = "anne.durand@eduquizai.local"
+MOT_DE_PASSE = "Tableau-Noir-2026"
+
+
+class LimitationConnexionTests(TestCase):
+    """Blocage après trop d'échecs, par compte + IP et par IP seule."""
+
+    def setUp(self):
+        """Crée un enseignant et vide les compteurs (cache partagé entre tests)."""
+        cache.clear()
+        self.addCleanup(cache.clear)
+        Utilisateur.objects.create_user(
+            ADRESSE, MOT_DE_PASSE, nom="Durand", prenom="Anne"
+        )
+
+    def _connexion(self, adresse=ADRESSE, mot_de_passe="faux", ip="10.0.0.1"):
+        """Tente une connexion depuis l'IP donnée."""
+        return self.client.post(
+            reverse("comptes:connexion"),
+            {"username": adresse, "password": mot_de_passe},
+            REMOTE_ADDR=ip,
+        )
+
+    def _echouer(self, fois, **kwargs):
+        """Enchaîne des connexions ratées."""
+        for _ in range(fois):
+            self._connexion(**kwargs)
+
+    def test_bloque_apres_trop_d_echecs_meme_avec_le_bon_mot_de_passe(self):
+        """Au-delà de 5 échecs, même le bon mot de passe est refusé."""
+        self._echouer(MAX_ECHECS_COMPTE)
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE)
+        self.assertContains(reponse, MESSAGE_BLOCAGE)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_compte_administrateur_protege_lui_aussi(self):
+        """L'administrateur se connecte par la même page : même limitation."""
+        admin = "admin@eduquizai.local"
+        Utilisateur.objects.create_superuser(admin, MOT_DE_PASSE)
+        self._echouer(MAX_ECHECS_COMPTE, adresse=admin)
+        reponse = self._connexion(adresse=admin, mot_de_passe=MOT_DE_PASSE)
+        self.assertContains(reponse, MESSAGE_BLOCAGE)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_sous_la_limite_la_connexion_reste_possible(self):
+        """4 échecs puis le bon mot de passe : connexion acceptée."""
+        self._echouer(MAX_ECHECS_COMPTE - 1)
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE)
+        self.assertRedirects(reponse, reverse("tableau_de_bord"))
+
+    def test_connexion_reussie_remet_le_compteur_a_zero(self):
+        """Après une connexion réussie, les anciens échecs ne comptent plus."""
+        self._echouer(MAX_ECHECS_COMPTE - 1)
+        self._connexion(mot_de_passe=MOT_DE_PASSE)
+        self.client.post(reverse("comptes:deconnexion"))
+        self._echouer(MAX_ECHECS_COMPTE - 1)
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE)
+        self.assertRedirects(reponse, reverse("tableau_de_bord"))
+
+    def test_une_autre_ip_n_est_pas_bloquee(self):
+        """Le blocage d'un compte vaut pour l'IP de l'attaquant seulement."""
+        self._echouer(MAX_ECHECS_COMPTE, ip="10.0.0.66")
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE, ip="10.0.0.1")
+        self.assertRedirects(reponse, reverse("tableau_de_bord"))
+
+    def test_ip_bloquee_apres_de_nombreux_comptes_essayes(self):
+        """20 échecs sur des comptes différents bloquent l'IP pour tous."""
+        for numero in range(MAX_ECHECS_IP):
+            self._connexion(adresse=f"inconnu{numero}@exemple.fr", ip="10.0.0.66")
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE, ip="10.0.0.66")
+        self.assertContains(reponse, MESSAGE_BLOCAGE)
+        reponse = self._connexion(mot_de_passe=MOT_DE_PASSE, ip="10.0.0.1")
+        self.assertRedirects(reponse, reverse("tableau_de_bord"))
+
+    def test_meme_message_pour_un_compte_inexistant(self):
+        """Le blocage ne révèle pas si l'adresse correspond à un compte."""
+        self._echouer(MAX_ECHECS_COMPTE, adresse="personne@exemple.fr")
+        reponse = self._connexion(adresse="personne@exemple.fr")
+        self.assertContains(reponse, MESSAGE_BLOCAGE)
+
+    def test_aucune_adresse_en_clair_dans_le_cache(self):
+        """Les clés du cache sont des empreintes, sans e-mail ni IP lisibles."""
+        for cle in _cles(ADRESSE, "10.0.0.1"):
+            self.assertNotIn("anne", cle)
+            self.assertNotIn("10.0.0.1", cle)
+
+
+class AdresseIpTests(TestCase):
+    """Adresse IP du visiteur, en direct ou derrière le proxy de production."""
+
+    def _requete(self, transmises=None):
+        """Requête arrivée par le proxy 172.18.0.2, avec X-Forwarded-For."""
+        entetes = {"REMOTE_ADDR": "172.18.0.2"}
+        if transmises is not None:
+            entetes["HTTP_X_FORWARDED_FOR"] = transmises
+        return RequestFactory().get("/", **entetes)
+
+    def test_sans_proxy_l_en_tete_est_ignore(self):
+        """En développement, X-Forwarded-For (falsifiable) n'est pas lu."""
+        self.assertEqual(adresse_ip(self._requete("6.6.6.6")), "172.18.0.2")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_derriere_le_proxy_adresse_ajoutee_par_le_proxy(self):
+        """Une IP inventée par le visiteur ne remplace pas la vraie."""
+        requete = self._requete("6.6.6.6, 203.0.113.7")
+        self.assertEqual(adresse_ip(requete), "203.0.113.7")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_derriere_le_proxy_sans_en_tete(self):
+        """En-tête absent : l'adresse de connexion sert par défaut."""
+        self.assertEqual(adresse_ip(self._requete()), "172.18.0.2")
+
+    @override_settings(PROXYS_DE_CONFIANCE=1)
+    def test_changer_d_ip_inventee_ne_debloque_pas(self):
+        """L'attaquant qui change d'IP inventée à chaque essai reste bloqué."""
+        cache.clear()
+        self.addCleanup(cache.clear)
+        Utilisateur.objects.create_user(ADRESSE, MOT_DE_PASSE)
+        for numero in range(MAX_ECHECS_COMPTE + 1):
+            reponse = self.client.post(
+                reverse("comptes:connexion"),
+                {"username": ADRESSE, "password": "faux"},
+                REMOTE_ADDR="172.18.0.2",
+                HTTP_X_FORWARDED_FOR=f"6.6.6.{numero}, 203.0.113.7",
+            )
+        self.assertContains(reponse, MESSAGE_BLOCAGE)

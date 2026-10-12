@@ -16,6 +16,7 @@ actor "Administrateur" as ADM
 actor "IA (Ollama)\n<<système>>" as IA
 
 rectangle "EduQuizAI" {
+  usecase "Choisir son mot de passe\n(activation du compte,\nmot de passe oublié)" as UC_MDP
   usecase "S'authentifier" as UC_AUTH
   usecase "Consulter le dashboard" as UC_DASH
   usecase "Gérer ses leçons\n(créer, consulter,\nmodifier, supprimer)" as UC_LECON
@@ -24,7 +25,7 @@ rectangle "EduQuizAI" {
   usecase "Valider un quiz" as UC_VAL
   usecase "Importer un texte" as UC_IMP
   usecase "Exporter un quiz" as UC_EXP
-  usecase "Créer et gérer\nles comptes enseignants" as UC_COMPTES
+  usecase "Créer et gérer\nles comptes enseignants\n(invitation par e-mail)" as UC_COMPTES
 }
 
 ENS --> UC_DASH
@@ -32,6 +33,7 @@ ENS --> UC_LECON
 ENS --> UC_QUIZ
 ENS --> UC_GEN
 ENS --> UC_VAL
+UC_AUTH <.. UC_MDP : <<extend>>
 UC_LECON <.. UC_IMP : <<extend>>
 UC_QUIZ <.. UC_EXP : <<extend>>
 ADM --> UC_COMPTES

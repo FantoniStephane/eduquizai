@@ -1,0 +1,291 @@
+# Intégration continue et déploiement d'EduQuizAI (tâches 41, 42 et 46).
+#
+# À chaque push sur develop ou main, et à chaque pull request vers main,
+# GitHub Actions vérifie le projet sur une machine neuve. Les jobs
+# s'enchaînent avec « needs » : si une étape échoue, les suivantes ne sont
+# pas lancées : aucun déploiement d'un code qui ne passe pas tous les contrôles.
+# Le déploiement n'a lieu que sur un push vers main (voir le dernier job).
+#
+# Machine fixée (ubuntu-24.04) plutôt que « ubuntu-latest » : l'environnement
+# ne change pas sans qu'on le décide (reproductibilité).
+#
+# Aucun vrai secret ici : les variables obligatoires reçoivent des valeurs de
+# test, qui ne servent que sur la machine temporaire de GitHub.
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [main]
+
+# Le pipeline ne fait que lire le dépôt (moindre privilège)
+permissions:
+  contents: read
+
+# Un nouveau push annule la vérification encore en cours sur la même branche
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  # Valeurs de test pour les variables obligatoires des settings
+  DJANGO_SECRET_KEY: cle-de-test-ci-sans-valeur-reelle
+  IA_SECRET_KEY: cle-ia-de-test-ci-sans-valeur-reelle
+  IA_JWT_SECRET: secret-jwt-de-test-ci-sans-valeur-reelle
+  POSTGRES_DB: eduquizai
+  POSTGRES_USER: eduquizai
+  POSTGRES_PASSWORD: mot-de-passe-de-test
+  MONGO_DB: eduquizai
+  MONGO_APP_USER: eduquizai_app
+  MONGO_APP_PASSWORD: mot-de-passe-de-test
+  MONGO_ROOT_USER: root
+  MONGO_ROOT_PASSWORD: mot-de-passe-root-de-test
+
+jobs:
+  qualite:
+    name: Qualité (dépendances, Ruff, configuration Django)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            web/requirements.txt
+            ia/requirements.txt
+
+      - name: Installer les dépendances et les outils
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r web/requirements.txt -r ia/requirements.txt
+          pip install pip-audit ruff==0.16.9
+
+      # Une dépendance avec une faille connue bloque le pipeline
+      - name: Audit des dépendances (pip-audit)
+        run: pip-audit -r web/requirements.txt -r ia/requirements.txt
+
+      # Mêmes règles que le pre-commit (pyproject.toml)
+      - name: Ruff (erreurs et style)
+        run: ruff check .
+
+      - name: Ruff (mise en forme)
+        run: ruff format --check .
+
+      # Cohérence de la configuration Django des deux projets
+      - name: Configuration Django (web)
+        working-directory: web
+        run: python manage.py check
+
+      - name: Configuration Django (ia)
+        working-directory: ia
+        run: python manage.py check
+
+      # Le compose de production (Coolify) est-il valide ? Les secrets absents
+      # ici sont seulement signalés : ils sont saisis dans Coolify
+      - name: Compose de production (syntaxe)
+        run: docker compose -f docker-compose.prod.yml config --quiet
+
+  tests-ia:
+    name: Tests du microservice IA (+ couverture)
+    needs: qualite
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ia
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: ia/requirements.txt
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt coverage
+
+      # Ollama et l'API Mistral sont remplacés par des doublures dans les tests
+      - name: Tests avec mesure de la couverture
+        run: python -m coverage run manage.py test
+
+      # « coverage report » échoue sous le seuil (fail_under dans .coveragerc)
+      - name: Rapport de couverture
+        if: always()
+        run: |
+          python -m coverage report
+          python -m coverage html
+          echo "### Couverture du microservice IA" >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publier le rapport HTML
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: couverture-ia
+          path: ia/htmlcov/
+          retention-days: 14
+
+  tests-web:
+    name: Tests de l'application web (+ couverture)
+    needs: qualite
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    # Vraies bases de données, comme dans docker-compose.yml
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eduquizai -d eduquizai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mongo:
+        image: mongo:8
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_ROOT_USER }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_ROOT_PASSWORD }}
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      MONGO_HOST: localhost
+      MONGO_PORT: "27017"
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      # Le compte MongoDB de l'application est créé par le même script qu'en
+      # développement : la CI le vérifie aussi
+      - name: Créer le compte MongoDB applicatif
+        working-directory: .
+        run: |
+          docker cp docker/mongo/initdb/01_utilisateur_app.js \
+            ${{ job.services.mongo.id }}:/tmp/01_utilisateur_app.js
+          docker exec \
+            -e MONGO_DB -e MONGO_APP_USER -e MONGO_APP_PASSWORD \
+            ${{ job.services.mongo.id }} \
+            mongosh --quiet -u "$MONGO_ROOT_USER" -p "$MONGO_ROOT_PASSWORD" \
+            --authenticationDatabase admin /tmp/01_utilisateur_app.js
+
+      - name: Installer Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: web/requirements.txt
+
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt coverage
+
+      # Le microservice IA est remplacé par des doublures dans les tests
+      - name: Tests avec mesure de la couverture
+        run: python -m coverage run manage.py test
+
+      # « coverage report » échoue sous le seuil (fail_under dans .coveragerc)
+      - name: Rapport de couverture
+        if: always()
+        run: |
+          python -m coverage report
+          python -m coverage html
+          echo "### Couverture de l'application web" >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publier le rapport HTML
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: couverture-web
+          path: web/htmlcov/
+          retention-days: 14
+
+  image:
+    name: Images Docker (construction et démarrage)
+    # Seulement si tous les tests sont passés
+    needs: [tests-ia, tests-web]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v5
+
+      # Mêmes Dockerfiles que docker-compose.yml : ce qui est construit ici
+      # est ce qui sera déployé (tâche 46)
+      - name: Construire l'image web
+        run: docker build --tag eduquizai-web:ci ./web
+
+      - name: Construire l'image ia
+        run: docker build --tag eduquizai-ia:ci ./ia
+
+      # L'application démarre-t-elle dans l'image ? (dépendance manquante,
+      # fichier écarté par .dockerignore…) ; aucune base n'est nécessaire
+      - name: Démarrage de l'application dans l'image web
+        run: |
+          docker run --rm \
+            -e DJANGO_SECRET_KEY -e IA_JWT_SECRET \
+            -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD \
+            -e MONGO_DB -e MONGO_APP_USER -e MONGO_APP_PASSWORD \
+            eduquizai-web:ci python manage.py check
+
+      - name: Démarrage du microservice dans l'image ia
+        run: |
+          docker run --rm -e IA_SECRET_KEY -e IA_JWT_SECRET \
+            eduquizai-ia:ci python manage.py check
+
+      - name: Taille des images
+        run: |
+          echo "### Images Docker" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | Taille |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          docker image ls --filter "reference=eduquizai-*:ci" \
+            --format "| {{.Repository}} | {{.Size}} |" >> "$GITHUB_STEP_SUMMARY"
+
+  # Déploiement sur le serveur (VPS avec Coolify), seulement après un push sur
+  # main et si tout ce qui précède est vert. Coolify reçoit l'ordre par son
+  # webhook, récupère le code de main, reconstruit les images avec
+  # docker-compose.prod.yml et remplace les conteneurs.
+  deploiement:
+    name: Déploiement (Coolify)
+    runs-on: ubuntu-24.04
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Environnement GitHub « production » : historique des déploiements
+    environment: production
+    steps:
+      # Secrets enregistrés dans GitHub (jamais dans le dépôt) : l'URL du
+      # webhook de la ressource Coolify et un jeton d'API Coolify.
+      # « --fail » : le job échoue si Coolify refuse l'ordre.
+      - name: Déclencher le déploiement
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_WEBHOOK"
+          echo "### Déploiement demandé à Coolify" >> "$GITHUB_STEP_SUMMARY"

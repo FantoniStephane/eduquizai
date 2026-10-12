@@ -1,5 +1,7 @@
 # EduQuizAI by SchoolUp
 
+[![CI](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/FantoniStephane/eduquizai/actions/workflows/ci.yml)
+
 Générateur de quiz pédagogiques pour enseignants, piloté par une intelligence artificielle **locale**.
 
 Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications (CDA)** — Metz Numeric School, session 2026.
@@ -7,20 +9,20 @@ Projet fil rouge du titre professionnel **Concepteur Développeur d'Applications
 ## Fonctionnalités
 
 - Espace enseignant sécurisé (comptes créés par l'administrateur)
-- Rédaction de leçons ou import d'un fichier texte (.txt, .md)
+- Rédaction de leçons dans un éditeur mis en forme, ou import d'un fichier (.docx, .txt)
 - Génération automatique de quiz par IA : QCM, vrai/faux, questions ouvertes
 - Relecture, modification et validation manuelle des quiz
-- Export des quiz en PDF, CSV ou JSON (version élève ou corrigée)
+- Export d'un quiz validé en PDF, version élève (sans les réponses)
 
 ## Stack technique
 
 | Couche | Technologie |
 |---|---|
 | Application | Python · Django (templates) |
-| Microservice IA | Django REST Framework · JWT · Ollama (modèle local) |
+| Microservice IA | Django REST Framework · JWT · API Mistral (par défaut) ou Ollama (modèle local) |
 | Bases de données | PostgreSQL (utilisateurs, leçons) · MongoDB (quiz) |
 | DevOps | Docker · Docker Compose · GitHub Actions |
-| Qualité | Ruff · pytest |
+| Qualité | Ruff · pre-commit · tests Django · coverage |
 
 ## Architecture
 
@@ -30,7 +32,7 @@ Voir `docs/conception/diagrammes/architecture.png`.
 ## Structure du dépôt
 
 ```
-docs/                    Dossier projet, journal de bord
+docs/                    Documentation technique (environnement, plan de tests)
 docs/conception/         Diagrammes (UML, MCD, architecture), charte graphique, maquettes
 ```
 

@@ -1,0 +1,63 @@
+"""Lanceur de tests : une base MongoDB de test, comme pour PostgreSQL.
+
+Django crée automatiquement une base PostgreSQL « test_… » avant les tests et
+la supprime après. Ce lanceur fait de même pour MongoDB : les tests
+n'écrivent jamais dans la base de développement.
+
+Pendant les tests seulement, les mots de passe sont hachés par un algorithme
+rapide (MD5) : le hachage réel (PBKDF2, un million d'itérations) est
+volontairement lent pour freiner un attaquant, mais il ralentissait chaque
+création de compte et chaque connexion des tests. La production n'est pas
+concernée : ce réglage n'existe que dans ce lanceur.
+
+Il rend aussi la sortie des tests lisible : les pannes simulées (MongoDB ou
+IA indisponibles) sont journalisées par les vues, et ces journaux ne sont plus
+affichés dans la console. Les tests qui les vérifient (assertLogs) les
+reçoivent toujours.
+"""
+
+import logging
+
+from django.conf import settings
+from django.test.runner import DiscoverRunner
+from django.test.utils import override_settings
+
+from quiz.mongo import get_client, get_db
+from quiz.schema import initialiser_collection
+
+
+class EduQuizTestRunner(DiscoverRunner):
+    """Base MongoDB de test, hachage rapide et journaux masqués pendant les tests."""
+
+    def setup_test_environment(self, **kwargs):
+        """Prépare l'environnement de test : journaux masqués, hachage rapide.
+
+        Un gestionnaire « vide » sur le journal racine remplace l'affichage par
+        défaut de Python (messages et traces sur la sortie d'erreur).
+        """
+        super().setup_test_environment(**kwargs)
+        self._journal_muet = logging.NullHandler()
+        logging.getLogger().addHandler(self._journal_muet)
+        self._hachage_rapide = override_settings(
+            PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"]
+        )
+        self._hachage_rapide.enable()
+
+    def teardown_test_environment(self, **kwargs):
+        """Rétablit l'affichage des journaux, puis l'environnement normal."""
+        logging.getLogger().removeHandler(self._journal_muet)
+        self._hachage_rapide.disable()
+        super().teardown_test_environment(**kwargs)
+
+    def setup_databases(self, **kwargs):
+        """Crée les bases de test (PostgreSQL par Django, puis MongoDB)."""
+        anciennes_bases = super().setup_databases(**kwargs)
+        settings.MONGO = {**settings.MONGO, "NAME": f"test_{settings.MONGO['NAME']}"}
+        get_client().drop_database(settings.MONGO["NAME"])
+        initialiser_collection(get_db())
+        return anciennes_bases
+
+    def teardown_databases(self, old_config, **kwargs):
+        """Supprime la base MongoDB de test, puis celles de PostgreSQL."""
+        get_client().drop_database(settings.MONGO["NAME"])
+        super().teardown_databases(old_config, **kwargs)

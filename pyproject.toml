@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 88              # longueur de ligne standard (celle de Django et de Black)
+target-version = "py312"
+src = ["web", "ia"]           # code des deux services : leurs imports sont « internes » au projet
+extend-exclude = ["**/migrations/**"]   # fichiers générés par Django : on n'y touche pas
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # style PEP 8
+    "F",       # erreurs (imports inutilisés, variables non définies…)
+    "I",       # tri des imports
+    "B",       # pièges courants (bugbear)
+    "UP",      # syntaxe Python moderne
+    "DJ",      # bonnes pratiques Django
+    "D",       # docstrings
+]
+ignore = ["D100", "D104", "D105", "D106", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

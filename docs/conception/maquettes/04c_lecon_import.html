@@ -44,22 +44,14 @@
         </div>
       </div>
       <div class="champ champ-extensible">
-        <div class="label-ligne"><label for="contenu-lecon" id="lbl-contenu">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label><a class="btn btn-secondaire btn-petit" href="04c_lecon_import.html">⭱ Importer un fichier texte</a></div>
+        <div class="label-ligne"><label id="lbl-contenu">Contenu de la leçon <span class="obligatoire" aria-hidden="true">*</span></label><a class="btn btn-secondaire btn-petit" href="04c_lecon_import.html">⭱ Importer un fichier texte</a></div>
         <div class="editeur">
           <div class="barre-outils" role="toolbar" aria-label="Mise en forme" aria-controls="contenu-lecon">
             <button type="button" aria-label="Gras">B</button><button type="button" aria-label="Italique"><i>I</i></button><button type="button" aria-label="Titre de section">H</button><button type="button" aria-label="Liste à puces">•≡</button>
           </div>
-          <textarea id="contenu-lecon" name="contenu" required aria-describedby="aide-contenu">La Révolution française (1789-1799) est une période de bouleversements politiques et sociaux en France.
-
-## Les causes
-- une crise financière : l'État est endetté ;
-- des inégalités entre les trois ordres (clergé, noblesse, tiers état) ;
-- la diffusion des idées des Lumières.
-
-## Les grandes étapes
-Le 14 juillet 1789, le peuple de Paris prend la Bastille. Le 26 août 1789, l'Assemblée adopte la **Déclaration des droits de l'homme et du citoyen**. Louis XVI est exécuté le 21 janvier 1793.</textarea>
+          <div class="zone-editeur" id="contenu-lecon" role="textbox" aria-multiline="true" contenteditable="true" aria-labelledby="lbl-contenu" aria-describedby="aide-contenu"><div>La Révolution française (1789-1799) est une période de bouleversements politiques et sociaux en France.</div><h1>Les causes</h1><ul><li>une crise financière : l'État est endetté ;</li><li>des inégalités entre les trois ordres (clergé, noblesse, tiers état) ;</li><li>la diffusion des idées des Lumières.</li></ul><h1>Les grandes étapes</h1><div>Le 14 juillet 1789, le peuple de Paris prend la Bastille. Le 26 août 1789, l'Assemblée adopte la <strong>Déclaration des droits de l'homme et du citoyen</strong>. Louis XVI est exécuté le 21 janvier 1793.</div></div>
         </div>
-        <div class="compteur aide" id="aide-contenu"><span>Mise en forme Markdown acceptée. C'est ce texte que l'IA utilisera pour générer le quiz.</span><span>612 / 20 000 caractères</span></div>
+        <div class="compteur aide" id="aide-contenu"><span>Utilisez les boutons pour mettre en forme le texte. C'est ce texte que l'IA utilisera pour générer le quiz.</span><span>612 / 20 000 caractères</span></div>
       </div>
       <div class="actions-form">
         <a class="btn btn-secondaire" href="03_lecons.html">Annuler</a>
@@ -76,10 +68,10 @@ Le 14 juillet 1789, le peuple de Paris prend la Bastille. Le 26 août 1789, l'As
           <div class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></div>
           <p><strong>Glissez votre fichier ici</strong> ou</p>
           <label for="fichier" class="btn btn-primaire btn-petit" style="margin-top:10px;display:inline-flex">Choisir un fichier</label>
-          <input id="fichier" name="fichier" type="file" accept=".txt,.md" class="sr" aria-describedby="regles-import">
+          <input id="fichier" name="fichier" type="file" accept=".txt,.docx" class="sr" aria-describedby="regles-import">
         </div>
-        <div class="fichier-choisi" role="status"><span aria-hidden="true">✓</span><span><strong>revolution_francaise.txt</strong> · 4 Ko · prêt à importer</span></div>
-        <ul class="regles" id="regles-import"><li>Formats acceptés : <strong>.txt</strong> et <strong>.md</strong> (texte uniquement)</li><li>Taille maximale : <strong>1 Mo</strong> (20 000 caractères)</li></ul>
+        <div class="fichier-choisi" role="status"><span aria-hidden="true">✓</span><span><strong>revolution_francaise.docx</strong> · 18 Ko · prêt à importer</span></div>
+        <ul class="regles" id="regles-import"><li>Formats acceptés : <strong>.docx</strong> (Word, LibreOffice) et <strong>.txt</strong> ; les images sont ignorées</li><li>Taille maximale : <strong>5 Mo</strong> (20 000 caractères de texte)</li></ul>
         <div class="boutons" style="justify-content:flex-end;margin-top:18px">
           <a class="btn btn-secondaire" href="04_lecon_form.html">Annuler</a>
           <button class="btn btn-primaire" type="submit">Importer le texte</button>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% comment %}
+  Pages de l'espace enseignant (maquettes 2 à 11) : assemble l'en-tête
+  (partials/entete.html), les messages (partials/messages.html), le contenu de la page
+  et le pied (partials/pied.html).
+  Fenêtre de confirmation (maquette 10) : bloc « apres_contenu », avec aria-hidden sur
+  le contenu principal grâce au bloc « attributs_main ».
+{% endcomment %}
+
+{% block corps %}
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  {% include "partials/entete.html" %}
+  <main id="contenu" class="contenu"{% block attributs_main %}{% endblock %}>
+    {% include "partials/messages.html" %}
+    {% block contenu %}{% endblock %}
+  </main>
+  {% block apres_contenu %}{% endblock %}
+  {% include "partials/pied.html" %}
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/menu.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,6 @@
+{% comment %}
+  Pied des pages de l'espace enseignant : lien vers l'information sur les données
+  personnelles (RGPD, art. 13). Inclus par base_connecte.html ; le CSS le garde en bas
+  de l'écran (section « Lien Données personnelles » de style.css).
+{% endcomment %}
+<footer class="pied"><a href="{% url 'donnees_personnelles' %}">Données personnelles</a></footer>

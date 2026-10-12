@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Choisir votre mot de passe · EduQuizAI</title>
+  <link rel="icon" href="assets/logo_icone.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="page-connexion">
+  <main class="connexion">
+    <img class="logo" src="assets/logo.svg" alt="EduQuizAI by SchoolUp">
+    <div class="carte">
+      <h1>Choisir votre mot de passe</h1>
+      <p class="muted">Compte : marie.durand@ecole.fr</p>
+      <form method="post" action="#" novalidate>
+        <div class="champ">
+          <label for="mdp1">Nouveau mot de passe</label>
+          <input id="mdp1" name="new_password1" type="password" autocomplete="new-password" aria-describedby="regles-mdp" required>
+          <ul class="regles" id="regles-mdp">
+            <li>au moins 8 caractères ;</li>
+            <li>pas uniquement des chiffres ;</li>
+            <li>pas trop courant, ni proche de votre nom ou de votre e-mail.</li>
+          </ul>
+        </div>
+        <div class="champ">
+          <label for="mdp2">Confirmer le mot de passe</label>
+          <input id="mdp2" name="new_password2" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn btn-primaire btn-bloc" type="submit">Enregistrer mon mot de passe</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

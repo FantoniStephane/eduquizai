@@ -1,0 +1,64 @@
+{% extends "base_connecte.html" %}
+{% load lecons_extras %}
+{% comment %}
+  Maquette 5 (détail d'une leçon). Le contenu Markdown est converti puis nettoyé
+  par le filtre markdown_sur (liste blanche de balises, protection XSS).
+  Liste des quiz de la leçon : lus dans MongoDB, limités à l'enseignant connecté.
+{% endcomment %}
+
+{% block titre %}{{ lecon.titre }}{% endblock %}
+{% block classe_body %}sans-scroll{% endblock %}
+
+{% block contenu %}
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <ol>
+      <li><a href="{% url 'lecons:liste' %}">Mes leçons</a></li>
+      <li aria-current="page">{{ lecon.titre }}</li>
+    </ol>
+  </nav>
+  <div class="titre-page">
+    <div>
+      <h1>{{ lecon.titre }}</h1>
+      <div class="meta">
+        <span class="badge badge-type">{{ lecon.get_matiere_display }}</span>
+        <span class="badge badge-type">{{ lecon.get_niveau_scolaire_display }}</span>
+        <span class="muted">Créée le {{ lecon.date_creation|date:"d/m/Y" }} · modifiée le {{ lecon.date_modification|date:"d/m/Y" }}</span>
+      </div>
+    </div>
+    <div class="boutons">
+      <a class="btn btn-modifier" href="{% url 'lecons:modifier' lecon.pk %}">Modifier</a>
+      <a class="btn btn-danger" href="{% url 'lecons:supprimer' lecon.pk %}">Supprimer</a>
+    </div>
+  </div>
+
+  <div class="grille-detail">
+    <section class="carte" aria-labelledby="t-contenu">
+      <h2 id="t-contenu" class="sr">Contenu de la leçon</h2>
+      <div class="zone-defilante texte-lecon" tabindex="0" aria-label="Contenu de la leçon">
+        {{ lecon.contenu|markdown_sur }}
+      </div>
+    </section>
+
+    <aside class="carte" aria-labelledby="t-quiz">
+      <div class="carte-titre"><h2 id="t-quiz">Quiz de cette leçon</h2></div>
+      {% if mongo_indisponible %}
+        <p class="alerte-erreur" role="alert">Les quiz de cette leçon sont momentanément indisponibles. Réessayez dans quelques instants.</p>
+      {% elif quiz_liste %}
+        <ul class="liste">
+          {% for quiz in quiz_liste %}
+            <li>
+              <div>
+                <a class="t" href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a>
+                <div class="s">{{ quiz.questions|length }} question{{ quiz.questions|length|pluralize }} · {{ quiz.difficulte }} · {{ quiz.date_creation|date:"d/m" }}</div>
+              </div>
+              {% if quiz.statut == "valide" %}<span class="badge badge-valide">Validé</span>{% else %}<span class="badge badge-brouillon">Brouillon</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucun quiz n'a encore été généré à partir de cette leçon.</p>
+      {% endif %}
+      <p class="aide" style="margin-top:12px">Pour générer un nouveau quiz, rendez-vous dans l'onglet <a href="{% url 'quiz:liste' %}">Quiz</a>.</p>
+    </aside>
+  </div>
+{% endblock %}

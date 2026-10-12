@@ -1,0 +1,81 @@
+{% extends "base_connecte.html" %}
+{% comment %}
+  Maquette 2 : tableau de bord. Chiffres clés, quiz à valider (les 3 plus récents
+  brouillons) et dernières leçons. Les textes sont échappés par Django.
+  Si MongoDB ne répond pas, les informations sur les quiz sont remplacées par un
+  message ; les leçons restent affichées.
+{% endcomment %}
+
+{% block titre %}Tableau de bord{% endblock %}
+
+{% block contenu %}
+  <div class="titre-page">
+    <div>
+      <h1>Bonjour {{ user.prenom }}</h1>
+      <p class="muted">Voici un aperçu de votre activité.</p>
+    </div>
+    <a class="btn btn-primaire" href="{% url 'lecons:creer' %}">+ Nouvelle leçon</a>
+  </div>
+
+  {% if mongo_indisponible %}
+    <div class="alerte-erreur" role="alert">Les informations sur vos quiz sont momentanément indisponibles. Réessayez dans quelques instants.</div>
+  {% endif %}
+
+  <section class="grille-stats" aria-label="Chiffres clés">
+    <div class="carte stat">
+      <div class="ico" style="background:var(--primaire-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 18.5"/></svg></div>
+      <div><div class="val">{{ nb_lecons }}</div><div class="lib">Leçon{{ nb_lecons|pluralize }}</div></div>
+    </div>
+    {% if not mongo_indisponible %}
+      <div class="carte stat">
+        <div class="ico" style="background:var(--succes-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></div>
+        <div><div class="val">{{ nb_valides }}</div><div class="lib">Quiz validé{{ nb_valides|pluralize }}</div></div>
+      </div>
+      <div class="carte stat">
+        <div class="ico" style="background:var(--alerte-clair)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div><div class="val">{{ nb_a_valider }}</div><div class="lib">Quiz à valider</div></div>
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="grille-2">
+    {% if not mongo_indisponible %}
+      <section class="carte" aria-labelledby="t-valider">
+        <div class="carte-titre"><h2 id="t-valider">Quiz à valider</h2><a href="{% url 'quiz:liste' %}">Voir tous les quiz</a></div>
+        {% if quiz_a_valider %}
+          <ul class="liste">
+            {% for quiz in quiz_a_valider %}
+              <li>
+                <div>
+                  <a class="t" href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a>
+                  <div class="s">{% if quiz.lecon %}{{ quiz.lecon.get_matiere_display }} · {{ quiz.lecon.niveau_scolaire }} · {% endif %}généré le {{ quiz.date_creation|date:"d/m" }}</div>
+                </div>
+                <span class="badge badge-brouillon">Brouillon</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">Aucun quiz à valider. <a href="{% url 'quiz:generer' %}">Générer un quiz</a></p>
+        {% endif %}
+      </section>
+    {% endif %}
+    <section class="carte" aria-labelledby="t-lecons">
+      <div class="carte-titre"><h2 id="t-lecons">Dernières leçons</h2><a href="{% url 'lecons:liste' %}">Voir toutes les leçons</a></div>
+      {% if dernieres_lecons %}
+        <ul class="liste">
+          {% for lecon in dernieres_lecons %}
+            <li>
+              <div>
+                <a class="t" href="{% url 'lecons:detail' lecon.pk %}">{{ lecon.titre }}</a>
+                <div class="s">{{ lecon.get_matiere_display }} · {{ lecon.niveau_scolaire }}</div>
+              </div>
+              <span class="s">{{ lecon.date_creation|date:"d/m" }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucune leçon pour le moment. <a href="{% url 'lecons:creer' %}">Créer une leçon</a></p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

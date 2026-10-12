@@ -1,0 +1,53 @@
+{% extends user.is_authenticated|yesno:"base_connecte.html,base_connexion.html" %}
+{% comment %}
+  Information sur les données personnelles (RGPD, articles 12 à 14).
+  Page publique : affichée dans la mise en page connectée ou dans celle des pages
+  de connexion selon la situation de la personne. Absente des maquettes : voir
+  ECARTS_MAQUETTES_CDC.md.
+{% endcomment %}
+
+{% block titre %}Données personnelles{% endblock %}
+{% block classe_body %}{% if user.is_authenticated %}sans-scroll{% else %}page-connexion{% endif %}{% endblock %}
+{% block classe_main %} large{% endblock %}
+
+{% block contenu %}
+  <article class="carte donnees-perso{% if user.is_authenticated %} zone-donnees-perso{% endif %}"{% if user.is_authenticated %} tabindex="0" aria-labelledby="t-donnees"{% endif %}>
+    <h1 id="t-donnees">Données personnelles</h1>
+    <p class="muted">Comment EduQuizAI utilise et protège vos données.</p>
+
+    <h2>Qui est responsable ?</h2>
+    <p>L'établissement scolaire qui met EduQuizAI à la disposition de ses enseignants est responsable du traitement. Pour toute question ou pour exercer vos droits, adressez-vous à l'administrateur de la plateforme de votre établissement.</p>
+
+    <h2>Quelles données ?</h2>
+    <ul>
+      <li><strong>Votre compte</strong> : nom, prénom, adresse e-mail professionnelle, rôle, dates de création et de dernière connexion. Votre mot de passe est enregistré sous une forme chiffrée irréversible : personne, administrateur compris, ne le connaît.</li>
+      <li><strong>Vos contenus</strong> : les leçons que vous saisissez ou importez, et les quiz générés à partir de ces leçons.</li>
+      <li><strong>Données techniques</strong> : un cookie de session (connexion) et un cookie de sécurité contre les requêtes forgées (CSRF). En cas d'échecs de connexion, votre adresse IP est conservée 15 minutes au plus, sous une forme anonymisée, pour bloquer les tentatives répétées.</li>
+    </ul>
+    <p>EduQuizAI ne contient aucune donnée sur les élèves et n'utilise aucun cookie publicitaire ni de mesure d'audience.</p>
+
+    <h2>Pourquoi ?</h2>
+    <p>Ces données servent uniquement à gérer votre compte, à créer vos leçons et vos quiz, et à sécuriser l'application. Elles ne sont ni vendues, ni utilisées à d'autres fins. Ce traitement relève de la mission d'enseignement de l'établissement.</p>
+
+    <h2>Qui y a accès ?</h2>
+    <p>Vous seul accédez à vos leçons et à vos quiz. L'administrateur gère les comptes (création, désactivation) mais ne voit ni vos leçons, ni vos quiz, ni votre mot de passe.</p>
+
+    <h2>Et l'intelligence artificielle ?</h2>
+    <p>Par défaut, les quiz sont générés par un modèle d'IA installé sur le serveur de l'établissement : le texte de vos leçons ne quitte pas l'infrastructure. Si l'administrateur choisit le service en ligne de Mistral AI (société française) pour accélérer la génération, seul le texte de la leçon lui est transmis, sans votre nom ni votre adresse e-mail. Aucun quiz n'est utilisé avec des élèves sans votre relecture et votre validation.</p>
+
+    <h2>Combien de temps ?</h2>
+    <table>
+      <caption class="sr">Durées de conservation</caption>
+      <thead><tr><th scope="col">Données</th><th scope="col">Durée</th></tr></thead>
+      <tbody>
+        <tr><td>Compte, leçons et quiz</td><td>Tant que votre compte existe. Sa suppression efface aussitôt vos leçons et vos quiz.</td></tr>
+        <tr><td>Session de connexion</td><td>8 heures au plus.</td></tr>
+        <tr><td>Échecs de connexion</td><td>15 minutes.</td></tr>
+        <tr><td>Lien d'invitation ou de nouveau mot de passe</td><td>72 heures, une seule utilisation.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Vos droits</h2>
+    <p>Vous pouvez demander l'accès à vos données, leur rectification, leur effacement, la limitation de leur traitement ou vous y opposer, en vous adressant à l'administrateur de votre établissement. Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (<a href="https://www.cnil.fr/fr/plaintes" rel="noopener">cnil.fr</a>).</p>
+  </article>
+{% endblock %}
