@@ -50,7 +50,7 @@ En production, le conteneur `web` enchaîne : `migrate` → `createcachetable` �
 
 1. **DNS** : sous-domaine `eduquizai.duckdns.org` pointant vers l'IP du VPS.
 2. **Coolify** : nouvelle ressource « Private Repository (with Deploy Key) », dépôt `git@github.com:FantoniStephane/eduquizai.git`, branche `main`, *build pack* **Docker Compose**, fichier `/docker-compose.prod.yml`.
-   - **Clé de déploiement** : une clé ED25519 générée dans Coolify (*Keys & Tokens*), dont la partie publique est ajoutée au dépôt GitHub (*Settings → Deploy keys*, lecture seule). Une clé de déploiement GitHub ne sert qu'à un seul dépôt.
+   - **Clé de déploiement** : une clé ED25519 générée dans Coolify (*Keys & Tokens*), dont la partie publique est ajoutée au dépôt GitHub (*Settings → Deploy keys*, lecture seule). Une clé de déploiement GitHub ne sert qu'à un seul dépôt. *Le dépôt est public ; Coolify continue d'utiliser cette clé en lecture seule.*
    - **Preserve repository during deployment** : coché. Sinon Coolify supprime le dépôt après la construction et le dossier `docker/mongo/initdb` monté dans MongoDB est vide (le compte applicatif n'est pas créé).
    - **Auto deploy** : « Manual deployments only » (le déploiement est commandé par la CI, après les tests).
    - **Domaine** : `https://eduquizai.duckdns.org`, service `web`, port `8000`.
@@ -82,4 +82,4 @@ En cas d'échec du job, il affiche le code et le message de Coolify (jamais l'UR
 - **Journaux** : Coolify → ressource → *Runtime Logs* (requêtes Gunicorn, erreurs Django, e-mails d'invitation tant qu'aucun SMTP n'est configuré).
 - **Commandes** : Coolify → *Terminal* → conteneur `web` (ex. `python manage.py donnees_demo`).
 - **Retour arrière** : Coolify → *Rollback* (redéploie une version précédente).
-- **À compléter** : sauvegarde automatique des bases de production (les scripts `scripts/sauvegarde.ps1` et `restauration.ps1` ne concernent que le poste de développement), serveur SMTP pour les e-mails, limite de taille des envois au niveau du proxy.
+- **Pistes d'amélioration** : sauvegarde automatique des bases de production (les scripts `scripts/sauvegarde.ps1` et `restauration.ps1` ne concernent que le poste de développement), serveur SMTP pour les e-mails, limite de taille des envois au niveau du proxy.

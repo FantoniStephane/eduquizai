@@ -34,15 +34,43 @@ Voir `docs/conception/diagrammes/architecture.png`.
 ## Structure du dépôt
 
 ```
-docs/                    Documentation technique (environnement, plan de tests, déploiement)
-docs/conception/         Diagrammes (UML, MCD, architecture), charte graphique, maquettes
+web/                     Application Django (templates) : comptes, lecons, quiz, config
+ia/                      Microservice IA (Django REST Framework, JWT, Mistral / Ollama)
+docker/mongo/            Initialisation de MongoDB (compte applicatif aux droits limités)
+docs/                    Documentation : environnement, plan de tests, déploiement, veille
+docs/conception/         Diagrammes (UML, MCD, architecture), script SQL, charte graphique, maquettes
+scripts/                 Sauvegarde et restauration des bases (PowerShell)
+.github/workflows/       Intégration continue et déploiement (GitHub Actions)
+docker-compose.yml       Environnement de développement (5 conteneurs)
+docker-compose.prod.yml  Environnement de production (4 conteneurs)
 ```
 
-*(la structure sera complétée au fil du développement)*
+## Installation (développement)
 
-## Installation
+Prérequis : Docker Desktop et Git.
 
-*(à venir — sprint 1)*
+```
+git clone https://github.com/FantoniStephane/eduquizai.git
+cd eduquizai
+cp .env.example .env        # puis remplacer chaque « a_changer » par un secret
+docker compose up -d --build
+docker compose exec web python manage.py createsuperuser
+```
+
+L'application est alors disponible sur http://127.0.0.1:8000. Pour générer des quiz, renseigner `MISTRAL_API_KEY` dans `.env`, ou choisir le modèle local avec `IA_FOURNISSEUR=ollama`. Pour charger des données de démonstration : `docker compose exec web python manage.py donnees_demo --mot-de-passe "<mot de passe>"`.
+
+Le détail (variables, IA, sauvegardes) est dans `docs/ENVIRONNEMENT.md`.
+
+## Tests
+
+284 tests automatiques (253 pour l'application web, 31 pour le microservice IA) :
+
+```
+docker compose exec web python manage.py test
+docker compose exec ia python manage.py test
+```
+
+Voir `docs/PLAN_DE_TESTS.md`.
 
 ## Conventions
 
@@ -51,3 +79,7 @@ Voir [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Auteur
 
 Stéphane Fantoni — [github.com/FantoniStephane](https://github.com/FantoniStephane)
+
+## Licence
+
+Projet distribué sous licence MIT (voir le fichier `LICENSE`).
