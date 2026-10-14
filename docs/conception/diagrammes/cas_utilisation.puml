@@ -9,22 +9,24 @@ skinparam usecase {
   BorderColor #1F4E79
 }
 skinparam actorBorderColor #1F4E79
+skinparam actorBackgroundColor #FFFFFF
+skinparam ArrowColor #222222
 title Diagramme de cas d'utilisation — EduQuizAI
 
 actor "Enseignant" as ENS
 actor "Administrateur" as ADM
-actor "IA (Ollama)\n<<système>>" as IA
+actor "IA (Mistral ou Ollama)\n<<système>>" as IA
 
 rectangle "EduQuizAI" {
   usecase "Choisir son mot de passe\n(activation du compte,\nmot de passe oublié)" as UC_MDP
   usecase "S'authentifier" as UC_AUTH
-  usecase "Consulter le dashboard" as UC_DASH
+  usecase "Consulter le\ntableau de bord" as UC_DASH
   usecase "Gérer ses leçons\n(créer, consulter,\nmodifier, supprimer)" as UC_LECON
   usecase "Gérer ses quiz\n(consulter, modifier,\nsupprimer)" as UC_QUIZ
   usecase "Générer un quiz" as UC_GEN
   usecase "Valider un quiz" as UC_VAL
   usecase "Importer un texte" as UC_IMP
-  usecase "Exporter un quiz" as UC_EXP
+  usecase "Exporter un quiz\n(validé, PDF élève)" as UC_EXP
   usecase "Créer et gérer\nles comptes enseignants\n(invitation par e-mail)" as UC_COMPTES
 }
 
