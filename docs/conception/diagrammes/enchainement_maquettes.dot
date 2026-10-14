@@ -30,7 +30,7 @@ digraph G {
   n05 -> n08 [label="ouvrir un quiz"];
   n06 -> n07 [label="Générer un quiz"];
   n07 -> n07b [label="Générer"];
-  n07b -> n08 [label="quiz créé (brouillon)"];
+  n07b -> n06 [label="quiz créé (brouillon)\nretour à la liste", constraint=false];
   n06 -> n08 [label="Voir"];
   n08 -> n09 [label="Modifier"];
   n09 -> n08 [label="Enregistrer", style=dashed, constraint=false];
