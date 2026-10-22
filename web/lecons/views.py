@@ -175,9 +175,23 @@ class LeconDeleteView(SuccessMessageMixin, DeleteView):
             return None
 
     def get_context_data(self, **kwargs):
-        """Ajoute le nombre de quiz : la fenêtre change s'il y en a."""
+        """Ajoute les quiz de la leçon : la fenêtre change et les liste s'il y en a.
+
+        La liste sert aussi au détail de la leçon affiché en arrière-plan.
+        Si MongoDB ne répond pas, nb_quiz vaut None (suppression refusée).
+        """
         contexte = super().get_context_data(**kwargs)
-        contexte["nb_quiz"] = self.nombre_de_quiz()
+        contexte["quiz_liste"] = []
+        contexte["mongo_indisponible"] = False
+        try:
+            contexte["quiz_liste"] = QuizRepository().lister(
+                self.request.user.pk, id_lecon=self.object.pk
+            )
+            contexte["nb_quiz"] = len(contexte["quiz_liste"])
+        except PyMongoError:
+            logger.exception("MongoDB indisponible : quiz d'une leçon à supprimer")
+            contexte["mongo_indisponible"] = True
+            contexte["nb_quiz"] = None
         return contexte
 
     def form_valid(self, form):

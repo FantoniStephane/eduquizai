@@ -48,8 +48,12 @@
   --primaire-fonce: #1E3A8A;
   --primaire-clair: #EFF6FF;
 
-  /* Accent IA (ambre) : décoration et contour de focus uniquement */
+  /* Accent IA (ambre) : décoration uniquement */
   --accent: #F59E0B;
+
+  /* Contour de focus clavier (bleu primaire, contraste ≥ 6:1 sur les fonds
+     clairs, au-dessus des 3:1 demandés par WCAG 1.4.11 / RGAA critère 3.3) */
+  --focus: #1D4ED8;
 
   /* Couleurs d'état (contraste ≥ 4,5:1 sur blanc) */
   --succes: #15803D;
@@ -197,13 +201,13 @@ h2 {
   font-size: 14px;
 }
 
-/* Focus clavier toujours visible (contour ambre) */
+/* Focus clavier toujours visible (contour bleu) */
 .btn:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -379,7 +383,7 @@ legend {
   display: none;
 }
 .editeur trix-editor:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
 /* Mise en forme affichée dans l'éditeur (comme sur la page détail) */
@@ -421,7 +425,7 @@ legend {
   background: var(--primaire);
 }
 .barre-outils button:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -1296,7 +1300,7 @@ td a.t:hover {
 }
 .choix-segment input:focus-visible + label,
 .choix-cases input:focus-visible + label {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -1707,7 +1711,7 @@ td a.t:hover {
   color: #fff;
 }
 .radio-correct input:focus-visible + label {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -1797,6 +1801,17 @@ td a.t:hover {
 
 .dialogue .boutons {
   justify-content: flex-end;
+}
+
+/* Suppression impossible : quiz à supprimer d'abord (liens vers leur détail) */
+.dialogue .liste-quiz-bloquants {
+  margin: 8px 0 20px 20px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.dialogue .liste-quiz-bloquants li {
+  margin-bottom: 4px;
 }
 
 /* Export : choix du format et du contenu */

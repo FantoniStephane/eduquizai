@@ -436,10 +436,17 @@ class LeconVuesTests(TestCase):
         """Une leçon qui a servi à générer un quiz n'est pas supprimée."""
         repository = QuizRepository()
         self.addCleanup(repository.collection.delete_many, {})
-        creer_quiz(repository, id_utilisateur=self.anne.pk, id_lecon=self.lecon.pk)
+        id_quiz = creer_quiz(
+            repository,
+            id_utilisateur=self.anne.pk,
+            id_lecon=self.lecon.pk,
+            titre="Quiz à supprimer d'abord",
+        )
         url = reverse("lecons:supprimer", args=[self.lecon.pk])
         confirmation = self.client.get(url)
         self.assertContains(confirmation, "Impossible de supprimer la leçon")
+        self.assertContains(confirmation, "Quiz à supprimer d&#x27;abord")
+        self.assertContains(confirmation, reverse("quiz:detail", args=[id_quiz]))
         self.assertNotContains(confirmation, "Supprimer définitivement")
         reponse = self.client.post(url, follow=True)
         self.assertRedirects(reponse, reverse("lecons:detail", args=[self.lecon.pk]))
@@ -449,8 +456,12 @@ class LeconVuesTests(TestCase):
     def test_suppression_refusee_si_mongodb_ne_repond_pas(self):
         """Sans réponse de MongoDB, la leçon est conservée par précaution."""
         url = reverse("lecons:supprimer", args=[self.lecon.pk])
-        with mock.patch.object(
-            QuizRepository, "compter_par_lecon", side_effect=PyMongoError
+        with (
+            mock.patch.object(QuizRepository, "lister", side_effect=PyMongoError),
+            mock.patch.object(
+                QuizRepository, "compter_par_lecon", side_effect=PyMongoError
+            ),
+            self.assertLogs("lecons.views", level="ERROR"),
         ):
             self.assertContains(self.client.get(url), "ne peuvent pas être vérifiés")
             reponse = self.client.post(url, follow=True)
