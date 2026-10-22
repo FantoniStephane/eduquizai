@@ -14,7 +14,8 @@ développeur ──push──> develop ──pull request──> main
                                                   │ POST webhook + jeton
                                                   ▼
                        VPS OVH ── Coolify ── git clone main ── docker compose
-                       (docker-compose.prod.yml) : web, ia, postgres, mongo
+                       (docker-compose.prod.yml) : web, ia, postgres, mongo,
+                       sauvegarde_postgres, sauvegarde_mongo
                                                   │
                        Traefik (proxy de Coolify) ── HTTPS Let's Encrypt
                                                   ▼
@@ -38,7 +39,8 @@ développeur ──push──> develop ──pull request──> main
 | Fournisseur d'IA | au choix (Ollama ou Mistral) | Mistral |
 | Ports publiés | `127.0.0.1` uniquement | aucun |
 | Secrets | `.env` local (ignoré par Git) | variables d'environnement de Coolify |
-| E-mails | console | console (journaux Coolify) tant qu'aucun SMTP n'est configuré |
+| E-mails | console | SMTP (relais Brevo) |
+| Sauvegarde des bases | scripts `sauvegarde.ps1` / `restauration.ps1` (à la main) | automatique, toutes les 24 h, 7 jours conservés |
 
 Contrôle : `python manage.py check --deploy` sans avertissement en mode production (W021, préchargement HSTS, désactivé volontairement : réservé au propriétaire du domaine `duckdns.org`).
 
@@ -54,7 +56,7 @@ En production, le conteneur `web` enchaîne : `migrate` → `createcachetable` �
    - **Preserve repository during deployment** : coché. Sinon Coolify supprime le dépôt après la construction et le dossier `docker/mongo/initdb` monté dans MongoDB est vide (le compte applicatif n'est pas créé).
    - **Auto deploy** : « Manual deployments only » (le déploiement est commandé par la CI, après les tests).
    - **Domaine** : `https://eduquizai.duckdns.org`, service `web`, port `8000`.
-3. **Variables d'environnement** (Coolify, jamais dans le dépôt) : `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS=eduquizai.duckdns.org`, `DJANGO_CSRF_TRUSTED_ORIGINS=https://eduquizai.duckdns.org`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`, `MONGO_DB`, `MONGO_APP_USER`, `MONGO_APP_PASSWORD`, `IA_SECRET_KEY`, `IA_JWT_SECRET`, `MISTRAL_API_KEY`. Secrets générés avec `python -c "import secrets; print(secrets.token_urlsafe(50))"`, tous différents de ceux du développement.
+3. **Variables d'environnement** (Coolify, jamais dans le dépôt) : `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS=eduquizai.duckdns.org`, `DJANGO_CSRF_TRUSTED_ORIGINS=https://eduquizai.duckdns.org`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`, `MONGO_DB`, `MONGO_APP_USER`, `MONGO_APP_PASSWORD`, `IA_SECRET_KEY`, `IA_JWT_SECRET`, `MISTRAL_API_KEY`, et pour les e-mails (relais SMTP Brevo, compte gratuit) : `DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend`, `DJANGO_DEFAULT_FROM_EMAIL` (adresse validée comme expéditeur dans Brevo), `EMAIL_HOST_USER` (identifiant SMTP Brevo), `EMAIL_HOST_PASSWORD` (clé SMTP Brevo). Secrets générés avec `python -c "import secrets; print(secrets.token_urlsafe(50))"`, tous différents de ceux du développement.
 4. **GitHub** (*Settings → Secrets and variables → Actions*) :
    - `COOLIFY_WEBHOOK` : `https://<coolify>/api/v1/deploy?uuid=<uuid de la ressource>&force=false` ;
    - `COOLIFY_TOKEN` : jeton d'API Coolify avec la seule permission `deploy`.
@@ -79,7 +81,11 @@ En cas d'échec du job, il affiche le code et le message de Coolify (jamais l'UR
 
 ## Exploitation
 
-- **Journaux** : Coolify → ressource → *Runtime Logs* (requêtes Gunicorn, erreurs Django, e-mails d'invitation tant qu'aucun SMTP n'est configuré).
+- **Journaux** : Coolify → ressource → *Runtime Logs* (requêtes Gunicorn, erreurs Django, résultat des sauvegardes).
 - **Commandes** : Coolify → *Terminal* → conteneur `web` (ex. `python manage.py donnees_demo`).
 - **Retour arrière** : Coolify → *Rollback* (redéploie une version précédente).
-- **Pistes d'amélioration** : sauvegarde automatique des bases de production (les scripts `scripts/sauvegarde.ps1` et `restauration.ps1` ne concernent que le poste de développement), serveur SMTP pour les e-mails, limite de taille des envois au niveau du proxy.
+- **Sauvegardes** : les conteneurs `sauvegarde_postgres` et `sauvegarde_mongo` sauvegardent les deux bases au démarrage puis toutes les 24 h dans le volume `sauvegardes_data` (`postgres_AAAA-MM-JJ.dump`, `mongo_AAAA-MM-JJ.archive.gz`) ; les fichiers de plus de 7 jours sont supprimés. Liste : *Terminal* → conteneur `sauvegarde_postgres` → `ls -l /sauvegardes`.
+- **Restauration** (écrase les données actuelles) :
+  - PostgreSQL : *Terminal* → `sauvegarde_postgres` → `pg_restore --clean --if-exists -d "$PGDATABASE" /sauvegardes/postgres_AAAA-MM-JJ.dump` ;
+  - MongoDB : *Terminal* → `sauvegarde_mongo` → `mongorestore --host mongo --username "$MONGO_APP_USER" --password "$MONGO_APP_PASSWORD" --authenticationDatabase "$MONGO_DB" --nsInclude="$MONGO_DB.*" --drop --archive=/sauvegardes/mongo_AAAA-MM-JJ.archive.gz --gzip`.
+- **Pistes d'amélioration** : copie des sauvegardes hors du VPS (stockage S3 par exemple ; aujourd'hui elles protègent d'une erreur de manipulation, pas de la perte du serveur), limite de taille des envois au niveau du proxy.
