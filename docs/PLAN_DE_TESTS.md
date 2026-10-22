@@ -55,7 +55,7 @@ La commande `python manage.py donnees_demo` charge un jeu de données cohérent 
 |---|---|---|
 | Qualité | `pip-audit` (aucune dépendance avec une faille connue), Ruff (erreurs, style, mise en forme), `manage.py check` sur les deux projets Django | ~30 s |
 | Tests du microservice IA | 31 tests, Ollama et Mistral remplacés par des doublures ; couverture | ~20 s |
-| Tests de l'application web | 253 tests sur de vraies bases PostgreSQL 17 et MongoDB 8 (services GitHub) ; couverture | ~1 min |
+| Tests de l'application web | 254 tests sur de vraies bases PostgreSQL 17 et MongoDB 7.0 (services GitHub ; MongoDB 8, utilisé en développement et en production, ne démarre pas sur le noyau Linux des machines GitHub depuis octobre 2026) ; couverture | ~1 min |
 | Images Docker | Construction des images `web` et `ia` avec les Dockerfiles du projet, puis démarrage de l'application dans chaque image (`manage.py check`) ; taille des images dans le résumé du run (web : 220 Mo, ia : 157 Mo, sur une base `python:3.12-slim`). Lancé seulement si tous les tests passent | ~1 min |
 | Déploiement | Seulement après un push sur `main` et si tout est vert : appel du webhook de Coolify (méthode POST, jeton d'API limité au déploiement) ; la réponse de Coolify est affichée, sans aucun secret | ~5 s, puis ~1 min de reconstruction sur le serveur |
 

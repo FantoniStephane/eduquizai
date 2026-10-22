@@ -158,8 +158,12 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # MongoDB 7.0 en CI seulement (8 en développement et en production) :
+      # MongoDB 8 refuse de démarrer sur les noyaux Linux 6.19 à 7.0.13, ceux
+      # des machines GitHub depuis octobre 2026 (ticket SERVER-121912, notes de
+      # version 8.0). Retour à mongo:8 quand les machines auront un noyau corrigé.
       mongo:
-        image: mongo:8
+        image: mongo:7.0
         env:
           MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_ROOT_USER }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_ROOT_PASSWORD }}
