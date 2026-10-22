@@ -139,6 +139,26 @@ class InvitationTests(TestCase):
         self.client.logout()
         self.assertContains(self.client.get(lien, follow=True), "Lien invalide")
 
+    def test_renvoyer_l_invitation_aux_seuls_comptes_non_actives(self):
+        """L'action de l'admin ne renvoie le lien qu'aux comptes sans mot de passe."""
+        en_attente = Utilisateur.objects.create_user(
+            "marie.martin@eduquizai.local", None, nom="Martin", prenom="Marie"
+        )
+        active = Utilisateur.objects.create_user(
+            "anne.durand@eduquizai.local", MOT_DE_PASSE, nom="Durand", prenom="Anne"
+        )
+        reponse = self.client.post(
+            reverse("admin:comptes_utilisateur_changelist"),
+            {
+                "action": "renvoyer_invitation",
+                "_selected_action": [en_attente.pk, active.pk],
+            },
+            follow=True,
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["marie.martin@eduquizai.local"])
+        self.assertContains(reponse, "1 invitation(s) envoyée(s).")
+
 
 class MotDePasseOublieTests(TestCase):
     """Réinitialisation du mot de passe."""
