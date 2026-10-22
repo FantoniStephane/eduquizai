@@ -204,6 +204,23 @@ class QuizGenerationTests(TestCase):
         self.assertContains(reponse, "pas répondu à temps")
         self.assertEqual(self.quiz_enregistres(), [])
 
+    def test_erreurs_rares_du_microservice(self):
+        """Autre erreur réseau, réponse illisible ou vide : message générique."""
+        illisible = reponse_ia()
+        illisible.json.side_effect = ValueError("pas du JSON")
+        cas = {
+            "autre erreur réseau": {"side_effect": requests.RequestException()},
+            "réponse illisible": {"return_value": illisible},
+            "aucune question": {"return_value": reponse_ia(questions=[])},
+        }
+        for nom, appel in cas.items():
+            with self.subTest(cas=nom):
+                with self.assertLogs("quiz.client_ia", level="WARNING"):
+                    reponse, _ = self.generer(**appel)
+                self.assertEqual(reponse.status_code, 200)
+                self.assertContains(reponse, "La génération a échoué")
+        self.assertEqual(self.quiz_enregistres(), [])
+
     def test_quiz_invalide_de_l_ia_refuse(self):
         """Des questions mal formées ne sont jamais enregistrées."""
         mauvaises = [{"type_question": "qcm", "texte": "", "choix": []}]
