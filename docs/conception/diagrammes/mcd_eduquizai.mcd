@@ -14,4 +14,4 @@ CHOIX: id_choix [INTEGER], texte [TEXT], est_correct [BOOLEAN]
 PROPOSE, 0N QUESTION, 11 CHOIX
 QUESTION: id_question [INTEGER], texte [TEXT], type_question [VARCHAR(20)], explication [TEXT], reponse_attendue [TEXT], ordre [INTEGER]
 COMPOSE, 1N QUIZ, 11 QUESTION
-QUIZ: id_quiz [INTEGER], titre [VARCHAR(100)], description [TEXT], difficulte [VARCHAR(20)], statut [VARCHAR(20)], date_creation [DATETIME], date_validation [DATETIME]
+QUIZ: id_quiz [INTEGER], titre [VARCHAR(200)], description [VARCHAR(500)], difficulte [VARCHAR(20)], statut [VARCHAR(20)], date_creation [DATETIME], date_validation [DATETIME]

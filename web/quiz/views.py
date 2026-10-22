@@ -287,7 +287,8 @@ def valider_un_quiz(request, id_quiz):
 
     Seule la méthode POST (protégée par le jeton CSRF) change le statut : un
     simple lien ne peut jamais valider un quiz. Le quiz est cherché parmi ceux
-    de l'enseignant connecté (404 sinon, faille IDOR).
+    de l'enseignant connecté : sinon, erreur 404 (protection contre l'accès
+    direct par l'URL, faille IDOR).
     """
     repository = QuizRepository()
     try:

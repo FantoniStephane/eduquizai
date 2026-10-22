@@ -1,15 +1,19 @@
 @startuml sequence_generer_quiz
 skinparam shadowing false
 hide footbox
-skinparam ArrowColor #1F4E79
+skinparam dpi 100
 skinparam defaultFontName Arial
+skinparam defaultFontSize 20
+skinparam ArrowColor #1F4E79
 skinparam sequenceMessageAlign left
 skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 6
 skinparam ParticipantBackgroundColor #EAF1FB
 skinparam ParticipantBorderColor #1F4E79
 skinparam DatabaseBackgroundColor #EAF1FB
 skinparam DatabaseBorderColor #1F4E79
 skinparam ActorBorderColor #1F4E79
+skinparam ActorBackgroundColor #FFFFFF
 skinparam SequenceLifeLineBorderColor #1F4E79
 skinparam SequenceGroupBorderColor #1F4E79
 skinparam NoteBackgroundColor #FFF8E1
@@ -17,62 +21,51 @@ skinparam NoteBorderColor #B45309
 title Diagramme de séquence — Générer un quiz
 
 autonumber
-actor "Enseignant" as ENS
-participant "Navigateur" as NAV
-participant "Application Django\n(conteneur web)" as WEB
+actor "Enseignant\n(navigateur)" as ENS
+participant "Application\nDjango" as WEB
 database "PostgreSQL" as PG
-participant "Microservice IA\n(conteneur ia)" as IA
-participant "Ollama\n(modèle local)" as OLL
 database "MongoDB" as MDB
+participant "Microservice\nIA" as IA
+participant "Fournisseur\nd'IA" as OLL
 
-ENS -> NAV : Choisit la leçon, la difficulté,\nles types et le nombre de questions,\npuis clique sur « Générer »
-NAV -> NAV : Affiche l'indicateur de chargement (écran 7b)
-NAV -> WEB : POST /quiz/generer/ (formulaire + jeton CSRF)
+ENS -> WEB : POST /quiz/generer/\n(leçon, réglages,\nCSRF)
 activate WEB
-WEB -> WEB : Vérifie la session, le jeton CSRF\net les paramètres du formulaire
-WEB -> PG : Lit la leçon (id, propriétaire = utilisateur connecté)
-activate PG
-PG --> WEB : Leçon (contenu en Markdown)
-deactivate PG
+note left of WEB : Écran 7b :\nattente, bouton\nAnnuler
+WEB -> WEB : Vérifie session,\nCSRF et réglages
+WEB -> PG : Lit la leçon\nde l'enseignant
+PG --> WEB : Leçon (Markdown)
 
-alt Leçon inexistante ou d'un autre enseignant
-  WEB --> NAV : 404 Page introuvable
+alt Leçon d'un autre enseignant
+  WEB --> ENS : Formulaire :\n« Cette leçon n'existe pas. »
 else Leçon trouvée
-  WEB -> WEB : Signe un jeton JWT de 2 minutes\n(secret partagé avec le service IA)
-  WEB -> IA : POST /api/generer-quiz/\nAuthorization: Bearer <JWT>\n(contenu de la leçon + paramètres, délai maximum)
+  WEB -> WEB : Signe un jeton JWT (2 min)
+  WEB -> IA : POST /api/generer-quiz/\n+ jeton JWT + leçon
   activate IA
-  IA -> IA : Vérifie le jeton JWT (signature, durée,\németteur, destinataire) et les paramètres
-  IA -> IA : Construit le prompt\n(consignes + contenu de la leçon délimité)
-  IA -> OLL : Demande de génération au format JSON
-  activate OLL
-  OLL --> IA : Réponse du modèle (JSON)
-  deactivate OLL
-  IA -> IA : Vérifie la structure du JSON\n(nombre et types de questions, choix,\nbonne réponse, explication)
+  IA -> IA : Vérifie le jeton\net les réglages
+  IA -> IA : Construit le prompt
+  IA -> OLL : Demande un quiz\nen JSON
+  OLL --> IA : Réponse JSON
+  IA -> IA : Vérifie le JSON\n(un nouvel essai\nsi invalide)
 
-  alt Réponse valide
-    IA --> WEB : 200 OK — questions du quiz
+  alt Quiz valide
+    IA --> WEB : 200 — questions
     deactivate IA
-    WEB -> WEB : Contrôle le document avant écriture
-    WEB -> MDB : Enregistre le quiz\n(statut « brouillon », propriétaire, leçon, date)
-    activate MDB
-    MDB --> WEB : Identifiant du quiz
-    deactivate MDB
-    WEB --> NAV : 302 Redirection vers le détail du quiz\n+ message « Quiz généré : relisez-le avant de le valider »
-    NAV -> WEB : GET /quiz/<id>/
-    WEB -> MDB : Lit le quiz (id, propriétaire = utilisateur connecté)
+    WEB -> WEB : Vérifie l'annulation,\ncontrôle le quiz
+    WEB -> MDB : Enregistre le quiz\n(brouillon, propriétaire,\nleçon)
+    MDB --> WEB : Identifiant
+    WEB --> ENS : 302 vers la liste\ndes quiz + message
+    ENS -> WEB : GET /quiz/
+    WEB -> MDB : Lit les quiz\nde l'enseignant
     MDB --> WEB : Quiz
-    WEB --> NAV : Page « Détail du quiz » (écran 8)
-    NAV --> ENS : Affiche le quiz en brouillon
-  else Délai dépassé, IA indisponible ou JSON invalide
-    IA --> WEB : Erreur (400, 401, 502, 503 ou 504)
-    WEB --> NAV : Formulaire réaffiché avec un message d'erreur\n(aucun quiz enregistré)
-    NAV --> ENS : Propose de relancer la génération
+    WEB --> ENS : Liste des quiz (écran 6) :\nnouveau brouillon
+  else Échec
+    WEB --> ENS : Formulaire + erreur\n(IA, annulation ou\nMongoDB : aucun quiz\nenregistré)
   end
 end
 deactivate WEB
 
-note over ENS, MDB
-  Appel synchrone : la page attend la réponse de l'IA derrière l'indicateur de chargement.
-  Objectif du cahier des charges : moins de 5 secondes pour un quiz simple.
+note over ENS, OLL
+  Appel synchrone : la page attend l'IA.
+  Objectif du CDC : moins de 5 s.
 end note
 @enduml

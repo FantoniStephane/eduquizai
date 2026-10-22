@@ -1,0 +1,15 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="#F8FAFC", pad=0.4, nodesep=0.3, ranksep=0.6, fontname="Inter", label=<<B>Parcours du mot de passe — EduQuizAI</B>>, labelloc=t, fontsize=24];
+  node [shape=plain, fontname="Inter"];
+  edge [fontname="Inter", fontsize=15, color="#1E3A8A", fontcolor="#1E3A8A", penwidth=1.6, arrowsize=0.8];
+  n01 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD BGCOLOR="#1E3A8A"><FONT POINT-SIZE="19" COLOR="white"><B>1 · Connexion</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">page d'entrée</FONT></TD></TR></TABLE>>];
+  n12 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD BGCOLOR="#1E3A8A"><FONT POINT-SIZE="19" COLOR="white"><B>12 · Choisir son mot de passe</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">12b lien invalide · 12c mot de passe enregistré</FONT></TD></TR></TABLE>>];
+  n13 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD BGCOLOR="#1E3A8A"><FONT POINT-SIZE="19" COLOR="white"><B>13 · Mot de passe oublié</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">13b e-mail envoyé</FONT></TD></TR></TABLE>>];
+  mail [shape=note, style=filled, fillcolor="#FFFBEB", color="#B45309", fontname="Inter", fontsize=15, fontcolor="#78350F", label=<<B>E-mail</B><BR/>lien personnel<BR/>usage unique · 72 h>];
+  adm [shape=box, style="rounded,filled", fillcolor="white", color="#1E3A8A", fontname="Inter", fontsize=15, fontcolor="#1E3A8A", label=<<B>Administrateur</B><BR/>crée le compte (admin Django)>];
+  adm -> mail [label="invitation"];
+  n01 -> n13 [label="Mot de passe oublié ?"];
+  n13 -> mail [label="Recevoir un lien"];
+  mail -> n12 [label="ouvrir le lien"];
+  n12 -> n01 [label="mot de passe enregistré", style=dashed, constraint=false];
+}

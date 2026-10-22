@@ -9,7 +9,9 @@
 #   serveur de développement (DJANGO_PRODUCTION=True, voir lancement.sh) ;
 # - redémarrage automatique des conteneurs ;
 # - les secrets sont saisis dans Coolify (variables d'environnement), jamais
-#   dans le dépôt.
+#   dans le dépôt ;
+# - sauvegarde automatique des deux bases (au démarrage puis toutes les 24 h,
+#   7 jours conservés) dans le volume sauvegardes_data.
 
 services:
   web:
@@ -21,10 +23,15 @@ services:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
       - DJANGO_CSRF_TRUSTED_ORIGINS=${DJANGO_CSRF_TRUSTED_ORIGINS}
-      # E-mails (invitations, mot de passe oublié) : dans les journaux du
-      # conteneur tant qu'aucun serveur SMTP n'est configuré
+      # E-mails (invitations, mot de passe oublié) : relais SMTP Brevo quand
+      # DJANGO_EMAIL_BACKEND vaut le backend smtp ; sinon dans les journaux
       - DJANGO_EMAIL_BACKEND=${DJANGO_EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       - DJANGO_DEFAULT_FROM_EMAIL=${DJANGO_DEFAULT_FROM_EMAIL:-EduQuizAI <no-reply@eduquizai.local>}
+      - EMAIL_HOST=${EMAIL_HOST:-smtp-relay.brevo.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -92,6 +99,68 @@ services:
       interval: 5s
       retries: 5
 
+  # Sauvegarde automatique de PostgreSQL : pg_dump au démarrage puis toutes
+  # les 24 h ; fichiers de plus de 7 jours supprimés (rotation)
+  sauvegarde_postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - PGHOST=postgres
+      - PGDATABASE=${POSTGRES_DB}
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - sauvegardes_data:/sauvegardes
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          fichier=/sauvegardes/postgres_$$(date +%Y-%m-%d).dump
+          if pg_dump -Fc -f "$$fichier.tmp"; then
+            mv "$$fichier.tmp" "$$fichier"
+            echo "Sauvegarde PostgreSQL : $$fichier"
+          else
+            rm -f "$$fichier.tmp"
+            echo "Échec de la sauvegarde PostgreSQL" >&2
+          fi
+          find /sauvegardes -name 'postgres_*.dump' -mtime +6 -delete
+          sleep 86400
+        done
+
+  # Sauvegarde automatique de MongoDB (base de l'application, compte
+  # applicatif aux droits limités), même rythme et même rotation
+  sauvegarde_mongo:
+    image: mongo:8
+    restart: unless-stopped
+    environment:
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+    volumes:
+      - sauvegardes_data:/sauvegardes
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          fichier=/sauvegardes/mongo_$$(date +%Y-%m-%d).archive.gz
+          if mongodump --quiet --host mongo --username "$$MONGO_APP_USER" --password "$$MONGO_APP_PASSWORD" --authenticationDatabase "$$MONGO_DB" --db "$$MONGO_DB" --archive="$$fichier.tmp" --gzip; then
+            mv "$$fichier.tmp" "$$fichier"
+            echo "Sauvegarde MongoDB : $$fichier"
+          else
+            rm -f "$$fichier.tmp"
+            echo "Échec de la sauvegarde MongoDB" >&2
+          fi
+          find /sauvegardes -name 'mongo_*.archive.gz' -mtime +6 -delete
+          sleep 86400
+        done
+
 volumes:
   postgres_data:
   mongo_data:
+  sauvegardes_data:

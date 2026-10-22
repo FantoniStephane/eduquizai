@@ -1,36 +1,33 @@
 digraph G {
-  graph [rankdir=LR, bgcolor="#F8FAFC", pad=0.4, nodesep=0.45, ranksep=0.9, fontname="Inter", label=<<B>Enchaînement des maquettes — EduQuizAI</B><BR/><FONT POINT-SIZE="11" COLOR="#475569">La barre de navigation (Tableau de bord · Leçons · Quiz · Déconnexion) est accessible depuis tous les écrans connectés</FONT>>, labelloc=t, fontsize=20];
+  graph [rankdir=TB, bgcolor="#F8FAFC", pad=0.4, nodesep=0.25, ranksep=0.5, fontname="Inter", label=<<B>Enchaînement des maquettes — EduQuizAI</B>>, labelloc=t, fontsize=24];
   node [shape=plain, fontname="Inter"];
-  edge [fontname="Inter", fontsize=10, color="#1E3A8A", fontcolor="#1E3A8A", penwidth=1.6, arrowsize=0.8];
-  n01 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/01.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>1 · Connexion</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">page d'entrée</FONT></TD></TR></TABLE>>];
-  n02 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/02.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT COLOR="white"><B>2 · Tableau de bord</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">après connexion</FONT></TD></TR></TABLE>>];
-  n03 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/03.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT COLOR="white"><B>3 · Liste des leçons</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
-  n04 [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/04.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT COLOR="white"><B>4 · Formulaire leçon</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Create / Update</FONT></TD></TR></TABLE>>];
-  n04c [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/04c.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT COLOR="white"><B>4c · Import fichier</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">remplit le contenu</FONT></TD></TR></TABLE>>];
-  n05 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/05.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT COLOR="white"><B>5 · Détail leçon</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
-  n06 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/06.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT COLOR="white"><B>6 · Liste des quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
-  n07 [label=<<TABLE BORDER="1" COLOR="#15803D" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/07.png"/></TD></TR><TR><TD BGCOLOR="#15803D"><FONT COLOR="white"><B>7 · Générateur</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Create (IA)</FONT></TD></TR></TABLE>>];
-  n07b [label=<<TABLE BORDER="1" COLOR="#15803D" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/07b.png"/></TD></TR><TR><TD BGCOLOR="#15803D"><FONT COLOR="white"><B>7b · Génération en cours</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">attente IA locale</FONT></TD></TR></TABLE>>];
-  n08 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/08.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT COLOR="white"><B>8 · Détail quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Read + Valider</FONT></TD></TR></TABLE>>];
-  n09 [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/09.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT COLOR="white"><B>9 · Modification quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Update</FONT></TD></TR></TABLE>>];
-  n10 [label=<<TABLE BORDER="1" COLOR="#B91C1C" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/10.png"/></TD></TR><TR><TD BGCOLOR="#B91C1C"><FONT COLOR="white"><B>10 · Suppression</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">Delete (leçon ou quiz)</FONT></TD></TR></TABLE>>];
-  n11 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/11.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>11 · Export</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">PDF · CSV · JSON</FONT></TD></TR></TABLE>>];
-  n12 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/12.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>12 · Choisir son mot de passe</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">12b lien invalide · 12c mot de passe enregistré</FONT></TD></TR></TABLE>>];
-  n13 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white" STYLE="rounded"><TR><TD><IMG SRC="miniatures/13.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT COLOR="white"><B>13 · Mot de passe oublié</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#475569">13b e-mail envoyé</FONT></TD></TR></TABLE>>];
-  mail [shape=note, style=filled, fillcolor="#FFFBEB", color="#B45309", fontname="Inter", fontsize=11, fontcolor="#78350F", label=<<B>E-mail</B><BR/>lien personnel<BR/>usage unique · 72 h>];
+  edge [fontname="Inter", fontsize=15, color="#1E3A8A", fontcolor="#1E3A8A", penwidth=1.6, arrowsize=0.8];
+  n01 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/01.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT POINT-SIZE="19" COLOR="white"><B>1 · Connexion</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">page d'entrée</FONT></TD></TR></TABLE>>];
+  n02 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/02.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT POINT-SIZE="19" COLOR="white"><B>2 · Tableau de bord</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">après connexion</FONT></TD></TR></TABLE>>];
+  n03 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/03.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT POINT-SIZE="19" COLOR="white"><B>3 · Liste des leçons</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
+  n04 [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/04.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT POINT-SIZE="19" COLOR="white"><B>4 · Formulaire leçon</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Create / Update</FONT></TD></TR></TABLE>>];
+  n04c [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/04c.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT POINT-SIZE="19" COLOR="white"><B>4c · Import fichier</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">remplit le contenu</FONT></TD></TR></TABLE>>];
+  n05 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/05.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT POINT-SIZE="19" COLOR="white"><B>5 · Détail leçon</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
+  n06 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/06.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT POINT-SIZE="19" COLOR="white"><B>6 · Liste des quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Read</FONT></TD></TR></TABLE>>];
+  n07 [label=<<TABLE BORDER="1" COLOR="#15803D" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/07.png"/></TD></TR><TR><TD BGCOLOR="#15803D"><FONT POINT-SIZE="19" COLOR="white"><B>7 · Générateur</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Create (IA)</FONT></TD></TR></TABLE>>];
+  n07b [label=<<TABLE BORDER="1" COLOR="#15803D" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/07b.png"/></TD></TR><TR><TD BGCOLOR="#15803D"><FONT POINT-SIZE="19" COLOR="white"><B>7b · Génération en cours</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">attente de l'IA</FONT></TD></TR></TABLE>>];
+  n08 [label=<<TABLE BORDER="1" COLOR="#1D4ED8" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/08.png"/></TD></TR><TR><TD BGCOLOR="#1D4ED8"><FONT POINT-SIZE="19" COLOR="white"><B>8 · Détail quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Read + Valider</FONT></TD></TR></TABLE>>];
+  n09 [label=<<TABLE BORDER="1" COLOR="#B45309" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/09.png"/></TD></TR><TR><TD BGCOLOR="#B45309"><FONT POINT-SIZE="19" COLOR="white"><B>9 · Modification quiz</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Update</FONT></TD></TR></TABLE>>];
+  n10 [label=<<TABLE BORDER="1" COLOR="#B91C1C" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/10.png"/></TD></TR><TR><TD BGCOLOR="#B91C1C"><FONT POINT-SIZE="19" COLOR="white"><B>10 · Suppression</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">Delete (leçon ou quiz)</FONT></TD></TR></TABLE>>];
+  n11 [label=<<TABLE BORDER="1" COLOR="#1E3A8A" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="white" STYLE="rounded"><TR><TD FIXEDSIZE="TRUE" WIDTH="180" HEIGHT="113"><IMG SCALE="TRUE" SRC="miniatures/11.png"/></TD></TR><TR><TD BGCOLOR="#1E3A8A"><FONT POINT-SIZE="19" COLOR="white"><B>11 · Export</B></FONT></TD></TR><TR><TD><FONT POINT-SIZE="15" COLOR="#475569">PDF élève (maquette : PDF · CSV · JSON)</FONT></TD></TR></TABLE>>];
   n01 -> n02 [label="se connecter"];
   n02 -> n03 [label="Leçons"];
   n02 -> n04 [label="+ Nouvelle leçon"];
   n02 -> n06 [label="Quiz"];
   n03 -> n04 [label="+ Nouvelle leçon / Modifier"];
   n03 -> n05 [label="Voir"];
-  n04 -> n04c [label="Importer"];
-  n04c -> n04 [label="texte importé", style=dashed];
+  n04 -> n04c [label="Importer  "];
+  n04c -> n04 [label="  texte importé", style=dashed];
   n04 -> n05 [dir=both, label="Enregistrer ↓\n↑ Modifier"];
   n05 -> n08 [label="ouvrir un quiz"];
   n06 -> n07 [label="Générer un quiz"];
   n07 -> n07b [label="Générer"];
-  n07b -> n08 [label="quiz créé (brouillon)"];
+  n07b -> n06 [label="quiz créé (brouillon)\nretour à la liste", constraint=false];
   n06 -> n08 [label="Voir"];
   n08 -> n09 [label="Modifier"];
   n09 -> n08 [label="Enregistrer", style=dashed, constraint=false];
@@ -38,12 +35,6 @@ digraph G {
   n03 -> n10 [label="Supprimer", color="#B91C1C", fontcolor="#B91C1C"];
   n08 -> n10 [label="Supprimer", color="#B91C1C", fontcolor="#B91C1C"];
   n02 -> n01 [label="Déconnexion", style=dotted, constraint=false];
-  adm [shape=box, style="rounded,filled", fillcolor="white", color="#1E3A8A", fontname="Inter", fontsize=11, fontcolor="#1E3A8A", label=<<B>Administrateur</B><BR/>crée le compte (admin Django)>];
-  adm -> mail [label="invitation"];
-  n01 -> n13 [label="Mot de passe oublié ?"];
-  n13 -> mail [label="Recevoir un lien"];
-  mail -> n12 [label="ouvrir le lien"];
-  n12 -> n01 [label="mot de passe enregistré", style=dashed, constraint=false];
   {rank=same; n03; n06}
   {rank=same; n04; n05; n07}
 }

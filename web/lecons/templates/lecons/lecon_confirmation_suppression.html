@@ -3,7 +3,8 @@
   Maquette 10 : confirmation de suppression, affichée par-dessus le détail de la leçon.
   La suppression n'a lieu qu'à l'envoi du formulaire (POST + jeton CSRF).
   Si des quiz ont été générés à partir de la leçon, la suppression est
-  bloquée : la fenêtre l'explique et ne propose que le retour à la leçon.
+  bloquée : la fenêtre l'explique, liste ces quiz (liens vers leur détail)
+  et ne propose que le retour à la leçon.
 {% endcomment %}
 
 {% block titre %}Supprimer la leçon{% endblock %}
@@ -27,6 +28,11 @@
           <p id="d-suppr">Les quiz de cette leçon ne peuvent pas être vérifiés pour le moment. Réessayez plus tard.</p>
         {% else %}
           <p id="d-suppr">Elle a servi à générer <strong>{{ nb_quiz }} quiz</strong>. Supprimez d'abord ces quiz, puis la leçon.</p>
+          <ul class="liste-quiz-bloquants">
+            {% for quiz in quiz_liste %}
+              <li><a href="{% url 'quiz:detail' quiz.id %}">{{ quiz.titre }}</a></li>
+            {% endfor %}
+          </ul>
         {% endif %}
         <div class="boutons">
           <a class="btn btn-secondaire" href="{% url 'lecons:detail' lecon.pk %}" autofocus>Retour à la leçon</a>

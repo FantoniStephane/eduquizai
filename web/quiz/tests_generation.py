@@ -225,13 +225,17 @@ class QuizGenerationTests(TestCase):
         self.assertContains(reponse, "n&#x27;a pas pu être enregistré")
 
     def test_encart_ia_locale(self):
-        """L'encart annonce l'IA locale seulement si le fournisseur est Ollama."""
+        """L'encart et l'attente s'adaptent au fournisseur (Ollama local ou Mistral)."""
         with mock.patch.dict("quiz.views.settings.IA", {"FOURNISSEUR": "ollama"}):
-            self.assertContains(self.client.get(self.url), "IA tourne en local")
+            reponse = self.client.get(self.url)
+        self.assertContains(reponse, "IA tourne en local")
+        self.assertContains(reponse, "une à deux minutes")
         with mock.patch.dict("quiz.views.settings.IA", {"FOURNISSEUR": "mistral"}):
             reponse = self.client.get(self.url)
         self.assertNotContains(reponse, "IA tourne en local")
+        self.assertNotContains(reponse, "une à deux minutes")
         self.assertContains(reponse, "API Mistral")
+        self.assertContains(reponse, "quelques secondes")
 
     def test_apercu_sans_injection(self):
         """Le titre d'une leçon est échappé dans la page (protection XSS)."""

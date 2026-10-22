@@ -115,7 +115,11 @@
             <li>Le texte de la leçon est envoyé à l'API Mistral, hébergée en Europe.</li>
           {% endif %}
           <li>Le quiz est créé en brouillon : relisez-le avant de le valider.</li>
-          <li>La génération peut prendre une à deux minutes.</li>
+          {% if ia_locale %}
+            <li>La génération peut prendre une à deux minutes.</li>
+          {% else %}
+            <li>La génération prend quelques secondes.</li>
+          {% endif %}
         </ul>
       </section>
     </aside>
@@ -125,7 +129,7 @@
     <div class="attente">
       <div class="spinner" aria-hidden="true"></div>
       <h2 id="t-attente">Génération du quiz en cours…</h2>
-      <p class="muted">Cela peut prendre une à deux minutes. Ne fermez pas cette page.</p>
+      <p class="muted">{% if ia_locale %}Cela peut prendre une à deux minutes.{% else %}Cela prend quelques secondes.{% endif %} Ne fermez pas cette page.</p>
       <div class="barre-prog barre-prog-indeterminee" aria-hidden="true"><span></span></div>
       <ul class="etapes">
         <li class="encours">Lecture de la leçon et envoi à l'IA</li>
