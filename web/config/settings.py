@@ -213,6 +213,14 @@ EMAIL_BACKEND = config(
 DEFAULT_FROM_EMAIL = config(
     "DJANGO_DEFAULT_FROM_EMAIL", default="EduQuizAI <no-reply@eduquizai.local>"
 )
+# Serveur SMTP (production : relais Brevo) ; identifiants dans l'environnement,
+# jamais dans le dépôt
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_TIMEOUT = 10
 
 # Liens d'activation et de réinitialisation du mot de passe : valables 72 heures
 PASSWORD_RESET_TIMEOUT = 60 * 60 * 72
