@@ -2009,8 +2009,13 @@ body:has(> .pied) > .contenu {
 }
 
 /* ===== Page d'accueil publique (maquette 00) ===== */
+/* Sur ordinateur, la page tient dans la hauteur de l'écran (comme les pages de
+   l'application) ; sur mobile ou écran très bas, défilement normal. */
 .page-accueil {
   background: var(--fond);
+}
+.page-accueil main {
+  background: linear-gradient(160deg, var(--primaire-clair), var(--fond) 70%);
 }
 .accueil-entete {
   background: var(--surface);
@@ -2020,7 +2025,7 @@ body:has(> .pied) > .contenu {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
-  height: 68px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2031,22 +2036,22 @@ body:has(> .pied) > .contenu {
   display: block;
 }
 .accueil-hero {
-  background: linear-gradient(160deg, var(--primaire-clair), var(--fond) 70%);
-  padding: 64px 24px 56px;
+  padding: 56px 24px 40px;
 }
 .accueil-hero .interieur {
-  max-width: 760px;
+  max-width: 900px;
   margin: 0 auto;
   text-align: center;
 }
 .accueil-hero h1 {
-  font-size: 40px;
-  margin-bottom: 16px;
+  font-size: 38px;
+  margin-bottom: 14px;
 }
 .accueil-hero .accroche {
   font-size: 18px;
   color: var(--texte-2);
-  margin-bottom: 28px;
+  margin: 0 auto 24px;
+  max-width: 720px;
 }
 .accueil-hero .btn {
   padding: 12px 28px;
@@ -2055,12 +2060,12 @@ body:has(> .pied) > .contenu {
 .accueil-etapes {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 56px 24px;
+  padding: 24px 24px 48px;
 }
 .accueil-etapes h2 {
   text-align: center;
-  font-size: 24px;
-  margin-bottom: 32px;
+  font-size: 22px;
+  margin-bottom: 20px;
 }
 .etapes {
   list-style: none;
@@ -2072,11 +2077,18 @@ body:has(> .pied) > .contenu {
 .etapes .carte {
   display: block;
   height: 100%;
-  padding: 24px;
+  padding: 18px 22px;
+}
+.etapes .tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 .etapes .numero {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--primaire);
   color: #fff;
@@ -2084,42 +2096,61 @@ body:has(> .pied) > .contenu {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  margin-bottom: 14px;
 }
 .etapes h3 {
   font-size: 18px;
-  margin-bottom: 8px;
 }
 .etapes p {
   color: var(--texte-2);
   font-size: 15px;
 }
-.accueil-note {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 0 24px 56px;
-  text-align: center;
-}
 .accueil-pied {
   border-top: 1px solid var(--bordure);
   background: var(--surface);
-  padding: 20px 24px;
+  padding: 14px 24px;
   text-align: center;
   font-size: 14px;
   color: var(--texte-2);
 }
+.accueil-pied p + p {
+  margin-top: 4px;
+}
 .accueil-pied a {
   font-weight: 600;
 }
+@media (min-width: 821px) and (min-height: 600px) {
+  body.page-accueil {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .page-accueil main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .accueil-hero {
+    padding: clamp(8px, 4vh, 48px) 24px clamp(8px, 2vh, 24px);
+  }
+  .accueil-hero h1 {
+    font-size: clamp(28px, 5.4vh, 40px);
+  }
+  .accueil-etapes {
+    padding: clamp(8px, 2vh, 24px) 24px clamp(8px, 3vh, 32px);
+  }
+}
 @media (max-width: 820px) {
   .accueil-hero {
-    padding: 40px 16px;
+    padding: 36px 16px 24px;
   }
   .accueil-hero h1 {
     font-size: 30px;
   }
   .accueil-etapes {
-    padding: 40px 16px;
+    padding: 24px 16px 32px;
   }
   .etapes {
     grid-template-columns: 1fr;
