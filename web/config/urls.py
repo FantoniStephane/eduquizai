@@ -20,7 +20,7 @@ from django.contrib.auth.decorators import login_not_required
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from .views import DonneesPersonnellesView, TableauDeBordView
+from .views import AccueilView, DonneesPersonnellesView, TableauDeBordView
 
 urlpatterns = [
     # Une seule page de connexion : celle de l'administration renvoie vers la
@@ -40,5 +40,6 @@ urlpatterns = [
         DonneesPersonnellesView.as_view(),
         name="donnees_personnelles",
     ),
-    path("", TableauDeBordView.as_view(), name="tableau_de_bord"),
+    path("tableau-de-bord/", TableauDeBordView.as_view(), name="tableau_de_bord"),
+    path("", AccueilView.as_view(), name="accueil"),
 ]

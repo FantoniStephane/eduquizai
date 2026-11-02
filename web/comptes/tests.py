@@ -21,7 +21,10 @@ class ConnexionTests(TestCase):
     def test_page_protegee_redirige_vers_la_connexion(self):
         """Un visiteur non connecté est renvoyé vers la page de connexion."""
         reponse = self.client.get(reverse("tableau_de_bord"))
-        self.assertRedirects(reponse, f"{reverse('comptes:connexion')}?next=/")
+        self.assertRedirects(
+            reponse,
+            f"{reverse('comptes:connexion')}?next={reverse('tableau_de_bord')}",
+        )
 
     def test_connexion_reussie(self):
         """L'enseignant se connecte avec son e-mail, quelle que soit la casse."""
@@ -41,11 +44,11 @@ class ConnexionTests(TestCase):
         )
         self.assertRedirects(reponse, reverse("admin:index"))
 
-    def test_administrateur_dans_l_administration_meme_depuis_l_accueil(self):
-        """Arrivé par la page d'accueil (« next=/ »), l'admin va dans l'admin."""
+    def test_administrateur_dans_l_administration_meme_depuis_le_tableau_de_bord(self):
+        """Arrivé depuis une page enseignant, l'administrateur va dans l'admin."""
         Utilisateur.objects.create_superuser("admin@eduquizai.local", MOT_DE_PASSE)
         reponse = self.client.post(
-            reverse("comptes:connexion") + "?next=/",
+            reverse("comptes:connexion") + f"?next={reverse('tableau_de_bord')}",
             {"username": "admin@eduquizai.local", "password": MOT_DE_PASSE},
         )
         self.assertRedirects(reponse, reverse("admin:index"))

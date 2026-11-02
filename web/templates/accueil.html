@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% comment %}
+  Page d'accueil publique (maquette 00) : présentation d'EduQuizAI avant la
+  connexion. Les personnes déjà connectées n'arrivent pas ici (voir AccueilView).
+{% endcomment %}
+
+{% block titre %}Accueil{% endblock %}
+{% block classe_body %}page-accueil{% endblock %}
+
+{% block corps %}
+  <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+  <header class="accueil-entete">
+    <div class="interieur">
+      <img class="logo" src="{% static 'img/logo.svg' %}" alt="EduQuizAI by SchoolUp">
+      <a class="btn btn-secondaire" href="{% url 'comptes:connexion' %}">Se connecter</a>
+    </div>
+  </header>
+  <main id="contenu">
+    <section class="accueil-hero">
+      <div class="interieur">
+        <h1>Transformez vos leçons en quiz, en quelques secondes</h1>
+        <p class="accroche">EduQuizAI aide les enseignants du collège à préparer des quiz à partir de leurs propres leçons. L'IA propose, vous relisez et vous validez.</p>
+        <a class="btn btn-primaire" href="{% url 'comptes:connexion' %}">Accéder à mon espace enseignant</a>
+      </div>
+    </section>
+    <section class="accueil-etapes" aria-labelledby="titre-etapes">
+      <h2 id="titre-etapes">Comment ça marche ?</h2>
+      <ol class="etapes">
+        <li class="carte">
+          <div class="numero" aria-hidden="true">1</div>
+          <h3>Créez une leçon</h3>
+          <p>Rédigez votre leçon directement, ou importez un document Word ou un fichier texte.</p>
+        </li>
+        <li class="carte">
+          <div class="numero" aria-hidden="true">2</div>
+          <h3>Générez un quiz</h3>
+          <p>Choisissez le nombre de questions, leur type et la difficulté : l'IA propose un quiz à partir de votre leçon.</p>
+        </li>
+        <li class="carte">
+          <div class="numero" aria-hidden="true">3</div>
+          <h3>Relisez et validez</h3>
+          <p>Visualisez le quiz, corrigez-le si besoin, validez-le, puis exportez la version élève en PDF.</p>
+        </li>
+      </ol>
+    </section>
+    <p class="accueil-note muted">Les comptes sont créés par l'administrateur de votre établissement : vous recevez un e&#8209;mail pour choisir votre mot de passe.</p>
+  </main>
+  <footer class="accueil-pied">
+    <a href="{% url 'donnees_personnelles' %}">Données personnelles</a> · EduQuizAI by SchoolUp
+  </footer>
+{% endblock %}

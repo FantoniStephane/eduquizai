@@ -1,8 +1,9 @@
-"""Vues générales : tableau de bord (maquette 02) et page des données personnelles."""
+"""Vues générales : accueil, tableau de bord (maquette 02), données personnelles."""
 
 import logging
 
 from django.contrib.auth.decorators import login_not_required
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from pymongo.errors import PyMongoError
@@ -16,8 +17,28 @@ NB_QUIZ_A_VALIDER = 3
 NB_DERNIERES_LECONS = 4
 
 
+@method_decorator(login_not_required, name="dispatch")
+class AccueilView(TemplateView):
+    """Première page du site, publique (maquette 00).
+
+    Elle présente EduQuizAI avant la connexion. Une personne déjà connectée n'a
+    pas besoin de cette présentation : elle est renvoyée de son côté, comme à la
+    connexion (l'administrateur dans l'administration, l'enseignant sur son
+    tableau de bord).
+    """
+
+    template_name = "accueil.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        """Renvoie les personnes connectées vers leur espace."""
+        if request.user.is_authenticated:
+            destination = "admin:index" if request.user.is_staff else "tableau_de_bord"
+            return redirect(destination)
+        return super().dispatch(request, *args, **kwargs)
+
+
 class TableauDeBordView(TemplateView):
-    """Page d'accueil de l'enseignant : chiffres clés et derniers éléments.
+    """Tableau de bord de l'enseignant : chiffres clés et derniers éléments.
 
     Tout est limité à l'enseignant connecté. Si MongoDB ne répond pas, les
     informations sur les quiz sont remplacées par un message et le reste de la

@@ -2007,3 +2007,124 @@ body:has(> .pied) > .contenu {
     overflow-y: auto;
   }
 }
+
+/* ===== Page d'accueil publique (maquette 00) ===== */
+.page-accueil {
+  background: var(--fond);
+}
+.accueil-entete {
+  background: var(--surface);
+  border-bottom: 1px solid var(--bordure);
+}
+.accueil-entete .interieur {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.accueil-entete .logo {
+  height: 40px;
+  display: block;
+}
+.accueil-hero {
+  background: linear-gradient(160deg, var(--primaire-clair), var(--fond) 70%);
+  padding: 64px 24px 56px;
+}
+.accueil-hero .interieur {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+.accueil-hero h1 {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+.accueil-hero .accroche {
+  font-size: 18px;
+  color: var(--texte-2);
+  margin-bottom: 28px;
+}
+.accueil-hero .btn {
+  padding: 12px 28px;
+  font-size: 17px;
+}
+.accueil-etapes {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 24px;
+}
+.accueil-etapes h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 32px;
+}
+.etapes {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.etapes .carte {
+  display: block;
+  height: 100%;
+  padding: 24px;
+}
+.etapes .numero {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primaire);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.etapes h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.etapes p {
+  color: var(--texte-2);
+  font-size: 15px;
+}
+.accueil-note {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px 56px;
+  text-align: center;
+}
+.accueil-pied {
+  border-top: 1px solid var(--bordure);
+  background: var(--surface);
+  padding: 20px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--texte-2);
+}
+.accueil-pied a {
+  font-weight: 600;
+}
+@media (max-width: 820px) {
+  .accueil-hero {
+    padding: 40px 16px;
+  }
+  .accueil-hero h1 {
+    font-size: 30px;
+  }
+  .accueil-etapes {
+    padding: 40px 16px;
+  }
+  .etapes {
+    grid-template-columns: 1fr;
+  }
+  .accueil-entete .interieur {
+    padding: 0 16px;
+  }
+}
