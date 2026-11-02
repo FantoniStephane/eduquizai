@@ -33,7 +33,7 @@ class ConnexionView(LoginView):
           sans ce filtre, il serait aussitôt redirigé vers /admin/, puis ici, et
           ainsi de suite. Il retrouve simplement son tableau de bord.
         - L'administrateur n'a rien à faire côté enseignant : une page demandée
-          hors de l'administration (souvent « / », la page d'accueil) est
+          hors de l'administration (souvent le tableau de bord) est
           ignorée, il arrive dans l'administration.
         """
         url = super().get_redirect_url()

@@ -21,7 +21,10 @@ class ConnexionTests(TestCase):
     def test_page_protegee_redirige_vers_la_connexion(self):
         """Un visiteur non connecté est renvoyé vers la page de connexion."""
         reponse = self.client.get(reverse("tableau_de_bord"))
-        self.assertRedirects(reponse, f"{reverse('comptes:connexion')}?next=/")
+        self.assertRedirects(
+            reponse,
+            f"{reverse('comptes:connexion')}?next={reverse('tableau_de_bord')}",
+        )
 
     def test_connexion_reussie(self):
         """L'enseignant se connecte avec son e-mail, quelle que soit la casse."""
@@ -41,11 +44,11 @@ class ConnexionTests(TestCase):
         )
         self.assertRedirects(reponse, reverse("admin:index"))
 
-    def test_administrateur_dans_l_administration_meme_depuis_l_accueil(self):
-        """Arrivé par la page d'accueil (« next=/ »), l'admin va dans l'admin."""
+    def test_administrateur_dans_l_administration_meme_depuis_le_tableau_de_bord(self):
+        """Arrivé depuis une page enseignant, l'administrateur va dans l'admin."""
         Utilisateur.objects.create_superuser("admin@eduquizai.local", MOT_DE_PASSE)
         reponse = self.client.post(
-            reverse("comptes:connexion") + "?next=/",
+            reverse("comptes:connexion") + f"?next={reverse('tableau_de_bord')}",
             {"username": "admin@eduquizai.local", "password": MOT_DE_PASSE},
         )
         self.assertRedirects(reponse, reverse("admin:index"))
@@ -138,6 +141,26 @@ class InvitationTests(TestCase):
         )
         self.client.logout()
         self.assertContains(self.client.get(lien, follow=True), "Lien invalide")
+
+    def test_renvoyer_l_invitation_aux_seuls_comptes_non_actives(self):
+        """L'action de l'admin ne renvoie le lien qu'aux comptes sans mot de passe."""
+        en_attente = Utilisateur.objects.create_user(
+            "marie.martin@eduquizai.local", None, nom="Martin", prenom="Marie"
+        )
+        active = Utilisateur.objects.create_user(
+            "anne.durand@eduquizai.local", MOT_DE_PASSE, nom="Durand", prenom="Anne"
+        )
+        reponse = self.client.post(
+            reverse("admin:comptes_utilisateur_changelist"),
+            {
+                "action": "renvoyer_invitation",
+                "_selected_action": [en_attente.pk, active.pk],
+            },
+            follow=True,
+        )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["marie.martin@eduquizai.local"])
+        self.assertContains(reponse, "1 invitation(s) envoyée(s).")
 
 
 class MotDePasseOublieTests(TestCase):
